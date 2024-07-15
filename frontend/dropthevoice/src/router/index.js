@@ -1,7 +1,8 @@
-import HomeView from '@/views/HomeView.vue'
-import SpreadView from '@/views/SpreadView.vue'
+import HomeView from '@/views/HomeView.vue';
+import SpreadView from '@/views/SpreadView.vue';
 import UserLogin from "@/views/UserLogin.vue";
 import UserSignUp from "@/views/UserSignUp.vue";
+import UserMypage from "@/views/UserMypage.vue";
 import ExampleView1 from "@/views/ExampleView1.vue";
 import ExampleView2 from "@/views/ExampleView2.vue";
 import { createRouter, createWebHistory } from 'vue-router'
@@ -42,6 +43,11 @@ const router = createRouter({
       path: "/signup",
       name: "signup",
       component: UserSignUp,
+    },
+    {
+      path: "/mypage",
+      name: "mypage",
+      component: UserMypage,
     },
   ]
 })
