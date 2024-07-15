@@ -1,4 +1,4 @@
-<<<<<<< frontend/dropthevoice/src/views/HomeView.vue
+
 <template>
   <v-app class="black-background">
     <v-main>
@@ -13,12 +13,11 @@
   </v-app>
 </template>
 <script>
-import HomeSpreadOrCatch from '@/components/HomeSpreadOrCatch.vue';
-import HomePopularVoices from '@/components/HomePopularVoices.vue';
-import Chat from '@/Components/chat/Chat.vue';
+import HomeSpreadOrCatch from '@/Components/HomeSpreadOrCatch.vue';
+import HomePopularVoices from '@/Components/HomePopularVoices.vue';
 
 export default {
-  components: {
+  Components: {
     HomeSpreadOrCatch,
     HomePopularVoices,
   },
