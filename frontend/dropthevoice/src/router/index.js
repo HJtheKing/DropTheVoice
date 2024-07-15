@@ -5,6 +5,7 @@ import UserSignUp from "@/views/UserSignUp.vue";
 import ExampleView1 from "@/views/ExampleView1.vue";
 import ExampleView2 from "@/views/ExampleView2.vue";
 import { createRouter, createWebHistory } from 'vue-router'
+import RecordCHJView from '@/views/RecordCHJView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +44,11 @@ const router = createRouter({
       name: "signup",
       component: UserSignUp,
     },
+    {
+      path: "/record",
+      name: "record",
+      component: RecordCHJView,
+    }
   ]
 })
 

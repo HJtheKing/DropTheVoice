@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 export const useSpreadStore = defineStore('spread', () => {
   const isRecording = ref(false)
   const isUploading = ref(false)
+  const activeTab = ref('pokemon')  // Default to 'pokemon'
 
   const startRecording = () => {
     isRecording.value = !isRecording.value
@@ -15,8 +16,6 @@ export const useSpreadStore = defineStore('spread', () => {
     console.log('파일 업로드')
     isUploading.value = false
   }
-
-  const activeTab = ref('spread')
 
   const setTab = (tab) => {
     activeTab.value = tab
