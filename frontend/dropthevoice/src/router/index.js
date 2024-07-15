@@ -5,6 +5,7 @@ import UserSignUp from "@/views/UserSignUp.vue";
 import ExampleView1 from "@/views/ExampleView1.vue";
 import ExampleView2 from "@/views/ExampleView2.vue";
 import { createRouter, createWebHistory } from 'vue-router'
+import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,11 @@ const router = createRouter({
       path: "/signup",
       name: "signup",
       component: UserSignUp,
+    },
+    {
+      path: "/changevoice",
+      name: "changevoice",
+      component: ChangeVoiceView,
     },
   ]
 })
