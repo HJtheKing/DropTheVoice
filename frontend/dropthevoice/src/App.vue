@@ -16,7 +16,7 @@
 
 <script setup>
 // import { RouterLink, RouterView } from 'vue-router'
-import MenuBar from '@/components/MenuBar.vue';
+import MenuBar from '@/Components/MenuBar.vue';
 </script>
 
 <!-- <style scoped></style> -->
