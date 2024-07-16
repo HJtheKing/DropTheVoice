@@ -18,8 +18,8 @@
 
 <script setup>
 import { useSpreadStore } from '@/stores/spread.js'
-import RecordButton from '@/Components/spread/RecordButton.vue'
-import UploadButton from '@/Components/spread/UploadButton.vue'
+import RecordButton from '@/components/spread/RecordButton.vue'
+import UploadButton from '@/components/spread/UploadButton.vue'
 import { storeToRefs } from 'pinia'
 
 const spreadStore = useSpreadStore()
