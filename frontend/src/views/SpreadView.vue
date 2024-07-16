@@ -14,9 +14,6 @@
       <RecordButton v-if="activeTab === 'virus'" />
       <UploadButton v-if="activeTab === 'virus'" />
     </div>
-    <div>
-      <navBarCHJ />
-    </div>
   </div>
 </template>
 
@@ -24,7 +21,6 @@
 import { useSpreadStore } from '@/stores/spread.js'
 import RecordButton from '@/Components/spread/RecordButton.vue'
 import UploadButton from '@/Components/spread/UploadButton.vue'
-import navBarCHJ from '@/Components/navBarCHJ/navBarCHJ.vue'
 import { storeToRefs } from 'pinia'
 
 const spreadStore = useSpreadStore()
