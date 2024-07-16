@@ -18,9 +18,9 @@
   </template>
   
   <script setup>
-  import RecordButton from '@/Components/spread/RecordButton.vue'
-  import UploadButton from '@/Components/spread/UploadButton.vue'
-  import navBarCHJ from '@/Components/navBarCHJ/navBarCHJ.vue'
+  import RecordButton from '@/components/spread/RecordButton.vue'
+  import UploadButton from '@/components/spread/UploadButton.vue'
+  import navBarCHJ from '@/components/navBarCHJ/navBarCHJ.vue'
   </script>
   
   <style scoped>

@@ -13,11 +13,11 @@
   </v-app>
 </template>
 <script>
-import HomeSpreadOrCatch from '@/Components/HomeSpreadOrCatch.vue';
-import HomePopularVoices from '@/Components/HomePopularVoices.vue';
+import HomeSpreadOrCatch from '@/components/HomeSpreadOrCatch.vue';
+import HomePopularVoices from '@/components/HomePopularVoices.vue';
 
 export default {
-  Components: {
+  components: {
     HomeSpreadOrCatch,
     HomePopularVoices,
   },
