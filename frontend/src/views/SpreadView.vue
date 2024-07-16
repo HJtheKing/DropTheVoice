@@ -10,7 +10,6 @@
     <div class="button-container">
       <RecordButton v-if="activeTab === 'pokemon'" />
       <UploadButton v-if="activeTab === 'pokemon'" />
-
       <RecordButton v-if="activeTab === 'virus'" />
       <UploadButton v-if="activeTab === 'virus'" />
     </div>
