@@ -9,7 +9,7 @@
         </v-card>
       </v-col>
       <v-col cols="6" class="d-flex justify-center">
-        <v-card class="main-button" elevation="2" @click="navigateTo('example2')">
+        <v-card class="main-button" elevation="2" @click="navigateTo('playlist')">
           <v-card-text class="text-center align-center">
             <v-icon class="main-button-icon">mdi-headphones</v-icon>
             <div class="main-button-text">주워듣기</div>

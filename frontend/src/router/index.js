@@ -5,6 +5,8 @@ import UserSignUp from "@/views/UserSignUp.vue";
 import ExampleView1 from "@/views/ExampleView1.vue";
 import ExampleView2 from "@/views/ExampleView2.vue";
 import { createRouter, createWebHistory } from 'vue-router'
+import AudioPlayView from '@/views/AudioPlayView.vue';
+import PlayListVue from '@/views/PlayListVue.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +44,16 @@ const router = createRouter({
       path: "/signup",
       name: "signup",
       component: UserSignUp,
+    },
+    {
+      path: "/playlist",
+      name: "playlist",
+      component: PlayListVue,
+    },
+    {
+      path: "/audioplayer",
+      name: "audioplayer",
+      component: AudioPlayView,
     },
   ]
 })
