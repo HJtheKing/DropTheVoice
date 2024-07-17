@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
+    "@ffmpeg/ffmpeg": "^0.12.10",
     "@mdi/font": "^7.4.47",
     "axios": "^1.7.2",
     "dayjs": "^1.11.11",

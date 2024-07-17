@@ -1,7 +1,7 @@
 <template>
     <v-row justify="center" class="py-8">
       <v-col cols="6" class="d-flex justify-center">
-        <v-card class="main-button" elevation="2" @click="navigateTo('example1')">
+        <v-card class="main-button" elevation="2" @click="navigateTo('recordkjk')">
           <v-card-text class="text-center align-center">
             <v-icon class="main-button-icon">mdi-send</v-icon>
             <div class="main-button-text">뿌리기</div>

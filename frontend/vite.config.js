@@ -21,6 +21,9 @@ export default defineConfig({
     global: 'window',
   },
 
+  optimizeDeps: {
+    exclude: ['@ffmpeg/ffmpeg']
+  }
 })
 
 

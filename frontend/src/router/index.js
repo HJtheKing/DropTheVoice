@@ -3,7 +3,7 @@ import SpreadView from '@/views/SpreadView.vue';
 import UserLogin from "@/views/UserLogin.vue";
 import UserSignUp from "@/views/UserSignUp.vue";
 import UserMypage from "@/views/UserMypage.vue";
-import ExampleView1 from "@/views/ExampleView1.vue";
+import recordviewkjk from "@/views/RecordViewKJK.vue";
 import { createRouter, createWebHistory } from 'vue-router'
 import AudioPlayView from '@/views/AudioPlayView.vue';
 import PlayListVue from '@/views/PlayListVue.vue';
@@ -20,11 +20,6 @@ const router = createRouter({
       path: '/home',
       name: 'home',
       component: HomeView
-    },
-    {
-      path: '/example1',
-      name: 'example1',
-      component: ExampleView1,
     },
     {
       path: '/spread',
@@ -50,6 +45,11 @@ const router = createRouter({
       path: "/audioplayer",
       name: "audioplayer",
       component: AudioPlayView,
+    },
+    {
+      path: '/recordkjk',
+      name: 'recordkjk',
+      component: recordviewkjk,
     },
     {
       path: "/mypage",
