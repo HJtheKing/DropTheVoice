@@ -1,5 +1,5 @@
 <script setup>
-import RecordFile from '@/Components/RecordFile.vue';
+import RecordFile from '@/components/RecordFile.vue';
 import { ref } from 'vue';
 import { reactive } from 'vue';
 
