@@ -26,10 +26,11 @@ import MyRecordButton from '@/components/RecordCHJ/MyRecordButton.vue'
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: black;
+  /* background-color: black; */
   height: 100vh;
-  color: white;
+  color: rgb(255, 255, 255);
   padding: 20px;
+  min-height: 100vh
 }
 
 .recording-container {
