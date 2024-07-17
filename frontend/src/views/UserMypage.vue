@@ -1,121 +1,135 @@
 <template>
-  <div class="container">
-    <div class="header">마이페이지</div>
-    <div class="profile">
-      <div class="profile-image">
-        <img src="https://via.placeholder.com/50" alt="Profile Picture">
+  <div class="profile-container">
+    <div class="profile-header">
+      <img src="@/assets/images/user.png" alt="Profile Image" class="profile-image" />
+      <div class="profile-info">
+        <h2>김싸피</h2>
+        <p>@a505</p>
       </div>
-      <div class="profile-details">
-        <strong>김싸피</strong>
-        <span>@a505</span>
+      <img src="@/assets/images/goldtier.png" alt="Badge" class="badge-image" />
+    </div>
+    <div class="profile-stats">
+      <p>음성 업로드 수 :</p>
+      <p>음성 확산 수 :</p>
+    </div>
+    <div class="profile-links">
+      <div class="service">
+        <h3>문의</h3>
+        <div class="thick-divider"></div>
+        <div class="menu-item" @click="navigate('customer-service')">
+          <span>고객센터</span>
+        </div>
+        <div class="menu-item" @click="navigate('privacy-policy')">
+          <span>개인 정보 처리 방침</span>
+        </div>
       </div>
-    </div>
-    <div class="statistics">
-      <div>음성 업로드 수 :</div>
-      <div>음성 확산 수 :</div>
-    </div>
-    <div class="menu-item" @click="navigate('password')">
-      <span>비밀번호 수정</span>
-      <i class="fas fa-chevron-right arrow"></i>
-    </div>
-    <div class="menu-item" @click="navigate('customer-center')">
-      <span>고객센터</span>
-      <i class="fas fa-chevron-right arrow"></i>
-    </div>
-    <div class="menu-item" @click="navigate('privacy-policy')">
-      <span>개인 정보 처리 방침</span>
-      <i class="fas fa-chevron-right arrow"></i>
-    </div>
-    <div class="menu-item" @click="navigate('leave-membership')">
-      <span>회원탈퇴</span>
-      <i class="fas fa-chevron-right arrow"></i>
+      <br>
+      <div class="service">
+        <h3>회원정보 변경</h3>
+        <div class="thick-divider"></div>
+        <div class="menu-item" @click="navigate('password-change')">
+          <span>비밀번호 변경</span>
+        </div>
+        <div class="menu-item" @click="navigate('account-deletion')">
+          <span>회원 탈퇴</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'MyPage',
   methods: {
-    navigate(page) {
-      console.log(`Navigating to ${page}`);
-      // Implement navigation logic here
+    navigate(route) {
+      // Navigation logic here
+      console.log(`Navigate to ${route}`);
     }
   }
-}
+};
 </script>
 
 <style scoped>
-body {
-  font-family: 'Arial', sans-serif;
-}
-.container {
-  max-width: 400px;
+.profile-container {
+  width: 400px;
   margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.profile-header {
+  background-color: #2e004b;
+  color: white;
   padding: 20px;
-}
-.header {
-  text-align: center;
-  font-size: 24px;
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-}
-.profile {
   display: flex;
   align-items: center;
-  padding: 20px 0;
-  border-bottom: 1px solid #ddd;
+  justify-content: space-between;
 }
+
 .profile-image {
-  margin-right: 10px;
-}
-.profile-image img {
   width: 50px;
   height: 50px;
   border-radius: 50%;
 }
-.profile-details {
+
+.profile-info {
+  flex-grow: 1;
+  margin-left: 10px;
+}
+
+.profile-info h2 {
+  margin: 0;
   font-size: 18px;
 }
-.profile-details span {
-  display: block;
-  color: #666;
+
+.profile-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #ccc;
 }
-.statistics {
-  padding: 20px 0;
-  border-bottom: 1px solid #ddd;
+
+.badge-image {
+  width: 50px;
+  height: 50px;
 }
+
+.profile-stats {
+  background-color: #2e004b;
+  color: white;
+  padding: 20px;
+  font-size: 14px;
+}
+
+.profile-links {
+  background-color: white;
+  color: black;
+  padding: 20px;
+}
+
+.profile-links h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
 .menu-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #ddd;
-  font-size: 18px;
-  color: #333;
-  transition: background-color 0.3s;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
-.menu-item:last-child {
-  border-bottom: none;
-}
+
 .menu-item:hover {
   background-color: #f0f0f0;
 }
-.menu-item i {
-  color: #FFC107;
+
+.menu-item span {
+  font-size: 14px;
 }
-@media (max-width: 600px) {
-  .container {
-    padding: 10px;
-  }
-  .header {
-    font-size: 20px;
-  }
-  .profile-details {
-    font-size: 16px;
-  }
-  .menu-item {
-    font-size: 16px;
-  }
+
+.thick-divider {
+  height: 2px;
+  background-color: #000;
+  margin: 10px 0;
 }
 </style>
