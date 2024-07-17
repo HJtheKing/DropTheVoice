@@ -1,6 +1,6 @@
 <template>
   <div class="current-time">
-    {{ currentTime }}
+    <sapn>{{ currentTime }}</sapn>
   </div>
 </template>
 
@@ -24,9 +24,18 @@ onMounted(() => {
 <style scoped>
 .current-time {
   font-size: 24px;
-  color: white;
-  background-color: #333;
+  color: #1e90ff;
+  /* background-color: #333; */
   padding: 10px;
   border-radius: 5px;
 }
+
+/* .current-time {
+  font-size: 24px;
+  display: flex;
+  justify-content: space-around;
+  width: 200px;
+  margin-bottom: 20px;
+} */
+
 </style>

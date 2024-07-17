@@ -1,5 +1,5 @@
 <template>
-  <div class="timer-container" v-if="isRecording">
+  <div class="timer-container" :class="{hidden : !isRecording}">
       <span>[녹음 중] </span>
       <span>{{ timer.toFixed(2) }} 초</span>
   </div>
@@ -52,10 +52,18 @@ onUnmounted(() => {
 .timer-container {
   font-size: 16px;
   color: red;
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap; /* 텍스트가 줄 바꿈 없이 한 줄로 나오도록 설정 */
+  white-space: nowrap;
+
+  margin-bottom: 20px;
+  text-align: center;
 }
+
+.hidden {
+  visibility: hidden;
+}
+/* .timer-container {
+  margin-bottom: 20px;
+  text-align: center;
+  color: white;
+} */
 </style>
