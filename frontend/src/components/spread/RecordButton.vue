@@ -1,5 +1,5 @@
 <template>
-    <button class="action-button" @click="startRecording">
+    <button class="action-button" @click="handleClick">
       <div class="button-content">
         <img src="@/assets/microphone-icon.png" alt="녹음 아이콘" />
         <span>실시간 녹음하기</span>
@@ -8,9 +8,11 @@
   </template>
   
   <script setup>
-  const startRecording = () => {
-    console.log('실시간 녹음하기');
-    // 녹음 시작 로직 추가
+  import { useRouter } from 'vue-router';
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push('record')
   };
   </script>
   
