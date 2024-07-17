@@ -5,8 +5,10 @@
       Your browser does not support the audio element.
     </audio>
     <div class="controls">
-      <button @click="togglePlay">{{ isPlaying ? '멈춤' : '재생' }}</button>
-      <input type="range" min="0" :max="duration" step="0.01" v-model="currentTime" @input="seekAudio">
+      <button class="play-btn" @click="togglePlay">
+        <v-icon>{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}</v-icon>
+      </button>
+      <input class="play-bar" type="range" min="0" :max="duration" step="0.01" v-model="currentTime" @input="seekAudio">
     </div>
     <div class="time">
       {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
@@ -102,13 +104,21 @@ export default {
 button {
   margin-right: 10px;
   padding: 10px 20px;
-  background-color: #007BFF;
-  color: white;
+  background-color: #f3b549;
+  color: #000;
+  font-weight: bold;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 button:hover {
-  background-color: #0056b3;
+  background-color: #f3b549;
+  color: #000;
+  font-weight: bold;
+}
+input {
+      overflow: hidden;
+      width: 80px;
+      accent-color: #8B92DF;
 }
 </style>

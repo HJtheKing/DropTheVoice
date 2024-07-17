@@ -1,8 +1,10 @@
 <template>
-  <div class="audio-play">
-    <audio-player ref="audioPlayer"></audio-player>
-    <button @click="playSampleAudio">오디오 불러오기</button>
-  </div>
+  <v-app class="black-background">
+    <v-container class="audio-play">
+      <audio-player ref="audioPlayer"></audio-player>
+      <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기</v-btn>
+    </v-container>
+</v-app>
 </template>
 
 <script>
@@ -27,16 +29,21 @@ export default {
   flex-direction: column;
   align-items: center;
 }
-button {
+.black-background {
+  background-color: #000;
+  color: #fff;
+}
+.load-btn {
   margin-top: 20px;
   padding: 10px 20px;
-  background-color: #007BFF;
-  color: white;
+  background-color: #f3b549;
+  color: #000;
+  font-weight: bold;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
-button:hover {
-  background-color: #0056b3;
+.load-btn:hover {
+  background-color: #cd9e01;
 }
 </style>
