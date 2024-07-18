@@ -3,6 +3,7 @@ package com.ssafy.a505.Config.WebSocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.a505.Config.Redis.RedisUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
+@Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final RedisUtils redisUtils;
@@ -29,7 +31,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         //클라이언트로 메세지를 응답 해 줄 때 prefix 정의 - 클라이언트가 메세지를 받을 때
         registry.enableSimpleBroker("/topic"); //ex) stomp.subscribe("/sub/chat/room/",function(){})
         //클라이언트에서 메세지 송신 시 붙일 prefix 정의 - 클라이언트가 메세지를 보낼때
-        registry.setApplicationDestinationPrefixes("/app"); //ex) stomp.send("/sub/chat/room/",function(){})
+        registry.setApplicationDestinationPrefixes("/ws"); //ex) stomp.send("/sub/chat/room/",function(){})
     }
 
     @Override
@@ -50,31 +52,27 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         @Override
         public Message<?> preSend(Message<?> message, MessageChannel channel) {
             // STOMP 연결 시에 전처리 작업 수행
-/*            StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
+            StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
             if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
 
                 //"연결 성공 전처리해보자"
-                String roomId = headerAccessor.getDestination().split("/")[4];
                 String sessionId = headerAccessor.getSessionId();
-                redisUtils.addOrRemoveUserLocationToCache(roomId,servernum,true);
-            }*/
-            System.out.println("HIHI");
+                log.debug("연결 수립 세션 ID : "+sessionId);
+            }
             return ChannelInterceptor.super.preSend(message, channel);
         }
 
         //메시지 전송후 인터셉터
         @Override
         public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
-/*            StompHeaderAccessor headerAccessor= StompHeaderAccessor.wrap(message);
+            StompHeaderAccessor headerAccessor= StompHeaderAccessor.wrap(message);
             if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
-                //"연결종료"
                 //{simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={},
                 // simpSessionId=pzvyh0aw}
 
                 String sessionId = headerAccessor.getSessionId();
-                Long roomId = redisUtils.getLong(sessionId);
-                redisUtils.addOrRemoveUserLocationToCache(Long.toString(roomId),servernum,false);
-            }*/
+                log.debug("연결 종료 세션 ID : "+sessionId);
+            }
         }
     }
 }

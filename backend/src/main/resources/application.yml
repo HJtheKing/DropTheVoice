@@ -18,3 +18,12 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:password@localhost:27017/chatdatabase
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+logging:
+  level:
+    root: Error

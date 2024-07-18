@@ -2,26 +2,15 @@ package com.ssafy.a505.Config.WebSocket;
 
 import com.ssafy.a505.Config.Redis.RedisUtils;
 import com.ssafy.a505.Domain.Member;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -32,39 +21,13 @@ public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping(value = "/position")
-    @SendTo("/topic/test")
-    public String message(Member member, Message<Member> message2) {
-        System.out.println("cont");
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message2);
-        String[] infos = headerAccessor.getDestination().split("/");
-        for(String str: infos){
-            System.out.println(str);
-        }
+    public void message(Member member, Message<Member> message) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
+        String sessionId = headerAccessor.getSessionId();
+
+        System.out.println(sessionId+"is sessionId");
+        messagingTemplate.convertAndSend("/topic/messages/" + sessionId, member);
         System.out.println(member);
-        //일관성을 위해 모든 메시지를 redis geolocation 토픽으로 전송한다.
-        //producer.sendWithKey("geolocation",message);
-        return "{\n" +
-                "    \"glossary\": {\n" +
-                "        \"title\": \"example glossary\",\n" +
-                "\t\t\"GlossDiv\": {\n" +
-                "            \"title\": \"S\",\n" +
-                "\t\t\t\"GlossList\": {\n" +
-                "                \"GlossEntry\": {\n" +
-                "                    \"ID\": \"SGML\",\n" +
-                "\t\t\t\t\t\"SortAs\": \"SGML\",\n" +
-                "\t\t\t\t\t\"GlossTerm\": \"Standard Generalized Markup Language\",\n" +
-                "\t\t\t\t\t\"Acronym\": \"SGML\",\n" +
-                "\t\t\t\t\t\"Abbrev\": \"ISO 8879:1986\",\n" +
-                "\t\t\t\t\t\"GlossDef\": {\n" +
-                "                        \"para\": \"A meta-markup language, used to create markup languages such as DocBook.\",\n" +
-                "\t\t\t\t\t\t\"GlossSeeAlso\": [\"GML\", \"XML\"]\n" +
-                "                    },\n" +
-                "\t\t\t\t\t\"GlossSee\": \"markup\"\n" +
-                "                }\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}";
     }
 
     @MessageMapping("/peer/offer/{camKey}/{roomId}")

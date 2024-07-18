@@ -1,3 +1,45 @@
+<script setup>
+import HomeSpreadOrCatch from '@/components/HomeSpreadOrCatch.vue';
+import HomePopularVoices from '@/components/HomePopularVoices.vue';
+
+import axios from 'axios';
+import { ref, onMounted, watch } from 'vue';
+import { useStore } from 'vuex';
+
+const store = useStore();
+
+const latitude = ref(0);
+const longitude = ref(0);
+
+onMounted(() => {
+  if (!store.getters.isConnected) {
+    store.dispatch('connectWebSocket').then(sendMessage());
+  }
+});
+
+function sendMessage() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                latitude.value = position.coords.latitude;
+                longitude.value = position.coords.longitude;
+                console.log(latitude.value);
+                store.dispatch('sendMessage',{name:"김병관",x:latitude.value,y:longitude.value});
+            },
+            (error) => {
+                alert("위치 정보를 가져오는데 실패했습니다: " + error.message);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        alert("이 브라우저에서는 위치 정보 서비스를 지원하지 않습니다.");
+    }
+}
+</script>
 
 <template>
   <v-app class="black-background">
@@ -7,49 +49,11 @@
           <h1 class="title">Drop The Voice</h1>
         </v-row>
         <HomeSpreadOrCatch />
-        <HomePopularVoices :popularVoices="popularVoices" />
+        <HomePopularVoices />
       </v-container>
     </v-main>
   </v-app>
 </template>
-<script>
-import HomeSpreadOrCatch from '@/components/HomeSpreadOrCatch.vue';
-import HomePopularVoices from '@/components/HomePopularVoices.vue';
-
-export default {
-  components: {
-    HomeSpreadOrCatch,
-    HomePopularVoices,
-  },
-  data() {
-    return {
-      popularVoices: [
-        {
-          title: '멀캠 14층에 들리는 소문',
-          listeners: '78.4K',
-          author: '김싸피',
-          image: './src/assets/images/thumb1.webp',
-          avatar: './src/assets/images/avatar1.webp',
-        },
-        {
-          title: '우리 사장 편집증인 것 같다...',
-          listeners: '23.5K',
-          author: 'Courier',
-          image: './src/assets/images/thumb2.jpg',
-          avatar: './src/assets/images/avatar2.webp',
-        },
-        {
-          title: '본인 술김에 약혼함.wav',
-          listeners: '20.5K',
-          author: 'Dovah',
-          image: './src/assets/images/thumb3.jpg',
-          avatar: './src/assets/images/avatar3.jpg',
-        },
-      ],
-    };
-  },
-};
-</script>
 
 <style>
 .custom-container {
@@ -57,14 +61,15 @@ export default {
   margin: 0 auto;
   padding-bottom: 80px;
 }
+
 .black-background {
   background-color: #000;
   color: #fff;
 }
+
 .title {
   color: #fff;
   font-weight: bold;
   font-size: 24px;
 }
 </style>
-
