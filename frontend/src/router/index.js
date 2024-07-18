@@ -9,6 +9,7 @@ import AudioPlayView from '@/views/AudioPlayView.vue';
 import PlayListVue from '@/views/PlayListVue.vue';
 import RecordCHJView from '@/views/RecordCHJView.vue';
 import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
+import PickItUpView from '@/views/PickItUpView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
