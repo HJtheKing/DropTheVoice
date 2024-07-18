@@ -9,6 +9,7 @@ import '@mdi/font/css/materialdesignicons.css' // MDI 아이콘 폰트 추가
 
 import App from './App.vue'
 import router from './router'
+import store from './store'
 
 const app = createApp(App)
 const vuetify = createVuetify({
@@ -22,6 +23,7 @@ const vuetify = createVuetify({
 app.use(createPinia())
 app.use(vuetify)
 app.use(router)
+app.use(store)
 
 // 개발 모드에서만 Vue Devtools 활성화
   app.config.devtools = false

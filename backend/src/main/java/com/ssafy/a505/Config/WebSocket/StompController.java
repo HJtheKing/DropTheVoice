@@ -51,7 +51,7 @@ public class StompController {
                 "\t\t\t\"GlossList\": {\n" +
                 "                \"GlossEntry\": {\n" +
                 "                    \"ID\": \"SGML\",\n" +
-                "\t\t\t\t\t\"SortAs\": \"SGML\",\n" +
+                "\t\t\t\t\t\"SorㅋtAs\": \"SGML\",\n" +
                 "\t\t\t\t\t\"GlossTerm\": \"Standard Generalized Markup Language\",\n" +
                 "\t\t\t\t\t\"Acronym\": \"SGML\",\n" +
                 "\t\t\t\t\t\"Abbrev\": \"ISO 8879:1986\",\n" +
