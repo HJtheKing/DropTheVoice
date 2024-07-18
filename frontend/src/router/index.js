@@ -8,6 +8,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AudioPlayView from '@/views/AudioPlayView.vue';
 import PlayListVue from '@/views/PlayListVue.vue';
 import RecordCHJView from '@/views/RecordCHJView.vue';
+import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -60,6 +61,11 @@ const router = createRouter({
       path: "/record",
       name: "record",
       component: RecordCHJView,
+    },
+    {
+      path: "/change",
+      name: "change",
+      component: ChangeVoiceView,
     },
   ]
 })
