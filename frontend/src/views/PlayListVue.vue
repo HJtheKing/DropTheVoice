@@ -3,7 +3,7 @@
         <div style="display: flex; flex-direction: column; align-items: center;">
             <h1 style="color: white;" >{{ title }}</h1>
             <template v-for="(item, index) in state.items" :key="index">
-                <button style="width: 90%; max-width: 300px; margin: 1%;" @click="jumpTo('audioplayer')">
+                <button style="width: 90%; margin: 1%;" @click="selectItemAndJump(item)">
                     <RecordFile :item="item"></RecordFile>
                 </button>
             </template>
@@ -17,8 +17,10 @@ import { ref } from 'vue';
 import { reactive, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
+import { useSeletedTrackStore } from '@/stores/playList.js';
 
 const router = useRouter();
+const store = useSeletedTrackStore();
 
 const title = ref('주워 듣기(실시간 알람함)');
 
@@ -46,6 +48,10 @@ function jumpTo(routeName) {
     router.push({ name: routeName });
 }
 
+function selectItemAndJump(item) {
+    store.selectItem(item);
+    router.push({ name: 'audioplayer' });
+  }
 </script>
 
 <style lang="scss" scoped></style>
