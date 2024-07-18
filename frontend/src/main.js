@@ -1,12 +1,13 @@
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
+import '@mdi/font/css/materialdesignicons.css' // MDI 아이콘 폰트 추가
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import 'vuetify/styles'
-import '@mdi/font/css/materialdesignicons.css' // MDI 아이콘 폰트 추가
 
+import { createNaverMap } from 'vue3-naver-maps'
 import App from './App.vue'
 import router from './router'
 
@@ -15,18 +16,16 @@ const vuetify = createVuetify({
   components,
   directives,
   icons: {
-    defaultSet: 'mdi',
-  },
+    defaultSet: 'mdi'
+  }
 })
 
 app.use(createPinia())
 app.use(vuetify)
 app.use(router)
-
-// 개발 모드에서만 Vue Devtools 활성화
-  app.config.devtools = false
-
+app.use(createNaverMap, { clientId: process.env.VUE_APP_NAVER_MAP_CLIENT_ID, language: 'kr' })
+app.config.devtools = false
 
 app.mount('#app')
 
-window.global = window;
+window.global = window
