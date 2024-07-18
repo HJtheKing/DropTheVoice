@@ -33,38 +33,10 @@ public class StompController {
 
     @MessageMapping(value = "/position")
     @SendTo("/topic/test")
-    public String message(Member member, Message<Member> message2) {
-        System.out.println("cont");
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message2);
-        String[] infos = headerAccessor.getDestination().split("/");
-        for(String str: infos){
-            System.out.println(str);
-        }
+    public String message(Member member, Message<Member> message) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
         System.out.println(member);
-        //일관성을 위해 모든 메시지를 redis geolocation 토픽으로 전송한다.
-        //producer.sendWithKey("geolocation",message);
-        return "{\n" +
-                "    \"glossary\": {\n" +
-                "        \"title\": \"example glossary\",\n" +
-                "\t\t\"GlossDiv\": {\n" +
-                "            \"title\": \"S\",\n" +
-                "\t\t\t\"GlossList\": {\n" +
-                "                \"GlossEntry\": {\n" +
-                "                    \"ID\": \"SGML\",\n" +
-                "\t\t\t\t\t\"SorㅋtAs\": \"SGML\",\n" +
-                "\t\t\t\t\t\"GlossTerm\": \"Standard Generalized Markup Language\",\n" +
-                "\t\t\t\t\t\"Acronym\": \"SGML\",\n" +
-                "\t\t\t\t\t\"Abbrev\": \"ISO 8879:1986\",\n" +
-                "\t\t\t\t\t\"GlossDef\": {\n" +
-                "                        \"para\": \"A meta-markup language, used to create markup languages such as DocBook.\",\n" +
-                "\t\t\t\t\t\t\"GlossSeeAlso\": [\"GML\", \"XML\"]\n" +
-                "                    },\n" +
-                "\t\t\t\t\t\"GlossSee\": \"markup\"\n" +
-                "                }\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}";
+        return "123";
     }
 
     @MessageMapping("/peer/offer/{camKey}/{roomId}")

@@ -23,7 +23,7 @@ export default createStore({
         }
     },
     actions: {
-        async connectWebSocket({ commit }) {
+        connectWebSocket({ commit }) {
             const socket = new SockJS('http://localhost:8080/stomp/handshake');
             const stompClient = Webstomp.over(socket);
 
@@ -35,6 +35,7 @@ export default createStore({
                     const body = JSON.parse(message.body);
                     commit('ADD_MESSAGE', body);
                 });
+                this.dispatch('startSendingMessages','hi');
 
             }, (error) => {
                 console.error('WebSocket error:', error);
@@ -51,14 +52,21 @@ export default createStore({
                 commit('SET_STOMP_CLIENT', null);
             }
         },
-        sendMessage({ state }, message) {
+        async sendMessage({ state }, message) {
             console.log("message is ");
             console.log(message);
+            const { latitude, longitude } = await getGeo();
             if (state.stompClient && state.isConnected) {
-                state.stompClient.send('/app/position', JSON.stringify({ name: message.name, x: message.x, y: message.y }));
+                state.stompClient.send('/app/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));
             } else {
                 console.log("fail");
             }
+        },
+        startSendingMessages({ dispatch }, message) {
+            setInterval(() => {
+                console.log("HIHI");
+                dispatch('sendMessage', message);
+            }, 30000);
         }
     },
     getters: {
@@ -70,31 +78,32 @@ export default createStore({
 
 function getGeo() {
     return new Promise((resolve, reject) => {
-    if ("geolocation" in navigator) {
-        console.log("xxxxxxxxxxx");
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                latitude = position.coords.latitude;
-                longitude = position.coords.longitude;
-                console.log("_----------------");
-                console.log(latitude);
-                console.log(longitude);
-                resolve({ latitude, longitude });
+        if ("geolocation" in navigator) {
+            console.log("xxxxxxxxxxx");
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    latitude = position.coords.latitude;
+                    longitude = position.coords.longitude;
+                    console.log("_----------------");
+                    console.log(latitude);
+                    console.log(longitude);
+                    resolve({ latitude, longitude });
 
-            },
-            (error) => {
-                alert("위치 정보를 가져오는데 실패했습니다: " + error.message);
-                reject(new Error("위치 정보를 가져오는데 실패했습니다: " + error.message));
+                },
+                (error) => {
+                    alert("위치 정보를 가져오는데 실패했습니다: " + error.message);
+                    reject(new Error("위치 정보를 가져오는데 실패했습니다: " + error.message));
 
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            }
-        );
-    } else {
-        alert("이 브라우저에서는 위치 정보 서비스를 지원하지 않습니다.");
-        reject(new Error("위치 정보를 가져오는데 실패했습니다: " + error.message));
-    }
-})}
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            alert("이 브라우저에서는 위치 정보 서비스를 지원하지 않습니다.");
+            reject(new Error("위치 정보를 가져오는데 실패했습니다: "));
+        }
+    })
+}
