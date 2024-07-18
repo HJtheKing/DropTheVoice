@@ -48,7 +48,6 @@ function sendMessage() {
         <v-row justify="center" class="py-4">
           <h1 class="title">Drop The Voice</h1>
         </v-row>
-        <button @click="sendMessage()">hih</button>
         <HomeSpreadOrCatch />
         <HomePopularVoices />
       </v-container>

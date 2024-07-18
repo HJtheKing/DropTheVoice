@@ -64,7 +64,6 @@ export default createStore({
         },
         startSendingMessages({ dispatch }, message) {
             setInterval(() => {
-                console.log("HIHI");
                 dispatch('sendMessage', message);
             }, 30000);
         }
