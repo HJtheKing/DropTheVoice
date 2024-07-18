@@ -30,8 +30,14 @@ export default createStore({
             stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
+                var url = stompClient.ws._transport.url;
+                var urls = url.split('/');
+                var sessionId = urls[6];
+                console.log(sessionId);
 
-                stompClient.subscribe('/topic/messages', (message) => {
+                stompClient.subscribe('/topic/messages/'+sessionId, function(message){
+                    console.log("-----------");
+                    console.log(message);
                     const body = JSON.parse(message.body);
                     commit('ADD_MESSAGE', body);
                 });
@@ -57,7 +63,7 @@ export default createStore({
             console.log(message);
             const { latitude, longitude } = await getGeo();
             if (state.stompClient && state.isConnected) {
-                state.stompClient.send('/app/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));
+                state.stompClient.send('/ws/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));
             } else {
                 console.log("fail");
             }
@@ -65,7 +71,7 @@ export default createStore({
         startSendingMessages({ dispatch }, message) {
             setInterval(() => {
                 dispatch('sendMessage', message);
-            }, 30000);
+            }, 3000);
         }
     },
     getters: {

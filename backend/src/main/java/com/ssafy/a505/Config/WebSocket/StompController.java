@@ -2,26 +2,15 @@ package com.ssafy.a505.Config.WebSocket;
 
 import com.ssafy.a505.Config.Redis.RedisUtils;
 import com.ssafy.a505.Domain.Member;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -32,11 +21,13 @@ public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping(value = "/position")
-    @SendTo("/topic/test")
-    public String message(Member member, Message<Member> message) {
+    public void message(Member member, Message<Member> message) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
+        String sessionId = headerAccessor.getSessionId();
+
+        System.out.println(sessionId+"is sessionId");
+        messagingTemplate.convertAndSend("/topic/messages/" + sessionId, member);
         System.out.println(member);
-        return "123";
     }
 
     @MessageMapping("/peer/offer/{camKey}/{roomId}")

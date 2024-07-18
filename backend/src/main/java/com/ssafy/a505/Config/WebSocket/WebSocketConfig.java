@@ -31,7 +31,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         //클라이언트로 메세지를 응답 해 줄 때 prefix 정의 - 클라이언트가 메세지를 받을 때
         registry.enableSimpleBroker("/topic"); //ex) stomp.subscribe("/sub/chat/room/",function(){})
         //클라이언트에서 메세지 송신 시 붙일 prefix 정의 - 클라이언트가 메세지를 보낼때
-        registry.setApplicationDestinationPrefixes("/app"); //ex) stomp.send("/sub/chat/room/",function(){})
+        registry.setApplicationDestinationPrefixes("/ws"); //ex) stomp.send("/sub/chat/room/",function(){})
     }
 
     @Override
