@@ -59,7 +59,7 @@ export default {
   font-weight: bold;
 }
 .avatar-img {
-  object-fit: cover; /* 이미지 아바타 영역에 맞게 조정 */
+  object-fit: cover;
   width: 100%;
   height: 100%;
 }

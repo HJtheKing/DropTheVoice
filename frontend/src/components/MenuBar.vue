@@ -8,7 +8,7 @@
         <v-icon>mdi-home</v-icon>
         <span>홈</span>
       </v-btn>
-      <v-btn value="음선찾기">
+      <v-btn value="음성찾기">
         <v-icon>mdi-compass</v-icon>
         <span>음성찾기</span>
       </v-btn>
@@ -29,6 +29,11 @@
   
   <script>
   export default {
+    data() {
+      return {
+        activeNav: 'HOME'
+      };
+    },
     methods: {
       navigateTo(routeName) {
         this.$router.push({ name: routeName });

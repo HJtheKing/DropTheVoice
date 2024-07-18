@@ -3,9 +3,10 @@ import SpreadView from '@/views/SpreadView.vue';
 import UserLogin from "@/views/UserLogin.vue";
 import UserSignUp from "@/views/UserSignUp.vue";
 import UserMypage from "@/views/UserMypage.vue";
-import ExampleView1 from "@/views/ExampleView1.vue";
-import ExampleView2 from "@/views/ExampleView2.vue";
+import recordviewkjk from "@/views/RecordViewKJK.vue";
 import { createRouter, createWebHistory } from 'vue-router'
+import AudioPlayView from '@/views/AudioPlayView.vue';
+import PlayListVue from '@/views/PlayListVue.vue';
 import RecordCHJView from '@/views/RecordCHJView.vue';
 
 const router = createRouter({
@@ -21,16 +22,6 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/example1',
-      name: 'example1',
-      component: ExampleView1,
-    },
-    {
-      path: '/example2',
-      name: 'example2',
-      component: ExampleView2,
-    },
-    {
       path: '/spread',
       name: 'spread',
       component: SpreadView
@@ -44,6 +35,21 @@ const router = createRouter({
       path: "/signup",
       name: "signup",
       component: UserSignUp,
+    },
+    {
+      path: "/playlist",
+      name: "playlist",
+      component: PlayListVue,
+    },
+    {
+      path: "/audioplayer",
+      name: "audioplayer",
+      component: AudioPlayView,
+    },
+    {
+      path: '/recordkjk',
+      name: 'recordkjk',
+      component: recordviewkjk,
     },
     {
       path: "/mypage",
