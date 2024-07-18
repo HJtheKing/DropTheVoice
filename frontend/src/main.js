@@ -1,7 +1,15 @@
-import '@mdi/font/css/materialdesignicons.css' // MDI 아이콘 폰트 추가
-import 'vuetify/styles'
+import { createPinia } from 'pinia';
+import { createApp } from 'vue';
 
-import { createNaverMap } from 'vue3-naver-maps'
+import '@mdi/font/css/materialdesignicons.css'; // MDI 아이콘 폰트 추가
+import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components';
+import * as directives from 'vuetify/directives';
+import 'vuetify/styles';
+
+import { createNaverMap } from 'vue3-naver-maps';
+import App from './App.vue';
+import router from './router';
 
 const app = createApp(App)
 const vuetify = createVuetify({
@@ -15,9 +23,7 @@ const vuetify = createVuetify({
 app.use(createPinia())
 app.use(vuetify)
 app.use(router)
-app.use(createNaverMap, { clientId: 'dd', language: 'kr' })
+app.use(createNaverMap, { clientId: `${import.meta.env.VITE_NAVER_MAP_CLIENT_ID}`, language: 'kr' })
 app.config.devtools = false
 
 app.mount('#app')
-
-window.global = window
