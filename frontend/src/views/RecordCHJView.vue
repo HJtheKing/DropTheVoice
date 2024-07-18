@@ -15,9 +15,9 @@
 </template>
 
 <script setup>
-import CurrentTime from '@/components/RecordCHJ/CurrentTime.vue'
-import MyTimer from '@/components/RecordCHJ/MyTimer.vue'
-import MyRecordButton from '@/components/RecordCHJ/MyRecordButton.vue'
+import CurrentTime from '@/components/recordCHJ/CurrentTime.vue'
+import MyTimer from '@/components/recordCHJ/MyTimer.vue'
+import MyRecordButton from '@/components/recordCHJ/MyRecordButton.vue'
 </script>
 
 <style scoped>
