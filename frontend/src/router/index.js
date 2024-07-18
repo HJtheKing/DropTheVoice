@@ -1,19 +1,21 @@
-import HomeView from '@/views/HomeView.vue';
-import SpreadView from '@/views/SpreadView.vue';
-import UserLogin from "@/views/UserLogin.vue";
-import UserSignUp from "@/views/UserSignUp.vue";
-import UserMypage from "@/views/UserMypage.vue";
-import ExampleView1 from "@/views/ExampleView1.vue";
-import ExampleView2 from "@/views/ExampleView2.vue";
+import ExampleView1 from '@/views/ExampleView1.vue'
+import ExampleView2 from '@/views/ExampleView2.vue'
+import HomeView from '@/views/HomeView.vue'
+import PickItUpView from '@/views/PickItUpView.vue'
+import RecordCHJView from '@/views/RecordCHJView.vue'
+import SpreadView from '@/views/SpreadView.vue'
+import UserLogin from '@/views/UserLogin.vue'
+import UserMypage from '@/views/UserMypage.vue'
+import UserSignUp from '@/views/UserSignUp.vue'
+
 import { createRouter, createWebHistory } from 'vue-router'
-import RecordCHJView from '@/views/RecordCHJView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/home',
+      redirect: '/home'
     },
     {
       path: '/home',
@@ -23,12 +25,12 @@ const router = createRouter({
     {
       path: '/example1',
       name: 'example1',
-      component: ExampleView1,
+      component: ExampleView1
     },
     {
       path: '/example2',
       name: 'example2',
-      component: ExampleView2,
+      component: ExampleView2
     },
     {
       path: '/spread',
@@ -36,25 +38,30 @@ const router = createRouter({
       component: SpreadView
     },
     {
-      path: "/login",
-      name: "login",
-      component: UserLogin,
+      path: '/login',
+      name: 'login',
+      component: UserLogin
     },
     {
-      path: "/signup",
-      name: "signup",
-      component: UserSignUp,
+      path: '/signup',
+      name: 'signup',
+      component: UserSignUp
     },
     {
-      path: "/mypage",
-      name: "mypage",
-      component: UserMypage,
+      path: '/search',
+      name: 'search',
+      component: PickItUpView
     },
     {
-      path: "/record",
-      name: "record",
-      component: RecordCHJView,
+      path: '/mypage',
+      name: 'mypage',
+      component: UserMypage
     },
+    {
+      path: '/record',
+      name: 'record',
+      component: RecordCHJView
+    }
   ]
 })
 
