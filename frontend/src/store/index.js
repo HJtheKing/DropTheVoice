@@ -71,7 +71,7 @@ export default createStore({
         startSendingMessages({ dispatch }, message) {
             setInterval(() => {
                 dispatch('sendMessage', message);
-            }, 3000);
+            }, 30000);
         }
     },
     getters: {
@@ -84,19 +84,17 @@ export default createStore({
 function getGeo() {
     return new Promise((resolve, reject) => {
         if ("geolocation" in navigator) {
-            console.log("xxxxxxxxxxx");
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     latitude = position.coords.latitude;
                     longitude = position.coords.longitude;
-                    console.log("_----------------");
                     console.log(latitude);
                     console.log(longitude);
                     resolve({ latitude, longitude });
 
                 },
                 (error) => {
-                    alert("위치 정보를 가져오는데 실패했습니다: " + error.message);
+                    console.log("위치 정보를 가져오는데 실패했습니다: " + error.message);
                     reject(new Error("위치 정보를 가져오는데 실패했습니다: " + error.message));
 
                 },
