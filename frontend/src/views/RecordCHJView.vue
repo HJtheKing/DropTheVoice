@@ -15,9 +15,9 @@
 </template>
 
 <script setup>
-import CurrentTime from '@/components/RecordCHJ/CurrentTime.vue'
-import MyTimer from '@/components/RecordCHJ/MyTimer.vue'
-import MyRecordButton from '@/components/RecordCHJ/MyRecordButton.vue'
+import CurrentTime from '@/components/recordCHJ/CurrentTime.vue'
+import MyTimer from '@/components/recordCHJ/MyTimer.vue'
+import MyRecordButton from '@/components/recordCHJ/MyRecordButton.vue'
 </script>
 
 <style scoped>
@@ -26,10 +26,11 @@ import MyRecordButton from '@/components/RecordCHJ/MyRecordButton.vue'
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: black;
+  /* background-color: black; */
   height: 100vh;
-  color: white;
+  color: rgb(255, 255, 255);
   padding: 20px;
+  min-height: 100vh
 }
 
 .recording-container {
