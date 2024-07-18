@@ -3,7 +3,7 @@
         <div style="display: flex; flex-direction: column; align-items: center;">
             <h1 style="color: white;" >{{ title }}</h1>
             <template v-for="(item, index) in state.items" :key="index">
-                <button style="width: 90%; margin: 1%;" @click="jumpTo('audioplayer')">
+                <button style="width: 90%; max-width: 300px; margin: 1%;" @click="jumpTo('audioplayer')">
                     <RecordFile :item="item"></RecordFile>
                 </button>
             </template>
