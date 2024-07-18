@@ -25,8 +25,12 @@ public class StompController {
         String sessionId = headerAccessor.getSessionId();
 
         log.info(sessionId+"is sessionId");
-        messagingTemplate.convertAndSend("/topic/messages/" + sessionId, member);
         log.info("Session Logged In Member Info: "+member.toString());
+
+
+
+
+        messagingTemplate.convertAndSend("/topic/messages/" + sessionId, "you connected to websocket");
     }
 
     @MessageMapping("/peer/offer/{camKey}/{roomId}")
