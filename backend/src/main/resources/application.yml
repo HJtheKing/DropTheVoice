@@ -26,4 +26,4 @@ spring:
 
 logging:
   level:
-    root: Error
+    root: info

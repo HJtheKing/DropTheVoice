@@ -5,7 +5,6 @@ import com.ssafy.a505.Domain.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -25,9 +24,9 @@ public class StompController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
         String sessionId = headerAccessor.getSessionId();
 
-        System.out.println(sessionId+"is sessionId");
+        log.info(sessionId+"is sessionId");
         messagingTemplate.convertAndSend("/topic/messages/" + sessionId, member);
-        System.out.println(member);
+        log.info("Session Logged In Member Info: "+member.toString());
     }
 
     @MessageMapping("/peer/offer/{camKey}/{roomId}")
@@ -35,7 +34,7 @@ public class StompController {
     public String PeerHandleOffer(@Payload String offer, @DestinationVariable(value = "roomId") String roomId,
                                   @DestinationVariable(value = "camKey") String camKey) {
         log.info("[OFFER] {} : {}", camKey, offer);
-        System.out.println("method peerhandle offer and camkey is "+camKey+" offer is "+offer);
+        log.info("method peerhandle offer and camkey is "+camKey+" offer is "+offer);
         return offer;
     }
 
@@ -46,7 +45,7 @@ public class StompController {
     public String PeerHandleIceCandidate(@Payload String candidate, @DestinationVariable(value = "roomId") String roomId,
                                          @DestinationVariable(value = "camKey") String camKey) {
         log.info("[ICECANDIDATE] {} : {}", camKey, candidate);
-        System.out.println("method peerhandleIceCandidate and camkey is "+camKey+" candidate is "+candidate);
+        log.info("method peerhandleIceCandidate and camkey is "+camKey+" candidate is "+candidate);
 
         return candidate;
     }

@@ -1,11 +1,8 @@
 package com.ssafy.a505.Config.WebSocket;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.a505.Config.Redis.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -57,7 +54,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
                 //"연결 성공 전처리해보자"
                 String sessionId = headerAccessor.getSessionId();
-                log.debug("연결 수립 세션 ID : "+sessionId);
+                log.info("연결 수립 세션 ID : "+sessionId);
             }
             return ChannelInterceptor.super.preSend(message, channel);
         }
@@ -71,7 +68,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 // simpSessionId=pzvyh0aw}
 
                 String sessionId = headerAccessor.getSessionId();
-                log.debug("연결 종료 세션 ID : "+sessionId);
+                log.info("연결 종료 세션 ID : "+sessionId);
             }
         }
     }
