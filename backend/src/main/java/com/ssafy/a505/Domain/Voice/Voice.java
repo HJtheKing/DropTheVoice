@@ -11,6 +11,7 @@ public class Voice {
     long like;
     long listenCount;
     String title;
+    String userName;
     String imageUrl;
     String voiceUrl;
     VoiceType type;

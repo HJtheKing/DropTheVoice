@@ -1,3 +1,42 @@
+<script setup>
+import {ref, onMounted} from 'vue';
+import axios from 'axios';
+
+onMounted(() => {
+  fetchBestVoices(); // <div>
+})
+
+const voices = ref([]);
+const voiceDetail = ref();
+
+async function fetchVoiceDetail(voiceId) {
+  try {
+    await axios.get(`http://localhost:8080/api-voice/best-voice/${voiceId}`)
+    .then((res)=>{
+      voiceDetail.value = res.data;
+      console.log(res.data);
+    });
+  } catch (error) {
+    console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
+  }
+}
+
+async function fetchBestVoices() {
+  try {
+    await axios.get('http://localhost:8080/api-voice/best-voice')
+                                .then((res) =>{
+                                  voices.value = res.data;
+                                });
+  } catch (error) {
+    console.error('Error fetching best voices:', error);
+  }
+}
+
+function getDetail(id){
+  fetchVoiceDetail(id);
+}
+</script>
+
 <template>
   <div>
     <v-row>
@@ -10,20 +49,20 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in popularVoices" :key="index">
-          <v-row no-gutters>
+        <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in voices" :key="index">
+          <v-row no-gutters @click="getDetail(item.id)">
             <v-col cols="4">
-              <v-img :src="item.image" height="100px" contain></v-img>
+              <v-img :src="item.imageUrl" height="100px" contain></v-img>
             </v-col>
             <v-col cols="8">
               <v-card-title>
                 <div class="content">
                   <h3>{{ item.title }}</h3>
-                  <p>{{ item.listeners }} Listeners</p>
+                  <p>{{ item.listenCount }} Listeners</p>
                   <v-avatar size="36">
-                    <img :src="item.avatar" class="avatar-img" />
+                    <img :src="item.imageUrl" class="avatar-img" />
                   </v-avatar>
-                  <span class="author-name">{{ item.author }}</span>
+                  <span class="author-name">{{ item.userName }}</span>
                 </div>
               </v-card-title>
             </v-col>
@@ -33,17 +72,6 @@
     </v-row>
   </div>
 </template>
-
-<script>
-export default {
-  props: {
-    popularVoices: {
-      type: Array,
-      required: true,
-    },
-  },
-};
-</script>
 
 <style scoped>
 .more-button {
