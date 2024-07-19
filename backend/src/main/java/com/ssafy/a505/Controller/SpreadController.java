@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api-spread")
@@ -37,8 +39,8 @@ public class SpreadController {
         }
 
         // 파일명 클린업
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
+        String fileName = UUID.randomUUID()+StringUtils.cleanPath(file.getOriginalFilename());
+        uploadDir = "./upload/";
         try {
             // 파일 저장 경로 설정
             Path path = Paths.get(uploadDir + fileName);

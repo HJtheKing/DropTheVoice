@@ -15,9 +15,9 @@ spring:
     host: localhost
     port: 6379
 
-  data:
-    mongodb:
-      uri: mongodb://root:password@localhost:27017/chatdatabase
+  #data:
+    #mongodb:
+      #uri: mongodb://root:password@localhost:27017/chatdatabase
 
   servlet:
     multipart:
