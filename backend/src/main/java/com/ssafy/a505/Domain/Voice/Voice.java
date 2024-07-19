@@ -14,7 +14,7 @@ public class Voice {
     String imageUrl;
     String voiceUrl;
     VoiceType type;
-    long latitude;
-    long longitude;
+    double latitude;
+    double longitude;
     LocalDateTime dateTime;
 }
