@@ -35,17 +35,17 @@ public class RecordController {
         log.info("voice ={}", voice);
 
         // 음성 제대로 전달되었나 Test
-//        MultipartFile voiceFile = voiceDto.getVoiceFile();
-//        File file = new File("C:/Users/SSAFY/Desktop/file.wav");
-//        file.getParentFile().mkdirs();
-//        voiceFile.transferTo(file);
+        MultipartFile voiceFile = voiceDto.getVoiceFile();
+        File file = new File("C:/Users/SSAFY/Desktop/file.wav");
+        file.getParentFile().mkdirs();
+        voiceFile.transferTo(file);
 
         // S3에 음성 파일 저장
 
         // RDB 저장 로직
 
         // Redis 저장 로직
-        redisUtils.addLocation("TMP_KEY", voiceDto.getLatitude(), voiceDto.getLongitude());
+//        redisUtils.addLocation("TP_KEY", voiceDto.getLatitude(), voiceDto.getLongitude());
         return new ResponseEntity<Voice>(voice, HttpStatus.OK);
     }
 
