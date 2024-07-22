@@ -1,20 +1,11 @@
 package com.ssafy.a505.RedisTest;
 
-import com.ssafy.a505.Config.Redis.RedisUtils;
-import com.ssafy.a505.Domain.Member;
-import org.aspectj.lang.annotation.Before;
+import com.ssafy.a505.repository.RedisUtils;
+import com.ssafy.a505.domain.Member;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 

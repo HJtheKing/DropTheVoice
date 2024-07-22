@@ -1,18 +1,16 @@
-package com.ssafy.a505.Controller;
+package com.ssafy.a505.controller;
 
-import com.ssafy.a505.Domain.Voice.InputVoiceDTO;
-import com.ssafy.a505.Domain.Voice.Voice;
-import com.ssafy.a505.Domain.Voice.VoiceType;
+import com.ssafy.a505.domain.Voice.Voice;
+import com.ssafy.a505.domain.Voice.VoiceType;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/api-voice")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class VoiceController {
     public Voice voice;
     public List<Voice> voices;
