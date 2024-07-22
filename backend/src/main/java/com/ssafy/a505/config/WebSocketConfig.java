@@ -1,6 +1,6 @@
-package com.ssafy.a505.Config.WebSocket;
+package com.ssafy.a505.config;
 
-import com.ssafy.a505.Config.Redis.RedisUtils;
+import com.ssafy.a505.repository.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;

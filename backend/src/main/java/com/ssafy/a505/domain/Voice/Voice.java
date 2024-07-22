@@ -1,4 +1,4 @@
-package com.ssafy.a505.Domain.Voice;
+package com.ssafy.a505.domain.Voice;
 
 import lombok.Data;
 

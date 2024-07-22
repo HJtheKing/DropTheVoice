@@ -1,9 +1,7 @@
-package com.ssafy.a505.Domain;
+package com.ssafy.a505.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.geo.Point;
-import org.springframework.data.redis.connection.RedisGeoCommands;
 
 import java.io.Serializable;
 

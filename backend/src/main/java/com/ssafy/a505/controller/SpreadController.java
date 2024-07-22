@@ -1,8 +1,7 @@
-package com.ssafy.a505.Controller;
+package com.ssafy.a505.controller;
 
-import com.ssafy.a505.Domain.Voice.InputVoiceDTO;
-import com.ssafy.a505.Domain.Voice.Voice;
-import com.ssafy.a505.Domain.Voice.VoiceType;
+import com.ssafy.a505.domain.Voice.InputVoiceDTO;
+import com.ssafy.a505.domain.Voice.Voice;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,15 +12,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api-spread")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class SpreadController {
 
     public Voice voice;

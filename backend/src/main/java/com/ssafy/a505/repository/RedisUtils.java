@@ -1,6 +1,6 @@
-package com.ssafy.a505.Config.Redis;
+package com.ssafy.a505.repository;
 
-import com.ssafy.a505.Domain.Member;
+import com.ssafy.a505.domain.Member;
 import io.lettuce.core.RedisCommandExecutionException;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
@@ -8,11 +8,9 @@ import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.*;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;

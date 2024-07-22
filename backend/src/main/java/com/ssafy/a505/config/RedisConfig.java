@@ -1,6 +1,6 @@
-package com.ssafy.a505.Config.Redis;
+package com.ssafy.a505.config;
 
-import com.ssafy.a505.Domain.Member;
+import com.ssafy.a505.domain.Member;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
