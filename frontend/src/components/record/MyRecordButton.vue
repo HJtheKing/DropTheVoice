@@ -10,14 +10,16 @@
   </div>
   
   <div class="save-button-container">
-      <button  class="save-button" v-if="audioUrl && !isRecording">저장</button>
-    </div>
+    <button  class="save-button" v-if="audioUrl && !isRecording" @click="saveRocord">저장</button>
+  </div>
 </template>
 
 <script setup>
 import { useRecordStore } from '@/stores/record'
+import { useSpreadStore } from '@/stores/spread';
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, onUnmounted } from 'vue'
+import axios from 'axios';
 
 const recordStore = useRecordStore()
 const { isRecording, audioUrl } = storeToRefs(recordStore)
@@ -36,6 +38,8 @@ let dataArray = null;
 let bufferLength = null;
 // 주기적으로 그리기 작업을 수행하기 위한 interval ID를 저장할 변수입니다.
 let drawInterval = null;  
+
+let audioBlob = null;
 
 const canvasRef = ref(null)
 
@@ -65,7 +69,7 @@ const toggleRecording = () => {
     startRecording()
   }
 }
-
+// 녹음
 const startRecording = async () => {
   console.log('Start Recording')  // 콘솔 로그 확인
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -92,7 +96,7 @@ const startRecording = async () => {
   }
   
   mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' })
+    audioBlob = new Blob(audioChunks, { type: 'audio/wav' })
     audioUrl.value = URL.createObjectURL(audioBlob)
     audioChunks = []
     clearInterval(drawInterval);
@@ -115,6 +119,64 @@ const stopRecording = () => {
 
 }
 
+// 위치 정보 가져오기
+const locationMessage = ref('');
+
+function saveRocord() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition, showError);
+  } else {
+    locationMessage.value = 'Geolocation is not supported by this browser.';
+  }
+}
+
+function showPosition(position) {
+  const latitude = position.coords.latitude;
+  const longitude = position.coords.longitude;
+  locationMessage.value = `Latitude: ${latitude} | Longitude: ${longitude}`;
+  console.log(locationMessage.value);
+  
+  // 서버로 위치 데이터 전송
+  sendVoiceInfoToServer(latitude, longitude);
+}
+
+function showError(error) {
+  switch(error.code) {
+    case error.PERMISSION_DENIED:
+      locationMessage.value = 'User denied the request for Geolocation.';
+      break;
+    case error.POSITION_UNAVAILABLE:
+      locationMessage.value = 'Location information is unavailable.';
+      break;
+    case error.TIMEOUT:
+      locationMessage.value = 'The request to get user location timed out.';
+      break;
+    case error.UNKNOWN_ERROR:
+      locationMessage.value = 'An unknown error occurred.';
+      break;
+  }
+}
+
+
+const spreadStore = useSpreadStore() 
+function sendVoiceInfoToServer(lat, lon) {
+  const formData = new FormData();
+  formData.append('voiceType', spreadStore.activeTab);
+  formData.append('latitude', lat);
+  formData.append('longitude', lon);
+  formData.append('voiceUrl', audioUrl.value);
+  formData.append('voiceFile', audioBlob);  // 'audio.wav'는 파일 이름
+
+  axios.post('http://localhost:8080/api-record/record', formData)
+  .then(response => {
+    console.log('Location sent to server:', response.data);
+  })
+  .catch(error => {
+    console.error('Error sending location to server:', error);
+  });
+}
+
+// 음파 시각화
 const startDrawing = () => {
   console.log('start drawing')
   const canvas = document.querySelector('canvas');
