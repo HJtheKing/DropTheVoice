@@ -29,7 +29,14 @@ public class StompController {
         this.messagingTemplate = simpMessagingTemplate;
     }
 
-    //매 10초마다 사용자와 연결된 웹소켓을 통해 사용자 위경도 업데이트
+    /**
+     *
+     * @param member
+     * @param message
+     *
+     * 매 10초마다 프론트엔드에서 호출되는 메서드.
+     * 사용자 위치정보를 계속해서 업데이트한다
+     */
     @MessageMapping(value = "/position")
     public void message(Member member, Message<Member> message) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
@@ -42,8 +49,18 @@ public class StompController {
         //redisService.update(member,lat,lng);
     }
 
-    //음원을 서버에 전송하면서 동시에 음원의 위경도를 전송하는 API
-    //반환값으로 인근 1km이내 세션들에 대한 리스트를 반환하여 음원 전송자가 보낼 대상을 특정가능하다.
+    /**
+     *
+     * @param sessionId - 내 세션ID
+     * @param latitude - 위도
+     * @param longitude - 경도
+     * @throws NullPointerException
+     *
+     * 사용자가 음원을 퍼트리기 위해 사용
+     * 반환값으로 인근 1km이내 세션들에 대한 리스트를 반환
+     * 만약 1km 이내에 사람이 없다면 에러 반환
+     * 현재 미개발 상태라 등록된 세션정보 모두를 반환하고 있다.
+     */
     @MessageMapping("/spread/{latitude}/{longitude}")
     public void spread(@Payload String sessionId,@DestinationVariable(value = "latitude") double latitude, @DestinationVariable(value = "longitude") double longitude) {
         log.info("[Key] : {}  [lat,lng] : {} : {}", sessionId,latitude,longitude);
