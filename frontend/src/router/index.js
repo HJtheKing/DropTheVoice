@@ -4,10 +4,9 @@ import SpreadView from '@/views/SpreadView.vue';
 import UserLogin from "@/views/UserLogin.vue";
 import UserSignUp from "@/views/UserSignUp.vue";
 import UserMypage from "@/views/UserMypage.vue";
-import recordviewkjk from "@/views/RecordViewKJK.vue";
 import AudioPlayView from '@/views/AudioPlayView.vue';
 import PlayListVue from '@/views/PlayListVue.vue';
-import RecordCHJView from '@/views/RecordCHJView.vue';
+import RecordView from '@/views/RecordView.vue';
 import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
 import PickItUpView from '@/views/PickItUpView.vue';
 
@@ -54,11 +53,6 @@ const router = createRouter({
             component: AudioPlayView,
         },
         {
-            path: '/recordkjk',
-            name: 'recordkjk',
-            component: recordviewkjk,
-        },
-        {
             path: "/mypage",
             name: "mypage",
             component: UserMypage,
@@ -66,7 +60,7 @@ const router = createRouter({
         {
             path: "/record",
             name: "record",
-            component: RecordCHJView,
+            component: RecordView,
         },
         {
             path: "/change",
