@@ -1,20 +1,22 @@
 <template>
-  <div class="canvas-container">
-    <canvas ref="canvas" width="500" height="500"></canvas>
-  </div>
-  <div class="record-button-container">
-    <div :class="['record-button', { recording: isRecording }]" @click="toggleRecording"></div>
-  </div>
-  <div class="audio-container">
-    <audio v-if="audioUrl && !isRecording" :src="audioUrl" controls></audio>
-  </div>
-  
-  <div class="save-button-container">
-    <button  class="save-button" v-if="audioUrl && !isRecording" @click="saveRocord">저장</button>
-  </div>
+  <v-app class="black-backgorund">
+    <div class="canvas-container">
+      <canvas ref="canvas" width="500" height="500"></canvas>
+    </div>
+    <div class="record-button-container">
+      <div :class="['record-button', { recording: isRecording }]" @click="toggleRecording"></div>
+    </div>
+    <v-container class="audio-play">
+      <audio-player ref="audioPlayer"></audio-player>
+    </v-container>
+    <div class="save-button-container">
+      <button class="save-button" v-if="audioUrl && !isRecording" @click="saveRecord">저장</button>
+    </div>
+  </v-app>
 </template>
 
 <script setup>
+import AudioPlayer from '@/components/AudioPlayer.vue';
 import { useRecordStore } from '@/store/record'
 import { useSpreadStore } from '@/store/spread';
 import { storeToRefs } from 'pinia'
@@ -42,6 +44,7 @@ let drawInterval = null;
 let audioBlob = null;
 
 const canvasRef = ref(null)
+const audioPlayer = ref(null);
 
 const resizeCanvas = () => {
   const canvas = canvasRef.value
@@ -69,6 +72,7 @@ const toggleRecording = () => {
     startRecording()
   }
 }
+
 // 녹음
 const startRecording = async () => {
   console.log('Start Recording')  // 콘솔 로그 확인
@@ -96,25 +100,22 @@ const startRecording = async () => {
   }
   
   mediaRecorder.onstop = async () => {
-    audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+    audioBlob = new Blob(audioChunks, { type: 'audio/wav' })
     console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
-    
-    const arrayBuffer = await audioBlob.arrayBuffer();
-    const wavBuffer = encodeWAV(arrayBuffer);
 
-    audioBlob = new Blob([wavBuffer], { type: 'audio/wav' })
     audioUrl.value = URL.createObjectURL(audioBlob)
     audioChunks = []
     clearInterval(drawInterval);
     if(audioContext){
       audioContext.close();
     }
+    audioPlayer.value.loadAudio(audioUrl.value); // 녹음된 오디오를 로드
+    console.log('Audio Loaded')
   }
   
   mediaRecorder.start()
   isRecording.value = true
 
-  
   startDrawing();
 }
 
@@ -122,13 +123,12 @@ const stopRecording = () => {
   console.log('Stop Recording')  // 콘솔 로그 확인
   mediaRecorder.stop()
   isRecording.value = false
-
 }
 
 // 위치 정보 가져오기
 const locationMessage = ref('');
 
-async function saveRocord() {
+async function saveRecord() {
   
   if (!audioBlob) return;
 
@@ -201,7 +201,6 @@ function showError(error) {
   }
 }
 
-
 const spreadStore = useSpreadStore() 
 function sendVoiceInfoToServer(lat, lon) {
   const formData = new FormData();
@@ -260,10 +259,7 @@ const startDrawing = () => {
     canvasCtx.stroke();
   }, 66)
 }
-  
 
-
-  
 // WAV 파일 인코딩
 function encodeWAV(samples) {
   const buffer = new ArrayBuffer(44 + samples.byteLength);
@@ -315,7 +311,18 @@ function floatTo16BitPCM(output, offset, input) {
 }
 </script>
 
+
 <style scoped>
+.black-background {
+  background-color: #000;
+  color: #fff;
+}
+.audio-play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .record-button-container {
   display: flex;
   flex-direction: column;
@@ -392,6 +399,7 @@ canvas {
   width: 100%;
   display: flex;
   justify-content: center;
+  padding-bottom: 80px;
 }
 
 .save-button {
