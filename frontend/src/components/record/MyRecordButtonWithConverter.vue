@@ -8,18 +8,15 @@
   <div class="audio-container">
     <audio v-if="audioUrl && !isRecording" :src="audioUrl" controls></audio>
   </div>
-  
   <div class="save-button-container">
-    <button  class="save-button" v-if="audioUrl && !isRecording" @click="saveRocord">저장</button>
+    <button class="save-button" v-if="audioUrl && !isRecording" @click="saveRecording">저장</button>
   </div>
 </template>
 
 <script setup>
 import { useRecordStore } from '@/store/record'
-import { useSpreadStore } from '@/store/spread';
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, onUnmounted } from 'vue'
-import axios from 'axios';
 
 const recordStore = useRecordStore()
 const { isRecording, audioUrl } = storeToRefs(recordStore)
@@ -37,11 +34,10 @@ let dataArray = null;
 // 분석할 데이터의 크기를 저장할 변수입니다.
 let bufferLength = null;
 // 주기적으로 그리기 작업을 수행하기 위한 interval ID를 저장할 변수입니다.
-let drawInterval = null;  
-
-let audioBlob = null;
+let drawInterval = null;
 
 const canvasRef = ref(null)
+let audioBlob = null;  // 오디오 Blob을 저장할 변수입니다.
 
 const resizeCanvas = () => {
   const canvas = canvasRef.value
@@ -69,7 +65,7 @@ const toggleRecording = () => {
     startRecording()
   }
 }
-// 녹음
+
 const startRecording = async () => {
   console.log('Start Recording')  // 콘솔 로그 확인
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -82,7 +78,7 @@ const startRecording = async () => {
   analyser = audioContext.createAnalyser();
   // fft 크기 설정
   analyser.fftSize = 2048;
-  // anlyser를 soucrce에 연결
+  // analyser를 source에 연결
   source.connect(analyser);
 
   bufferLength = analyser.frequencyBinCount;
@@ -102,11 +98,11 @@ const startRecording = async () => {
     const arrayBuffer = await audioBlob.arrayBuffer();
     const wavBuffer = encodeWAV(arrayBuffer);
 
-    audioBlob = new Blob([wavBuffer], { type: 'audio/wav' })
-    audioUrl.value = URL.createObjectURL(audioBlob)
-    audioChunks = []
+    audioBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+    audioUrl.value = URL.createObjectURL(audioBlob);
+    audioChunks = [];
     clearInterval(drawInterval);
-    if(audioContext){
+    if (audioContext) {
       audioContext.close();
     }
   }
@@ -114,7 +110,6 @@ const startRecording = async () => {
   mediaRecorder.start()
   isRecording.value = true
 
-  
   startDrawing();
 }
 
@@ -122,21 +117,50 @@ const stopRecording = () => {
   console.log('Stop Recording')  // 콘솔 로그 확인
   mediaRecorder.stop()
   isRecording.value = false
-
 }
 
-// 위치 정보 가져오기
-const locationMessage = ref('');
+const startDrawing = () => {
+  console.log('start drawing')
+  const canvas = document.querySelector('canvas');
+  const canvasCtx = canvas.getContext('2d');
 
-async function saveRocord() {
-  
+  drawInterval = setInterval(() => {
+    if (!analyser) return;
+
+    analyser.getByteTimeDomainData(dataArray);
+
+    canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    canvasCtx.lineWidth = 3;
+    canvasCtx.strokeStyle = 'rgb(0, 0, 0)'
+
+    canvasCtx.beginPath();
+    // 파형을 그릴 폭을 계산합니다.
+    const sliceWidth = (canvas.width * 1.0) / (bufferLength / 8);
+    let x = 0;
+
+    // 데이터를 사용하여 파형을 그립니다.
+    for (let i = 0; i < bufferLength; i += 8) {
+      const v = (dataArray[i]) / 128.0;
+      const y = (v * canvas.height) / 2;
+
+      if (i === 0) {
+        canvasCtx.moveTo(x, y);
+      } else {
+        canvasCtx.lineTo(x, y);
+      }
+      x += sliceWidth;
+    }
+
+    // 파형 그리기를 마무리합니다.
+    canvasCtx.lineTo(canvas.width, canvas.height / 2);
+    canvasCtx.stroke();
+  }, 66)
+}
+
+const saveRecording = async () => {
   if (!audioBlob) return;
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition, showError);
-  } else {
-    locationMessage.value = 'Geolocation is not supported by this browser.';
-  }
 
   const arrayBuffer = await audioBlob.arrayBuffer();
   const dataView = new DataView(arrayBuffer);
@@ -174,96 +198,6 @@ async function saveRocord() {
   downloadLink.click();
 }
 
-function showPosition(position) {
-  const latitude = position.coords.latitude;
-  const longitude = position.coords.longitude;
-  locationMessage.value = `Latitude: ${latitude} | Longitude: ${longitude}`;
-  console.log(locationMessage.value);
-  
-  // 서버로 위치 데이터 전송
-  sendVoiceInfoToServer(latitude, longitude);
-}
-
-function showError(error) {
-  switch(error.code) {
-    case error.PERMISSION_DENIED:
-      locationMessage.value = 'User denied the request for Geolocation.';
-      break;
-    case error.POSITION_UNAVAILABLE:
-      locationMessage.value = 'Location information is unavailable.';
-      break;
-    case error.TIMEOUT:
-      locationMessage.value = 'The request to get user location timed out.';
-      break;
-    case error.UNKNOWN_ERROR:
-      locationMessage.value = 'An unknown error occurred.';
-      break;
-  }
-}
-
-
-const spreadStore = useSpreadStore() 
-function sendVoiceInfoToServer(lat, lon) {
-  const formData = new FormData();
-  formData.append('voiceType', spreadStore.activeTab);
-  formData.append('latitude', lat);
-  formData.append('longitude', lon);
-  formData.append('voiceUrl', audioUrl.value);
-  formData.append('voiceFile', audioBlob);  // 'audio.wav'는 파일 이름
-
-  axios.post('http://localhost:8080/api-record/record', formData)
-  .then(response => {
-    console.log('Location sent to server:', response.data);
-  })
-  .catch(error => {
-    console.error('Error sending location to server:', error);
-  });
-}
-
-// 음파 시각화
-const startDrawing = () => {
-  console.log('start drawing')
-  const canvas = document.querySelector('canvas');
-  const canvasCtx = canvas.getContext('2d');
-
-  drawInterval = setInterval(() => {
-    if(!analyser) return;
-
-    analyser.getByteTimeDomainData(dataArray);
-
-    canvasCtx.fillStyle = 'rgb(255, 255, 255)';
-    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-    canvasCtx.lineWidth = 3;
-    canvasCtx.strokeStyle = 'rgb(0, 0, 0)'
-
-    canvasCtx.beginPath();
-    // 파형을 그릴 폭을 계산합니다.
-    const sliceWidth = (canvas.width * 1.0) / (bufferLength / 8);
-    let x = 0;
-
-    // 데이터를 사용하여 파형을 그립니다.
-    for (let i = 0; i < bufferLength; i += 8) {
-      const v = (dataArray[i])/ 128.0;
-      const y = (v * canvas.height) / 2;
-
-      if (i === 0) {
-        canvasCtx.moveTo(x, y);
-      } else {
-        canvasCtx.lineTo(x, y);
-      }
-      x += sliceWidth;
-    }
-
-    // 파형 그리기를 마무리합니다.
-    canvasCtx.lineTo(canvas.width, canvas.height / 2);
-    canvasCtx.stroke();
-  }, 66)
-}
-  
-
-
-  
 // WAV 파일 인코딩
 function encodeWAV(samples) {
   const buffer = new ArrayBuffer(44 + samples.byteLength);
