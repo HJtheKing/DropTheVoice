@@ -26,7 +26,7 @@
       </v-btn>
     </v-bottom-navigation>
   </template>
-  
+
   <script>
   export default {
     data() {
@@ -41,11 +41,11 @@
     },
   };
   </script>
-  
+
   <style scoped>
   .bottom-navy {
     background-color: #252836;
-    color: #808191; 
+    color: #808191;
   }
   </style>
   

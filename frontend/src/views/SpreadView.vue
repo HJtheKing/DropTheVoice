@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { useSpreadStore } from '@/stores/spread.js'
+import { useSpreadStore } from '@/store/spread.js'
 import RecordButton from '@/components/spread/RecordButton.vue'
 import UploadButton from '@/components/spread/UploadButton.vue'
 import { storeToRefs } from 'pinia'
