@@ -8,9 +8,11 @@
         <v-icon>mdi-home</v-icon>
         <span>홈</span>
       </v-btn>
-      <v-btn value="음성찾기">
+      <v-btn value="음성찾기" @click="navigateTo('finder')">
         <v-icon>mdi-compass</v-icon>
-        <span>음성찾기</span>
+        <span router-link :to="{ name: 'finder' }">
+          User profile
+        </span>
       </v-btn>
       <v-btn value="보관함">
         <v-icon>mdi-folder</v-icon>
