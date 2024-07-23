@@ -47,7 +47,6 @@ const pw = ref("");
 const login = () => {
   store.userLogin(id.value, pw.value);
 };
-
 </script>
 
 <style scoped>

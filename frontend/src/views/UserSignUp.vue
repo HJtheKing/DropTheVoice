@@ -33,7 +33,7 @@
 
 <script>
 import { ref } from "vue";
-import { useUserStore } from "@/store/user";
+import { useUserStore } from "@/stores/user";
 
 export default {
   setup() {

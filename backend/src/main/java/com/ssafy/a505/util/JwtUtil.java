@@ -1,4 +1,4 @@
-package com.ssafy.a505.Util;
+package com.ssafy.a505.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

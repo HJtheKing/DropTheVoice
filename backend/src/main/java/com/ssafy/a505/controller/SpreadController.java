@@ -1,7 +1,7 @@
 package com.ssafy.a505.controller;
 
-import com.ssafy.a505.domain.Voice.InputVoiceDTO;
-import com.ssafy.a505.domain.Voice.Voice;
+import com.ssafy.a505.domain.voice.InputVoiceDTO;
+import com.ssafy.a505.domain.voice.Voice;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

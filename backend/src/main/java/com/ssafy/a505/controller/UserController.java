@@ -1,7 +1,7 @@
-package com.ssafy.a505.Controller;
+package com.ssafy.a505.controller;
 
-import com.ssafy.a505.Domain.User.User;
-import com.ssafy.a505.Util.JwtUtil;
+import com.ssafy.a505.domain.user.User;
+import com.ssafy.a505.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
