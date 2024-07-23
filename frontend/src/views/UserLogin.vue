@@ -4,17 +4,17 @@
     <form>
       <div class="input-group">
         <label for="username">아이디</label>
-        <input type="text" id="username" placeholder="아이디" v-model.trim="id"/>
+        <input type="text" id="username" placeholder="아이디" />
       </div>
       <div class="input-group">
         <label for="password">비밀번호</label>
-        <input type="password" id="password" placeholder="비밀번호" v-model.trim="pw"/>
+        <input type="password" id="password" placeholder="비밀번호" />
       </div>
       <div class="remember-me">
         <input type="checkbox" id="remember" />
         <label for="remember">아이디 저장</label>
       </div>
-      <button type="button" @click="login">로그인</button>
+      <button type="button">로그인</button>
       <div class="social-login">
         <button class="naver-login">
           <img src="@/assets/images/icon-naver.png" alt="Naver Login" />
@@ -36,18 +36,9 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue";
-import { useUserStore } from "@/stores/user";
-
-const store = useUserStore();
-const id = ref("");
-const pw = ref("");
-
-const login = () => {
-  store.userLogin(id.value, pw.value);
+<script>
+export default {
 };
-
 </script>
 
 <style scoped>
