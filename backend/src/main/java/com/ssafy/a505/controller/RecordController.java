@@ -1,7 +1,7 @@
 package com.ssafy.a505.controller;
 
-import com.ssafy.a505.domain.Voice.Voice;
-import com.ssafy.a505.domain.Voice.VoiceDto;
+import com.ssafy.a505.domain.voice.Voice;
+import com.ssafy.a505.domain.voice.VoiceDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

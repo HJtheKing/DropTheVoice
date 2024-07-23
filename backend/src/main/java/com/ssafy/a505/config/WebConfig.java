@@ -1,4 +1,4 @@
-package com.ssafy.a505.Config;
+package com.ssafy.a505.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
