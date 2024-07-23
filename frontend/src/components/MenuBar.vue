@@ -11,7 +11,7 @@
       <v-btn value="음성찾기" @click="navigateTo('finder')">
         <v-icon>mdi-compass</v-icon>
         <span router-link :to="{ name: 'finder' }">
-          User profile
+          음성 줍기
         </span>
       </v-btn>
       <v-btn value="보관함">
