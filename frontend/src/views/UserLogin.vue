@@ -36,27 +36,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from "vue";
 import { useUserStore } from "@/stores/user";
 
-export default {
-  setup() {
-    const store = useUserStore();
-    const id = ref("");
-    const pw = ref("");
+const store = useUserStore();
+const id = ref("");
+const pw = ref("");
 
-    const login = () => {
-      store.userLogin(id.value, pw.value);
-    };
-
-    return {
-      id,
-      pw,
-      login
-    };
-  }
+const login = () => {
+  store.userLogin(id.value, pw.value);
 };
+
 </script>
 
 <style scoped>

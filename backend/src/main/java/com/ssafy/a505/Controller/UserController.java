@@ -4,8 +4,11 @@ import com.ssafy.a505.Domain.User.User;
 import com.ssafy.a505.Util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,30 +29,57 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // 로그인 요청 검증
-    @Operation(summary = "로그인 요청 검증")
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody User user) {
-        // 서비스 -> 다오-> DB
-        HttpStatus status = null;
+        // 로그인 처리 로직
         Map<String, Object> result = new HashMap<>();
-
-        System.out.println(1);
+        HttpStatus status;
 
         if(user.getUserId() == 1234 && user.getUserPassword().equals("1234")) {
-            // 토큰 만들어서 넘김
-            System.out.println(2);
-            result.put("message", SUCCESS);
-            result.put("access-token", jwtUtil.createToken(user.getUserId()));
-            // id 같이 보내면 덜 번거로움
-            status = HttpStatus.ACCEPTED;
-        }else {
-            System.out.println(3);
-            result.put("message", FAIL);
-            status = HttpStatus.NO_CONTENT;
-        }
+            // 토큰 생성
+            Map<String, String> tokens = jwtUtil.createTokens(user.getUserId());
 
-        return new ResponseEntity<>(result, status);
+            // Refresh Token 쿠키 생성
+            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
+                    .httpOnly(true)
+                    .secure(false) // true in production
+                    .path("/")
+                    .maxAge(60 * 60 * 24 * 30) // 30일
+                    .sameSite("Lax") // "Strict" for more security
+                    .build();
+
+            // Access Token 응답 본문에 포함
+            result.put("message", "SUCCESS");
+            result.put("access-token", tokens.get("accessToken"));
+            status = HttpStatus.ACCEPTED;
+
+            return ResponseEntity.status(status)
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString()) // 헤더에 Refresh Token 쿠키 추가
+                    .body(result); // 본문에 Access Token 추가
+        } else {
+            result.put("message", "FAIL");
+            status = HttpStatus.UNAUTHORIZED; // 더 적절한 상태 코드로 변경
+            return new ResponseEntity<>(result, status);
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout() {
+        // Refresh Token 쿠키 만료
+        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false) // true in production
+                .path("/")
+                .maxAge(0) // 쿠키 즉시 만료
+                .sameSite("Lax") // "Strict" for more security
+                .build();
+
+        Map<String, String> result = new HashMap<>();
+        result.put("message", "Logged out successfully");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString()) // 만료된 쿠키 설정
+                .body(result);
     }
 
 }

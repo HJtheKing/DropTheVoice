@@ -38,54 +38,13 @@ import { useUserStore } from "@/stores/user";
 export default {
   setup() {
     
-    const confirmPassword = ref("");
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
-const idError = ref("");
-const pwError = ref("");
-const confirmPwError = ref("");
-const nameError = ref("");
+    const store = useUserStore();
+    const id = ref("");
+    const pw = ref("");
 
-const store = useUserStore();
-
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value;
-};
-
-const toggleConfirmPasswordVisibility = () => {
-  showConfirmPassword.value = !showConfirmPassword.value;
-};
-
-const validateInput = () => {
-  idError.value =
-    user.value.userId.length < 5 ? "ID는 최소 5자 이상이어야 합니다." : "";
-  pwError.value =
-    user.value.userPassword.length < 4
-      ? "PW는 최소 4자 이상이어야 합니다."
-      : "";
-  confirmPwError.value =
-    user.value.userPassword !== confirmPassword.value
-      ? "비밀번호가 일치하지 않습니다."
-      : "";
-  nameError.value =
-    user.value.userName.length < 2 ? "이름은 최소 2자 이상이어야 합니다." : "";
-};
-
-const isFormValid = computed(() => {
-  return (
-    idError.value === "" &&
-    pwError.value === "" &&
-    confirmPwError.value === "" &&
-    nameError.value === ""
-  );
-});
-
-const createUser = () => {
-  if (isFormValid.value) {
-    store.createUser(user.value);
-  }
-};
-
+    const login = () => {
+      store.userLogin(id.value, pw.value);
+    };
 
     return {
       id,

@@ -10,6 +10,7 @@ export const useUserStore = defineStore("user", () => {
   const loginUserId = ref(null);
   const user = ref(null);
 
+  // 로그인 메서드
   const userLogin = function (id, password) {
 
     console.log("asdasd");
