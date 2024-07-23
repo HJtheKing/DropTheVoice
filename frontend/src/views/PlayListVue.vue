@@ -17,7 +17,7 @@ import { ref } from 'vue';
 import { reactive, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
-import { useSeletedTrackStore } from '@/stores/playList.js';
+import { useSeletedTrackStore } from '@/store/playList.js';
 
 const router = useRouter();
 const store = useSeletedTrackStore();
