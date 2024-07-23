@@ -27,7 +27,7 @@
 
 <script setup>
 import { computed, ref, onMounted } from 'vue';
-import { useSeletedTrackStore } from '@/stores/playList.js';
+import { useSeletedTrackStore } from '@/store/playList.js';
 import AudioPlayer from '@/components/AudioPlayer.vue';
 import audioFile from '@/assets/tracks/Computer_Love-Feel_The_Funk.mp3';
 

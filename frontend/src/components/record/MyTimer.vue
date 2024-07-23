@@ -7,7 +7,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { useRecordStore } from '@/stores/record';
+import { useRecordStore } from '@/store/record';
 import { onBeforeRouteLeave } from 'vue-router'
 import { storeToRefs } from 'pinia';
 

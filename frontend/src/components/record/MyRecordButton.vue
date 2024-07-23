@@ -15,8 +15,8 @@
 </template>
 
 <script setup>
-import { useRecordStore } from '@/stores/record'
-import { useSpreadStore } from '@/stores/spread';
+import { useRecordStore } from '@/store/record'
+import { useSpreadStore } from '@/store/spread';
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios';
