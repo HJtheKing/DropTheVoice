@@ -29,7 +29,7 @@
 import { computed, ref, onMounted } from 'vue';
 import { useSeletedTrackStore } from '@/store/playList.js';
 import AudioPlayer from '@/components/AudioPlayer.vue';
-import audioFile from '@/assets/tracks/Computer_Love-Feel_The_Funk.mp3';
+import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
 
 const store = useSeletedTrackStore();
 const selectedItem = computed(() => store.getSelectedItem);
