@@ -66,6 +66,11 @@ const router = createRouter({
             name: "change",
             component: ChangeVoiceView,
         },
+        {
+            path: "/drop",
+            name: "drop",
+            component: ()=> import('@/views/SpreadDropVersionView.vue')
+        }
     ]
 })
 
