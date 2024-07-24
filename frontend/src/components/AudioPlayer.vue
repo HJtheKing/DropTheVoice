@@ -1,7 +1,7 @@
 <template>
   <div class="audio-player">
     <audio ref="audio" @timeupdate="updateTime" @loadedmetadata="updateDuration" @ended="resetPlayer" @error="handleError">
-      <source :src="audioSrc" type="audio/mpeg">
+      <source :src="audioSrc" type="audio/wav">
       Your browser does not support the audio element.
     </audio>
     <div class="controls">
@@ -87,6 +87,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .audio-player {
