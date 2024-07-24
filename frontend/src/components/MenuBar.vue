@@ -14,9 +14,9 @@
           음성 줍기
         </span>
       </v-btn>
-      <v-btn value="보관함">
+      <v-btn value="보관함" @click="navigateTo('storage')">
         <v-icon>mdi-folder</v-icon>
-        <span>보관함</span>
+        <span router-link :to="{ name: 'storage'}">보관함</span>
       </v-btn>
       <v-btn value="알림함">
         <v-icon>mdi-bell</v-icon>

@@ -8,6 +8,7 @@ import AudioPlayView from '@/views/AudioPlayView.vue';
 import PlayListVue from '@/views/PlayListVue.vue';
 import RecordView from '@/views/RecordView.vue';
 import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
+import StorageView from '@/views/StorageView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,6 +66,11 @@ const router = createRouter({
             path: "/change",
             name: "change",
             component: ChangeVoiceView,
+        },
+        {
+            path: "/storage",
+            name: "storage",
+            component: StorageView,
         },
     ]
 })
