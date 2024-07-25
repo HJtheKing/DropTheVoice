@@ -5,7 +5,7 @@ import UserLogin from "@/views/UserLogin.vue";
 import UserSignUp from "@/views/UserSignUp.vue";
 import UserMypage from "@/views/UserMypage.vue";
 import AudioPlayView from '@/views/AudioPlayView.vue';
-import PlayListVue from '@/views/PlayListVue.vue';
+import PlayListView from '@/views/PlayListView.vue';
 import RecordView from '@/views/RecordView.vue';
 import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
 
@@ -44,7 +44,7 @@ const router = createRouter({
         {
             path: "/playlist",
             name: "playlist",
-            component: PlayListVue,
+            component: PlayListView,
         },
         {
             path: "/audioplayer",
