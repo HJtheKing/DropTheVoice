@@ -1,4 +1,4 @@
-package com.ssafy.a505.domain.Voice;
+package com.ssafy.a505.domain.voice;
 
 import lombok.Data;
 
@@ -15,7 +15,7 @@ public class Voice {
     String imageUrl;
     String voiceUrl;
     VoiceType type;
-    long latitude;
-    long longitude;
+    double latitude;
+    double longitude;
     LocalDateTime dateTime;
 }

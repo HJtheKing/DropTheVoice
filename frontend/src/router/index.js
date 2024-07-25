@@ -1,15 +1,13 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import HomeView from '@/views/HomeView.vue';
 import SpreadView from '@/views/SpreadView.vue';
 import UserLogin from "@/views/UserLogin.vue";
 import UserSignUp from "@/views/UserSignUp.vue";
 import UserMypage from "@/views/UserMypage.vue";
-import recordviewkjk from "@/views/RecordViewKJK.vue";
 import AudioPlayView from '@/views/AudioPlayView.vue';
 import PlayListView from '@/views/PlayListView.vue';
-import RecordCHJView from '@/views/RecordCHJView.vue';
+import RecordView from '@/views/RecordView.vue';
 import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
-import PickItUpView from '@/views/PickItUpView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,9 +37,9 @@ const router = createRouter({
             component: UserSignUp,
         },
         {
-            path: '/search',
-            name: 'search',
-            component: PickItUpView
+            path: '/finder',
+            name: 'finder',
+            component: () => import('@/views/VoiceFinderView.vue')
         },
         {
             path: "/playlist",
@@ -54,11 +52,6 @@ const router = createRouter({
             component: AudioPlayView,
         },
         {
-            path: '/recordkjk',
-            name: 'recordkjk',
-            component: recordviewkjk,
-        },
-        {
             path: "/mypage",
             name: "mypage",
             component: UserMypage,
@@ -66,7 +59,7 @@ const router = createRouter({
         {
             path: "/record",
             name: "record",
-            component: RecordCHJView,
+            component: RecordView,
         },
         {
             path: "/change",

@@ -1,7 +1,7 @@
 package com.ssafy.a505.controller;
 
-import com.ssafy.a505.domain.Voice.Voice;
-import com.ssafy.a505.domain.Voice.VoiceType;
+import com.ssafy.a505.domain.voice.Voice;
+import com.ssafy.a505.domain.voice.VoiceType;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
