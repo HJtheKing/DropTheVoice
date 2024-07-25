@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
-export const useVoiceStore = defineStore('voice', {
+export const useStorageStore = defineStore('stoarge', {
   state: () => ({
     allVoices: [],
     likedVoices: [],
