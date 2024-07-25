@@ -1,42 +1,43 @@
 <template>
-  <div class="home-container">
-    <header>
-      <h1>뿌리기</h1>
-    </header>
-    <div class="tab-container">
-      <button :class="{ active: activeTab === 'pokemon' }" @click="setTab('pokemon')">포켓몬</button>
-      <button :class="{ active: activeTab === 'virus' }" @click="setTab('virus')">바이러스</button>
-    </div>
-    <div class="button-container">
-      <RecordButton v-if="activeTab === 'pokemon'" />
-      <UploadButton v-if="activeTab === 'pokemon'" />
-      <RecordButton v-if="activeTab === 'virus'" />
-      <UploadButton v-if="activeTab === 'virus'" />
-    </div>
-  </div>
+  <v-app class="black-background">
+    <v-container class="custom-container">
+      <header>
+        <h1>뿌리기</h1>
+      </header>
+
+      <div class="tab-container">
+        <button :class="{ active: activeTab === 'pokemon' }" @click="setTab('pokemon')">포켓몬</button>
+        <button :class="{ active: activeTab === 'virus' }" @click="setTab('virus')">바이러스</button>
+      </div>
+
+      <MapComponent v-if="activeTab==='pokemon'"/>
+      <div class="bottom-button-container" v-if="activeTab === 'pokemon'">
+        <RecordButton/>
+        <UploadButton/>
+      </div>
+
+      <div class="button-container" v-if="activeTab === 'virus'">
+        <RecordButton/>
+        <UploadButton/>
+      </div>
+    </v-container>
+  </v-app>
+
 </template>
 
 <script setup>
-import { useSpreadStore } from '@/store/spread.js'
+import {useSpreadStore} from '@/store/spread.js'
 import RecordButton from '@/components/spread/RecordButton.vue'
 import UploadButton from '@/components/spread/UploadButton.vue'
-import { storeToRefs } from 'pinia'
+import {storeToRefs} from 'pinia'
+import MapComponent from "@/components/spread/MapComponent.vue";
 
 const spreadStore = useSpreadStore()
-const { activeTab } = storeToRefs(spreadStore)
-const { setTab } = spreadStore
+const {activeTab} = storeToRefs(spreadStore)
+const {setTab} = spreadStore
 </script>
 
 <style scoped>
-.home-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #1e1e1e;
-  height: 100vh;
-  color: white;
-  padding: 20px;
-}
 
 header {
   margin-top: 20px;
@@ -87,19 +88,18 @@ h1 {
   margin-top: 50px;
 }
 
+.bottom-button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  margin-top: 50px;
+}
+
 @media (min-width: 600px) {
   .button-container {
     flex-direction: row;
   }
 }
 
-.nav-item {
-  color: #999;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.nav-item.active {
-  color: #bb86fc;
-}
 </style>

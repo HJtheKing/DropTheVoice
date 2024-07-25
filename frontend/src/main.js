@@ -31,5 +31,4 @@ app.use(store)
 // 개발 모드에서만 Vue Devtools 활성화
 app.config.devtools = false
 
-
 app.mount('#app')
