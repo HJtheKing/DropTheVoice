@@ -100,6 +100,7 @@ const startRecording = async () => {
 
     audioBlob = new Blob([wavBuffer], { type: 'audio/wav' });
     audioUrl.value = URL.createObjectURL(audioBlob);
+    
     audioChunks = [];
     clearInterval(drawInterval);
     if (audioContext) {

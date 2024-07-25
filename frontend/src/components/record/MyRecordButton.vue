@@ -95,18 +95,30 @@ const startRecording = async () => {
   }
   
   mediaRecorder.onstop = async () => {
-    audioBlob = new Blob(audioChunks, { type: 'audio/wav' } )
+    // audioBlob = new Blob(audioChunks, { type: 'audio/wav' } );
+    // console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
+    
+    // audioUrl.value = URL.createObjectURL(audioBlob);
+    
+    audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
     console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
     
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const wavBuffer = encodeWAV(arrayBuffer);
+
+    audioBlob = new Blob([wavBuffer], { type: 'audio/wav' });
     audioUrl.value = URL.createObjectURL(audioBlob);
+    
+    if (audioPlayer.value) {
+      audioPlayer.value.loadAudio(audioUrl.value);
+    }
+
     audioChunks = [];
     clearInterval(drawInterval);
     if (audioContext) {
       audioContext.close();
     }
-    if (audioPlayer.value) {
-      audioPlayer.value.loadAudio(audioUrl.value);
-    }
+
   }
   
   mediaRecorder.start()
@@ -201,54 +213,54 @@ const saveRecording = async () => {
 }
 
 // WAV 파일 인코딩
-// function encodeWAV(samples) {
-//   const buffer = new ArrayBuffer(44 + samples.byteLength);
-//   const view = new DataView(buffer);
+function encodeWAV(samples) {
+  const buffer = new ArrayBuffer(44 + samples.byteLength);
+  const view = new DataView(buffer);
 
-//   /* RIFF identifier */
-//   writeString(view, 0, 'RIFF');
-//   /* file length */
-//   view.setUint32(4, 36 + samples.byteLength, true);
-//   /* RIFF type */
-//   writeString(view, 8, 'WAVE');
-//   /* format chunk identifier */
-//   writeString(view, 12, 'fmt ');
-//   /* format chunk length */
-//   view.setUint32(16, 16, true);
-//   /* sample format (raw) */
-//   view.setUint16(20, 1, true);
-//   /* channel count */
-//   view.setUint16(22, 1, true);
-//   /* sample rate */
-//   view.setUint32(24, 44100, true);
-//   /* byte rate (sample rate * block align) */
-//   view.setUint32(28, 44100 * 2, true);
-//   /* block align (channel count * bytes per sample) */
-//   view.setUint16(32, 2, true);
-//   /* bits per sample */
-//   view.setUint16(34, 16, true);
-//   /* data chunk identifier */
-//   writeString(view, 36, 'data');
-//   /* data chunk length */
-//   view.setUint32(40, samples.byteLength, true);
+  /* RIFF identifier */
+  writeString(view, 0, 'RIFF');
+  /* file length */
+  view.setUint32(4, 36 + samples.byteLength, true);
+  /* RIFF type */
+  writeString(view, 8, 'WAVE');
+  /* format chunk identifier */
+  writeString(view, 12, 'fmt ');
+  /* format chunk length */
+  view.setUint32(16, 16, true);
+  /* sample format (raw) */
+  view.setUint16(20, 1, true);
+  /* channel count */
+  view.setUint16(22, 1, true);
+  /* sample rate */
+  view.setUint32(24, 8000, true);
+  /* byte rate (sample rate * block align) */
+  view.setUint32(28, 8000 * 2, true);
+  /* block align (channel count * bytes per sample) */
+  view.setUint16(32, 2, true);
+  /* bits per sample */
+  view.setUint16(34, 16, true);
+  /* data chunk identifier */
+  writeString(view, 36, 'data');
+  /* data chunk length */
+  view.setUint32(40, samples.byteLength, true);
 
-//   floatTo16BitPCM(view, 44, samples);
+  floatTo16BitPCM(view, 44, samples);
 
-//   return view;
-// }
+  return view;
+}
 
-// function writeString(view, offset, string) {
-//   for (let i = 0; i < string.length; i++) {
-//     view.setUint8(offset + i, string.charCodeAt(i));
-//   }
-// }
+function writeString(view, offset, string) {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
 
-// function floatTo16BitPCM(output, offset, input) {
-//   for (let i = 0; i < input.length; i++, offset += 2) {
-//     const s = Math.max(-1, Math.min(1, input[i]));
-//     output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-//   }
-// }
+function floatTo16BitPCM(output, offset, input) {
+  for (let i = 0; i < input.length; i++, offset += 2) {
+    const s = Math.max(-1, Math.min(1, input[i]));
+    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+}
 </script>
 
 <style scoped>
