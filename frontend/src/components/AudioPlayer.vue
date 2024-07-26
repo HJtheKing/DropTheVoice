@@ -63,6 +63,9 @@ export default {
     const loadAudio = (audioUrl) => {
       audioSrc.value = audioUrl;
       audio.value.load();
+      audio.value.onloadedmetadata = () => {
+        duration.value = audio.value.duration;
+      };
     };
 
     const handleError = (event) => {

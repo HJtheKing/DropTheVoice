@@ -95,20 +95,26 @@ const startRecording = async () => {
   }
   
   mediaRecorder.onstop = async () => {
-    // audioBlob = new Blob(audioChunks, { type: 'audio/wav' } );
+    // [Before]
+    audioBlob = new Blob(audioChunks, { type: 'audio/wav' } );
+    console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
+    audioUrl.value = URL.createObjectURL(audioBlob);
+    // [Before]
+
+    // [After]
+    // audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
     // console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
     
-    // audioUrl.value = URL.createObjectURL(audioBlob);
-    
-    audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
-    console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
-    
-    const arrayBuffer = await audioBlob.arrayBuffer();
-    const wavBuffer = encodeWAV(arrayBuffer);
+    // const arrayBuffer = await audioBlob.arrayBuffer();
+    // const float32Array = convertBlock(arrayBuffer);
+    // const wavBuffer = encodeWAV(float32Array);
 
-    audioBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+
+    // audioBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+    // audioUrl.value = URL.createObjectURL(audioBlob);
     audioUrl.value = URL.createObjectURL(audioBlob);
-    
+    // [After]
+
     if (audioPlayer.value) {
       audioPlayer.value.loadAudio(audioUrl.value);
     }
@@ -127,10 +133,38 @@ const startRecording = async () => {
   startDrawing();
 }
 
+// function convertBlock(buffer) { // incoming data is an ArrayBuffer
+//     var incomingData = new Uint8Array(buffer); // create a uint8 view on the ArrayBuffer
+//     var i, l = incomingData.length; // length, we need this for the loop
+//     var outputData = new Float32Array(incomingData.length); // create the Float32Array for output
+//     for (i = 0; i < l; i++) {
+//         outputData[i] = (incomingData[i] - 128) / 128.0; // convert audio to float
+//     }
+//     return outputData; // return the Float32Array
+// }
+function convertBlock(buffer) {
+    // WebM 파일에서 사용하는 형식에 맞게 변환 필요
+    const incomingData = new Uint8Array(buffer);
+    const outputData = new Float32Array(incomingData.length);
+
+    for (let i = 0; i < incomingData.length; i++) {
+        // WebM 파일의 오디오 데이터 형식을 확인하고 변환 로직 수정 필요
+        // 여기서는 단순한 예로 0~255 범위를 -1.0~1.0 범위로 변환
+        outputData[i] = (incomingData[i] - 128) / 128.0;
+    }
+
+    return outputData;
+}
+
+
 const stopRecording = () => {
   console.log('Stop Recording')  // 콘솔 로그 확인
   mediaRecorder.stop()
   isRecording.value = false
+  const downloadLink = document.createElement('a');
+  downloadLink.href = audioUrl.value;
+  downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.webm`;
+  downloadLink.click();
 }
 
 const startDrawing = () => {
@@ -232,9 +266,9 @@ function encodeWAV(samples) {
   /* channel count */
   view.setUint16(22, 1, true);
   /* sample rate */
-  view.setUint32(24, 8000, true);
+  view.setUint32(24, 48000, true);
   /* byte rate (sample rate * block align) */
-  view.setUint32(28, 8000 * 2, true);
+  view.setUint32(28, 48000 * 2, true);
   /* block align (channel count * bytes per sample) */
   view.setUint16(32, 2, true);
   /* bits per sample */
