@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: dropthevoice
+
+  datasource:
+    url: jdbc:mysql://mysql-container:3306/dropthevoice
+    username: ssafy
+    password: ssafy
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  redis:
+    host: redis
+    port: 6379
+
+  #data:
+    #mongodb:
+      #uri: mongodb://root:password@localhost:27017/chatdatabase
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+logging:
+  level:
+    root: info
