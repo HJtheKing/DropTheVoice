@@ -1,8 +1,12 @@
 <template>
-  <div class="timer-container" :class="{hidden : !isRecording}">
-      <span>[녹음 중] </span>
-      <span>{{ timer.toFixed(2) }} 초</span>
-  </div>
+  <v-container class="timer-container" :class="{ hidden: !isRecording }" fluid>
+    <v-row justify="center">
+        <div class="d-flex justify-center align-center">
+          <v-icon color="red" class="mr-2">mdi-record-circle</v-icon>
+          <span class="timer-text">[녹음 중] {{ timer.toFixed(2) }} 초</span>
+        </div>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
@@ -12,7 +16,7 @@ import { onBeforeRouteLeave } from 'vue-router'
 import { storeToRefs } from 'pinia';
 
 const recordStore = useRecordStore();
-const {isRecording} = storeToRefs(recordStore)
+const { isRecording } = storeToRefs(recordStore)
 
 const timer = ref(0.00)
 let intervalId = null
@@ -50,20 +54,16 @@ onUnmounted(() => {
 
 <style scoped>
 .timer-container {
-  font-size: 16px;
-  color: red;
-  white-space: nowrap;
-
   margin-bottom: 20px;
-  text-align: center;
 }
 
 .hidden {
   visibility: hidden;
 }
-/* .timer-container {
-  margin-bottom: 20px;
-  text-align: center;
-  color: white;
-} */
+
+.timer-text {
+  font-size: 16px;
+  color: red;
+  white-space: nowrap;
+}
 </style>

@@ -1,17 +1,38 @@
 <template>
-  <div class="canvas-container">
-    <canvas ref="canvas" width="500" height="500"></canvas>
-  </div>
-  <div class="record-button-container">
-    <div :class="['record-button', { recording: isRecording }]" @click="toggleRecording"></div>
-  </div>
-  <div class="audio-container">
-    <audio v-if="audioUrl && !isRecording" :src="audioUrl" controls></audio>
-  </div>
-  
-  <div class="save-button-container">
-    <button  class="save-button" v-if="audioUrl && !isRecording" @click="saveRocord">저장</button>
-  </div>
+  <v-container fluid>
+    <v-row justify="center" class="my-4">
+        <v-card class="d-flex justify-center align-center pa-2">
+          <canvas ref="canvas" width="400" height="400"></canvas>
+        </v-card>
+    </v-row>
+
+    <v-row justify="center" class="my-4">
+      <v-col cols="12" class="d-flex justify-center align-center">
+        <v-btn
+          class="record-button"
+          :class="{ recording: isRecording }"
+          @click="toggleRecording"
+          color="red"
+          rounded
+          large
+        >
+          <v-icon>mdi-record-circle</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <v-row justify="center" class="my-4">
+        <v-card v-if="audioUrl && !isRecording" class="pa-2">
+            <audio :src="audioUrl" controls></audio>
+        </v-card>
+    </v-row>
+
+    <v-row justify="center">
+        <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
+          저장
+        </v-btn>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
@@ -122,7 +143,7 @@ const stopRecording = () => {
 // 위치 정보 가져오기
 const locationMessage = ref('');
 
-function saveRocord() {
+function saveRecord() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition, showError);
   } else {
