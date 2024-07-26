@@ -34,7 +34,7 @@ public class JwtUtil {
         return createdTokens;
     }
 
-    // 토큰 유효성 확인
+    // 토큰 유효성 (확인
     public Jws<Claims> validate(String token) {
         try {
             return Jwts.parser()

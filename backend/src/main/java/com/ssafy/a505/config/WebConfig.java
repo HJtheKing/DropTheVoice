@@ -28,7 +28,11 @@ public class WebConfig implements WebMvcConfigurer {
         configuration.addAllowedOriginPattern("http://localhost:3000");
         configuration.addAllowedHeader("Content-Type");
         configuration.addAllowedHeader("Authorization");
-        configuration.addAllowedMethod("*");
+        configuration.addAllowedMethod("GET");
+        configuration.addAllowedMethod("POST");
+        configuration.addAllowedMethod("PUT");
+        configuration.addAllowedMethod("DELETE");
+        configuration.addAllowedMethod("OPTIONS");
         configuration.addExposedHeader("Authorization");
         configuration.addExposedHeader("New-Access-Token");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
