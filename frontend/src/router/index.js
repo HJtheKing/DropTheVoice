@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue';
 import SpreadView from '@/views/SpreadView.vue';
-import UserLogin from "@/views/UserLogin.vue";
-import UserSignUp from "@/views/UserSignUp.vue";
-import UserMypage from "@/views/UserMypage.vue";
+import UserLoginView from "@/views/UserLoginView.vue";
+import UserSignUpView from "@/views/UserSignUpView.vue";
+import UserMypageView from "@/views/UserMypageView.vue";
 import AudioPlayView from '@/views/AudioPlayView.vue';
 import PlayListVue from '@/views/PlayListVue.vue';
 import RecordView from '@/views/RecordView.vue';
@@ -30,12 +30,12 @@ const router = createRouter({
         {
             path: "/login",
             name: "login",
-            component: UserLogin,
+            component: UserLoginView,
         },
         {
             path: "/signup",
             name: "signup",
-            component: UserSignUp,
+            component: UserSignUpView,
         },
         {
             path: '/search',
@@ -55,7 +55,7 @@ const router = createRouter({
         {
             path: "/mypage",
             name: "mypage",
-            component: UserMypage,
+            component: UserMypageView,
         },
         {
             path: "/record",
