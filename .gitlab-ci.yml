@@ -29,7 +29,7 @@ docker-build:
       fi
   # Run this job in a branch where a Dockerfile exists
   rules:
-    - if: '$CI_COMMIT_BRANCH == "feat/webrtc-apply"`
+    - if: $CI_COMMIT_BRANCH == "feat/webrtc-apply"
       exists:
         - ../backend/Dockerfile
 
