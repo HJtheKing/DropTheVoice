@@ -23,7 +23,8 @@ docker-build:
   # All branches are tagged with $DOCKER_IMAGE_NAME (defaults to commit ref slug)
   # Default branch is also tagged with `latest`
   script:
-    - if [[ "$CI_COMMIT_BRANCH" == "feat/webrtc-apply" ]]; then
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "feat/webrtc-apply" ]]; then
         docker build -t gbds234/backend:latest --push ../backend/
       fi
   # Run this job in a branch where a Dockerfile exists
