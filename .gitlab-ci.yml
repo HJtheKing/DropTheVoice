@@ -14,6 +14,8 @@ docker-build-back:
   # Use the official docker image.
   image: docker:cli
   stage: build
+  tags:
+    - docker
   services:
     - docker:dind
   variables:
@@ -37,6 +39,8 @@ docker-build-front:
   # Use the official docker image.
   image: docker:cli
   stage: build
+  tags:
+  - docker
   services:
     - docker:dind
   variables:
