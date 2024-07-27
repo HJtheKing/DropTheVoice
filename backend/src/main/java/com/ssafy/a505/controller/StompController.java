@@ -43,7 +43,7 @@ public class StompController {
         String sessionId = headerAccessor.getSessionId();
 
         log.info(sessionId+"is sessionId");
-        log.info("Session Logged In Member Info: "+member.toString());
+        log.info("Session Logged In Member Info : "+member.toString());
 
         //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자.
         //redisService.update(member,lat,lng);
