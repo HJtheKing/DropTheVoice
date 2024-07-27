@@ -31,7 +31,7 @@ docker-build-back:
   rules:
     - if: $CI_COMMIT_BRANCH == "feat/webrtc-apply"
       exists:
-        - ../backend/Dockerfile
+        - backend/Dockerfile
 
 docker-build-front:
   # Use the official docker image.
@@ -54,5 +54,5 @@ docker-build-front:
   rules:
     - if: $CI_COMMIT_BRANCH == "feat/webrtc-apply"
       exists:
-        - ../frontend/Dockerfile
+        - frontend/Dockerfile
 
