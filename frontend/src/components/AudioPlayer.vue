@@ -1,7 +1,7 @@
 <template>
   <div class="audio-player">
     <audio ref="audio" @timeupdate="updateTime" @loadedmetadata="updateDuration" @ended="resetPlayer" @error="handleError">
-      <source :src="audioSrc" type="audio/wav">
+      <source :src="audioSrc" type="audio/mp3">
       Your browser does not support the audio element.
     </audio>
     <div class="controls">
@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 export default {
   setup() {
@@ -90,6 +90,7 @@ export default {
   }
 };
 </script>
+
 
 
 <style scoped>

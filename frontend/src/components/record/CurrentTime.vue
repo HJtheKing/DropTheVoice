@@ -1,6 +1,6 @@
 <template>
   <div class="current-time">
-    <sapn>{{ currentTime }}</sapn>
+    <span>{{ currentTime }}</span>
   </div>
 </template>
 

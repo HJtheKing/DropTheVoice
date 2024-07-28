@@ -1,6 +1,6 @@
 <template>
   <div class="canvas-container">
-    <canvas ref="canvas" width="500" height="500"></canvas>
+    <canvas ref="canvasRef" width="500" height="500"></canvas>
   </div>
   <div class="record-button-container">
     <div :class="['record-button', { recording: isRecording }]" @click="toggleRecording"></div>
@@ -14,184 +14,181 @@
 </template>
 
 <script setup>
-import { useRecordStore } from '@/store/record'
-import { storeToRefs } from 'pinia'
-import { ref, onMounted, onUnmounted } from 'vue'
-import AudioPlayer from '@/components/AudioPlayer.vue'
+import { useRecordStore } from '@/store/record';
+import { storeToRefs } from 'pinia';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { MediaRecorder, register } from 'extendable-media-recorder';
+import { connect } from 'extendable-media-recorder-wav-encoder';
+import * as lamejs from '@breezystack/lamejs';
+import AudioPlayer from "@/components/AudioPlayer.vue";
 
-const recordStore = useRecordStore()
-const { isRecording, audioUrl } = storeToRefs(recordStore)
+// Pinia 스토어를 사용하여 전역 상태 관리
+const recordStore = useRecordStore();
+const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 참조
 
-const audioPlayer = ref(null);
+// 녹음된 오디오 청크를 저장하는 배열
+const audioChunks = [];
+let mediaRecorder = null; // MediaRecorder 객체를 저장할 변수
+let audioBlob = null; // 녹음된 오디오 데이터를 저장할 Blob
 
-// MediaRecorder 객체를 저장할 변수입니다.
-let mediaRecorder = null;
-// 오디오 데이터를 저장할 배열입니다.
-let audioChunks = [];
-// Web Audio API의 AudioContext 객체를 저장할 변수입니다.
-let audioContext = null;
-// Web Audio API의 AnalyserNode 객체를 저장할 변수입니다.
-let analyser = null;
-// 오디오 데이터를 저장할 배열입니다.
-let dataArray = null;
-// 분석할 데이터의 크기를 저장할 변수입니다.
-let bufferLength = null;
-// 주기적으로 그리기 작업을 수행하기 위한 interval ID를 저장할 변수입니다.
-let drawInterval = null;
+const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
 
-const canvasRef = ref(null)
-let audioBlob = null;  // 오디오 Blob을 저장할 변수입니다.
+// Web Audio API 관련 변수
+let audioContext = null; // AudioContext 객체를 저장할 변수
+let analyser = null; // 오디오 분석기 (AnalyserNode) 객체를 저장할 변수
+let dataArray = null; // 오디오 데이터 배열을 저장할 변수
+let bufferLength = null; // 분석할 데이터의 크기를 저장할 변수
+let drawInterval = null; // 주기적으로 그리기 작업을 수행하기 위한 interval ID를 저장할 변수
+let stream = null; // MediaStream 객체를 저장할 변수 (오디오 입력 스트림)
 
-const resizeCanvas = () => {
-  const canvas = canvasRef.value
-  if (canvas) {
-    const container = canvas.parentElement
-    canvas.width = container.clientWidth
-    canvas.height = container.clientHeight
-  }
-}
+// 인코더 등록 상태 추적
+let isEncoderRegistered = false;
+
+// canvas 요소에 대한 ref
+const canvasRef = ref(null);
 
 onMounted(() => {
-  window.addEventListener('resize', resizeCanvas)
-  resizeCanvas()
-})
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', resizeCanvas)
-})
+  window.removeEventListener('resize', resizeCanvas);
+  clearInterval(drawInterval);
+});
 
+const resizeCanvas = () => {
+  const canvas = canvasRef.value;
+  if (canvas) {
+    const container = canvas.parentElement;
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+  }
+};
+
+// 녹음 시작 및 중지 토글 메서드
 const toggleRecording = () => {
-  console.log('Toggle Recording Clicked')  // 콘솔 로그 확인
   if (isRecording.value) {
-    stopRecording()
+    stopRecording();
   } else {
-    startRecording()
+    startRecording();
   }
-}
+};
 
+// 녹음을 시작하는 메서드
 const startRecording = async () => {
-  console.log('Start Recording')  // 콘솔 로그 확인
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-
-  // Web Audio API 설정
-  audioContext = new (window.AudioContext)();
-  // 스트림을 AudioContext의 소스로 만듭니다.
-  const source = audioContext.createMediaStreamSource(stream);
-  // audiocontext의 analyser 생성 및 할당
-  analyser = audioContext.createAnalyser();
-  // fft 크기 설정
-  analyser.fftSize = 2048;
-  // analyser를 source에 연결
-  source.connect(analyser);
-
-  bufferLength = analyser.frequencyBinCount;
-
-  dataArray = new Uint8Array(bufferLength);
-
-  mediaRecorder = new MediaRecorder(stream)
-  
-  mediaRecorder.ondataavailable = event => {
-    audioChunks.push(event.data)
-  }
-  
-  mediaRecorder.onstop = async () => {
-    // [Before]
-    audioBlob = new Blob(audioChunks, { type: 'audio/wav' } );
-    console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
-    audioUrl.value = URL.createObjectURL(audioBlob);
-    // [Before]
-
-    // [After]
-    // audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
-    // console.log(audioBlob.type, audioBlob.size); // 타입과 크기 로그 확인
-    
-    // const arrayBuffer = await audioBlob.arrayBuffer();
-    // const float32Array = convertBlock(arrayBuffer);
-    // const wavBuffer = encodeWAV(float32Array);
-
-
-    // audioBlob = new Blob([wavBuffer], { type: 'audio/wav' });
-    // audioUrl.value = URL.createObjectURL(audioBlob);
-    audioUrl.value = URL.createObjectURL(audioBlob);
-    // [After]
-
-    if (audioPlayer.value) {
-      audioPlayer.value.loadAudio(audioUrl.value);
+  try {
+    console.log("Started Recording")
+    // 기존 스트림과 오디오 컨텍스트 종료
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
     }
-
-    audioChunks = [];
-    clearInterval(drawInterval);
     if (audioContext) {
       audioContext.close();
+      audioContext = null;
     }
 
+    // 오디오 플레이어 초기화
+    if (audioPlayer.value) {
+      audioPlayer.value.loadAudio('');
+    }
+
+    // 인코더가 등록되지 않은 경우에만 등록
+    if (!isEncoderRegistered) {
+      await register(await connect());
+      isEncoderRegistered = true; // 등록 상태 설정
+    }
+
+    // 오디오 입력 스트림 가져오기
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Web Audio API 설정
+    audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    source.connect(analyser);
+
+    // MediaRecorder 설정 및 시작
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
+    mediaRecorder.ondataavailable = event => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+      audioUrl.value = URL.createObjectURL(audioBlob);
+
+      if (audioPlayer.value) {
+        audioPlayer.value.loadAudio(audioUrl.value);
+      }
+
+      audioChunks.length = 0;
+      clearInterval(drawInterval);
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+
+      // 스트림의 모든 트랙을 종료
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+    };
+
+    // 파형 그리기 시작
+    startDrawing(); // 파형 그리기 함수 먼저 호출
+
+    mediaRecorder.start(); // 녹음 시작
+    isRecording.value = true;
+
+  } catch (error) {
+    console.error('Error starting recording:', error);
   }
-  
-  mediaRecorder.start()
-  isRecording.value = true
+};
 
-  startDrawing();
-}
-
-// function convertBlock(buffer) { // incoming data is an ArrayBuffer
-//     var incomingData = new Uint8Array(buffer); // create a uint8 view on the ArrayBuffer
-//     var i, l = incomingData.length; // length, we need this for the loop
-//     var outputData = new Float32Array(incomingData.length); // create the Float32Array for output
-//     for (i = 0; i < l; i++) {
-//         outputData[i] = (incomingData[i] - 128) / 128.0; // convert audio to float
-//     }
-//     return outputData; // return the Float32Array
-// }
-function convertBlock(buffer) {
-    // WebM 파일에서 사용하는 형식에 맞게 변환 필요
-    const incomingData = new Uint8Array(buffer);
-    const outputData = new Float32Array(incomingData.length);
-
-    for (let i = 0; i < incomingData.length; i++) {
-        // WebM 파일의 오디오 데이터 형식을 확인하고 변환 로직 수정 필요
-        // 여기서는 단순한 예로 0~255 범위를 -1.0~1.0 범위로 변환
-        outputData[i] = (incomingData[i] - 128) / 128.0;
-    }
-
-    return outputData;
-}
-
-
+// 녹음을 중지하는 메서드
 const stopRecording = () => {
-  console.log('Stop Recording')  // 콘솔 로그 확인
-  mediaRecorder.stop()
-  isRecording.value = false
-  const downloadLink = document.createElement('a');
-  downloadLink.href = audioUrl.value;
-  downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.webm`;
-  downloadLink.click();
-}
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop(); // 녹음 중지
+    console.log("Stopped recording");
+  }
+  isRecording.value = false;
+};
 
+// 오디오 파형을 그리는 메서드
 const startDrawing = () => {
-  console.log('start drawing')
+  console.log("Started drawing")
+
   const canvas = document.querySelector('canvas');
+  if (!canvas) return;
+
   const canvasCtx = canvas.getContext('2d');
+  if (!canvasCtx) return;
 
   drawInterval = setInterval(() => {
     if (!analyser) return;
 
-    analyser.getByteTimeDomainData(dataArray);
+    analyser.getByteTimeDomainData(dataArray); // 오디오 데이터 가져오기
 
-    canvasCtx.fillStyle = 'rgb(255, 255, 255)';
-    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
+    canvasCtx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
     canvasCtx.lineWidth = 3;
-    canvasCtx.strokeStyle = 'rgb(0, 0, 0)'
+    canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
 
     canvasCtx.beginPath();
-    // 파형을 그릴 폭을 계산합니다.
+    // 파형 폭 계산하기
     const sliceWidth = (canvas.width * 1.0) / (bufferLength / 8);
     let x = 0;
 
-    // 데이터를 사용하여 파형을 그립니다.
+    // 오디오 데이터를 기반으로 파형 그리기
     for (let i = 0; i < bufferLength; i += 8) {
-      const v = (dataArray[i]) / 128.0;
-      const y = (v * canvas.height) / 2;
+      const v = (dataArray[i] / 128.0);
+      const y = (v * canvas.height / 2);
 
       if (i === 0) {
         canvasCtx.moveTo(x, y);
@@ -201,101 +198,75 @@ const startDrawing = () => {
       x += sliceWidth;
     }
 
-    // 파형 그리기를 마무리합니다.
     canvasCtx.lineTo(canvas.width, canvas.height / 2);
     canvasCtx.stroke();
-  }, 66)
-}
+  }, 66);
+};
 
+// 녹음을 저장하고 MP3로 변환하는 메서드
 const saveRecording = async () => {
   if (!audioBlob) return;
 
-  const arrayBuffer = await audioBlob.arrayBuffer();
-  const dataView = new DataView(arrayBuffer);
-
-  const wavHeader = lamejs.WavHeader.readHeader(dataView);
-  if (!wavHeader) {
-    console.error("WAV 파일 헤더 읽기 실패");
-    return;
-  }
-
-  const samples = new Int16Array(arrayBuffer, wavHeader.dataOffset, wavHeader.dataLen / 2);
-
-  const mp3Encoder = new lamejs.Mp3Encoder(1, wavHeader.sampleRate, 128);
-  const mp3Data = [];
-  let sampleBlockSize = 1152;
-  for (let i = 0; i < samples.length; i += sampleBlockSize) {
-    let sampleChunk = samples.subarray(i, i + sampleBlockSize);
-    let mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
-    if (mp3buf.length > 0) {
-      mp3Data.push(new Int8Array(mp3buf));
-    }
-  }
-  const mp3buf = mp3Encoder.flush();
-  if (mp3buf.length > 0) {
-    mp3Data.push(new Int8Array(mp3buf));
-  }
-
-  const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+  const mp3Blob = await convertWavToMp3(audioBlob);
   const url = URL.createObjectURL(mp3Blob);
-  
-  // mp3 다운로드
+
+  // MP3 다운로드
   const downloadLink = document.createElement('a');
   downloadLink.href = url;
   downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
   downloadLink.click();
-}
+  console.log("Started downloading");
+};
 
-// WAV 파일 인코딩
-function encodeWAV(samples) {
-  const buffer = new ArrayBuffer(44 + samples.byteLength);
-  const view = new DataView(buffer);
+// WAV 파일을 MP3로 변환하는 메서드
+async function convertWavToMp3(wavBlob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const arrayBuffer = this.result;
+      const wavHeader = lamejs.WavHeader.readHeader(new DataView(arrayBuffer));
+      // 모노 채널로 설정 (1 채널)
+      const wavSamples = new Int16Array(arrayBuffer, wavHeader.dataOffset, wavHeader.dataLen / 2);
+      
+      // 모노로 인코딩 설정
+      const channels = 1; // 모노
+      const sampleRate = wavHeader.sampleRate; // 원본 샘플링 레이트 사용
+      const bitRate = 128; // 비트 전송률 128kbps
 
-  /* RIFF identifier */
-  writeString(view, 0, 'RIFF');
-  /* file length */
-  view.setUint32(4, 36 + samples.byteLength, true);
-  /* RIFF type */
-  writeString(view, 8, 'WAVE');
-  /* format chunk identifier */
-  writeString(view, 12, 'fmt ');
-  /* format chunk length */
-  view.setUint32(16, 16, true);
-  /* sample format (raw) */
-  view.setUint16(20, 1, true);
-  /* channel count */
-  view.setUint16(22, 1, true);
-  /* sample rate */
-  view.setUint32(24, 48000, true);
-  /* byte rate (sample rate * block align) */
-  view.setUint32(28, 48000 * 2, true);
-  /* block align (channel count * bytes per sample) */
-  view.setUint16(32, 2, true);
-  /* bits per sample */
-  view.setUint16(34, 16, true);
-  /* data chunk identifier */
-  writeString(view, 36, 'data');
-  /* data chunk length */
-  view.setUint32(40, samples.byteLength, true);
+      // MP3 인코더 초기화
+      const mp3Encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitRate);
+      const mp3Data = [];
 
-  floatTo16BitPCM(view, 44, samples);
+      // 샘플 블록 크기를 더 크게 설정
+      const sampleBlockSize = 1152 * 4; // 기본값의 4배 크기
+      
+      let mp3Buffer;
+      for (let i = 0; i < wavSamples.length; i += sampleBlockSize) {
+        // 샘플 블록 크기를 사용하여 버퍼 인코딩
+        mp3Buffer = mp3Encoder.encodeBuffer(wavSamples.subarray(i, i + sampleBlockSize));
+        if (mp3Buffer.length > 0) {
+          mp3Data.push(new Int8Array(mp3Buffer));
+        }
+      }
 
-  return view;
-}
+      // 인코딩 완료 후 남은 데이터 플러시
+      mp3Buffer = mp3Encoder.flush();
+      if (mp3Buffer.length > 0) {
+        mp3Data.push(new Int8Array(mp3Buffer));
+      }
 
-function writeString(view, offset, string) {
-  for (let i = 0; i < string.length; i++) {
-    view.setUint8(offset + i, string.charCodeAt(i));
-  }
-}
+      // 최종 MP3 Blob 생성
+      const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+      resolve(mp3Blob);
+      console.log("Successfully converted to mp3");
+    };
 
-function floatTo16BitPCM(output, offset, input) {
-  for (let i = 0; i < input.length; i++, offset += 2) {
-    const s = Math.max(-1, Math.min(1, input[i]));
-    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-  }
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(wavBlob);
+  });
 }
 </script>
+
 
 <style scoped>
 .black-background {
