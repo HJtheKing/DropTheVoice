@@ -1,5 +1,5 @@
 <template>
-  <v-app class="black-background">
+  <v-app class="bg-black">
     <v-container class="custom-container">
       <header>
         <h1>뿌리기</h1>
@@ -12,8 +12,23 @@
 
       <MapComponent v-if="activeTab==='pokemon'"/>
       <div class="bottom-button-container" v-if="activeTab === 'pokemon'">
-        <RecordButton/>
-        <UploadButton/>
+
+        <v-container class="bg-black">
+          <v-row no-gutters class="align-content-start">
+            <v-col cols="12" sm="6" md="4" lg="2" class="d-flex justify-center ">
+              <v-btn router-link class="v-alert--density-comfortable" size="x-large" prepend-icon="mdi-microphone"
+                     variant="tonal" @click="router.push({name: 'record'})">
+                녹음하기
+              </v-btn>
+              <v-col></v-col>
+              <v-btn class="v-alert--density-comfortable" size="x-large" prepend-icon="mdi-upload-box" variant="tonal"
+                     @click="triggerFileInput">
+                업로드
+              </v-btn>
+              <v-file-input class="d-none" @click="upload" ref="fileInput"/>
+            </v-col>
+          </v-row>
+        </v-container>
       </div>
 
       <div class="button-container" v-if="activeTab === 'virus'">
@@ -26,15 +41,29 @@
 </template>
 
 <script setup>
+import {ref} from 'vue';
 import {useSpreadStore} from '@/store/spread.js'
 import RecordButton from '@/components/spread/RecordButton.vue'
 import UploadButton from '@/components/spread/UploadButton.vue'
 import {storeToRefs} from 'pinia'
 import MapComponent from "@/components/spread/MapComponent.vue";
+import {useRouter} from 'vue-router';
+
+const router = useRouter();
 
 const spreadStore = useSpreadStore()
 const {activeTab} = storeToRefs(spreadStore)
 const {setTab} = spreadStore
+const fileInput = ref(null);
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+}
+
+const upload = (event) => {
+  const voice = event.target.files[0];
+}
+
 </script>
 
 <style scoped>
