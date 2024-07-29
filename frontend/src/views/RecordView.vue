@@ -8,7 +8,6 @@
     <div class="recording-container">
       <MyTimer />
       <MyRecordButton />
-      <!-- <MyRecordButtonWithConverter/> -->
     </div>
 
     
@@ -19,7 +18,6 @@
 import CurrentTime from '@/components/record/CurrentTime.vue'
 import MyTimer from '@/components/record/MyTimer.vue'
 import MyRecordButton from '@/components/record/MyRecordButton.vue'
-import MyRecordButtonWithConverter from '@/components/record/MyRecordButtonWithConverter.vue';
 </script>
 
 <style scoped>

@@ -22,7 +22,6 @@ import { connect } from 'extendable-media-recorder-wav-encoder';
 import * as lamejs from '@breezystack/lamejs';
 import AudioPlayer from "@/components/AudioPlayer.vue";
 
-// Pinia 스토어를 사용하여 전역 상태 관리
 const recordStore = useRecordStore();
 const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 참조
 
@@ -125,6 +124,7 @@ const startRecording = async () => {
 
       if (audioPlayer.value) {
         audioPlayer.value.loadAudio(audioUrl.value);
+        console.log("Loaded recorded audio to player")
       }
 
       audioChunks.length = 0;
@@ -237,8 +237,8 @@ async function convertWavToMp3(wavBlob) {
       const mp3Encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitRate);
       const mp3Data = [];
 
-      // 샘플 블록 크기를 더 크게 설정
-      const sampleBlockSize = 1152 * 4; // 기본값의 4배 크기
+      // 샘플 블록 크기를 더 크게 설정 (클수록 속도 커짐, 메모리 더 많이 씀)
+      const sampleBlockSize = 1152 * 4; // 기본값의 4배
       
       let mp3Buffer;
       for (let i = 0; i < wavSamples.length; i += sampleBlockSize) {
