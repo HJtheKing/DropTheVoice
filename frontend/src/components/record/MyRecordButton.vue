@@ -1,16 +1,38 @@
 <template>
-  <div class="canvas-container">
-    <canvas ref="canvasRef" width="500" height="500"></canvas>
-  </div>
-  <div class="record-button-container">
-    <div :class="['record-button', { recording: isRecording }]" @click="toggleRecording"></div>
-  </div>
-  <v-container class="audio-container">
-    <audio-player ref="audioPlayer"></audio-player>
+  <v-container fluid>
+    <v-row justify="center" class="my-4">
+        <v-card class="d-flex justify-center align-center pa-2">
+          <canvas ref="canvas" width="400" height="400"></canvas>
+        </v-card>
+    </v-row>
+
+    <v-row justify="center" class="my-4">
+      <v-col cols="12" class="d-flex justify-center align-center">
+        <v-btn
+          class="record-button"
+          :class="{ recording: isRecording }"
+          @click="toggleRecording"
+          color="red"
+          rounded
+          large
+        >
+          <v-icon>mdi-record-circle</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <v-row justify="center" class="my-4">
+        <v-card v-if="audioUrl && !isRecording" class="pa-2">
+            <audio :src="audioUrl" controls></audio>
+        </v-card>
+    </v-row>
+
+    <v-row justify="center">
+        <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
+          저장
+        </v-btn>
+    </v-row>
   </v-container>
-  <div class="save-button-container">
-    <button class="save-button" v-if="audioUrl && !isRecording" @click="saveRecording">저장</button>
-  </div>
 </template>
 
 <script setup>
@@ -154,9 +176,47 @@ const startRecording = async () => {
 
 // 녹음을 중지하는 메서드
 const stopRecording = () => {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop(); // 녹음 중지
-    console.log("Stopped recording");
+  console.log('Stop Recording')  // 콘솔 로그 확인
+  mediaRecorder.stop()
+  isRecording.value = false
+
+}
+
+// 위치 정보 가져오기
+const locationMessage = ref('');
+
+function saveRecord() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition, showError);
+  } else {
+    locationMessage.value = 'Geolocation is not supported by this browser.';
+  }
+}
+
+function showPosition(position) {
+  const latitude = position.coords.latitude;
+  const longitude = position.coords.longitude;
+  locationMessage.value = `Latitude: ${latitude} | Longitude: ${longitude}`;
+  console.log(locationMessage.value);
+  
+  // 서버로 위치 데이터 전송
+  sendVoiceInfoToServer(latitude, longitude);
+}
+
+function showError(error) {
+  switch(error.code) {
+    case error.PERMISSION_DENIED:
+      locationMessage.value = 'User denied the request for Geolocation.';
+      break;
+    case error.POSITION_UNAVAILABLE:
+      locationMessage.value = 'Location information is unavailable.';
+      break;
+    case error.TIMEOUT:
+      locationMessage.value = 'The request to get user location timed out.';
+      break;
+    case error.UNKNOWN_ERROR:
+      locationMessage.value = 'An unknown error occurred.';
+      break;
   }
   isRecording.value = false;
 };

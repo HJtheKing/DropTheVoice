@@ -1,6 +1,6 @@
 package com.ssafy.a505.controller;
 
-import com.ssafy.a505.Domain.Voice.Voice;
+import com.ssafy.a505.domain.voice.Voice;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

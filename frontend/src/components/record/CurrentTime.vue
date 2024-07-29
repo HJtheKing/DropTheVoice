@@ -1,7 +1,15 @@
 <template>
-  <div class="current-time">
-    <span>{{ currentTime }}</span>
-  </div>
+  <v-container class="current-time" fluid>
+    <v-row justify="center">
+      <v-col cols="12" sm="6" md="4">
+        <v-card>
+          <v-card-text>
+            <span>{{ currentTime }}</span>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
@@ -25,17 +33,9 @@ onMounted(() => {
 .current-time {
   font-size: 24px;
   color: #1e90ff;
-  /* background-color: #333; */
   padding: 10px;
   border-radius: 5px;
+  text-align: center;
 }
-
-/* .current-time {
-  font-size: 24px;
-  display: flex;
-  justify-content: space-around;
-  width: 200px;
-  margin-bottom: 20px;
-} */
 
 </style>
