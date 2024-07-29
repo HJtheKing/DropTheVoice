@@ -33,12 +33,6 @@ public class RecordController {
         voice.setDateTime(LocalDateTime.now());
         log.info("voice ={}", voice);
 
-        // 음성 제대로 전달되었나 Test
-        MultipartFile voiceFile = voiceDto.getVoiceFile();
-        File file = new File("C:/Users/SSAFY/Desktop/file.wav");
-        file.getParentFile().mkdirs();
-        voiceFile.transferTo(file);
-
         // S3에 음성 파일 저장
 
         // RDB 저장 로직

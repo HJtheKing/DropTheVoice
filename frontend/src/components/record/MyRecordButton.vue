@@ -23,7 +23,7 @@
 
     <v-row justify="center" class="my-4">
         <v-card class="pa-2">
-          <audio-player ref="audioPlayer"></audio-player>
+          <audio-player v-if="audioUrl && !isRecording" ref="audioPlayer"></audio-player>
         </v-card>
     </v-row>
 

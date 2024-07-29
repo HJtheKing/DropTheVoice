@@ -59,13 +59,8 @@ public class RedisService {
     // 값이 없으면 add, 있으면 remove -> add
     public void updateLocation(String name, Double longitude, Double latitude){
         GeoOperations<String, Object> geoOps = redisTemplate.opsForGeo();
-        List<Point> point = getLocations(name);
-        if(point == null || point.isEmpty()){
-            geoOps.add(GEO_KEY, new Point(longitude, latitude), name);
-        } else {
-            geoOps.remove(GEO_KEY, name);
-            geoOps.add(GEO_KEY, new Point(longitude, latitude), name);
-        }
+        geoOps.remove(GEO_KEY, name);
+        geoOps.add(GEO_KEY, new Point(longitude, latitude), name);
     }
 
     //  member의 반경 내의 다른 멤버 조회 V1
