@@ -6,14 +6,14 @@ stages:
   #DOCKER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 before_script:
-  - echo ssafya505 | docker login -u gbds234 --password-stdin
+  - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_ID} --password-stdin
 
   #- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 build:
   stage: build
   script:
-    - git clone https://gitlab-ci-token:AvYshLSLv12UVqFqvxyv@lab.ssafy.com/s11-webmobile1-sub2/S11P12A505.git
+    - git clone https://gitlab-ci-token:${GITCLONE_TOKEN}@lab.ssafy.com/s11-webmobile1-sub2/S11P12A505.git
     - docker build -t gbds234/front:latest --push ~/S11P12A505/frontend #$DOCKER_IMAGE .
     - docker build -t gbds234/back:latest --push ~/S11P12A505/backend #$DOCKER_IMAGE .
     - cd ~/S11P12A505/dockercompose
