@@ -13,7 +13,7 @@ before_script:
 build:
   stage: build
   script:
-    - git clone https://lab.ssafy.com/s11-webmobile1-sub2/S11P12A505.git
+    - git clone https://gitlab-ci-token:AvYshLSLv12UVqFqvxyv@lab.ssafy.com/s11-webmobile1-sub2/S11P12A505.git
     - docker build -t gbds234/frontend:latest --push ~/S11P12A505/frontend #$DOCKER_IMAGE .
   only:
     - branches
