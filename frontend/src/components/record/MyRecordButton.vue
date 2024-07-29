@@ -22,8 +22,8 @@
     </v-row>
 
     <v-row justify="center" class="my-4">
-        <v-card v-if="audioUrl && !isRecording" class="pa-2">
-            <audio :src="audioUrl" controls></audio>
+        <v-card class="pa-2">
+          <audio-player ref="audioPlayer"></audio-player>
         </v-card>
     </v-row>
 
@@ -36,6 +36,7 @@
 </template>
 
 <script setup>
+import { useSpreadStore } from '@/store/spread';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import { ref, onMounted, onUnmounted } from 'vue';
@@ -43,6 +44,7 @@ import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
 import * as lamejs from '@breezystack/lamejs';
 import AudioPlayer from "@/components/AudioPlayer.vue";
+import axios from 'axios';
 
 const recordStore = useRecordStore();
 const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 참조
@@ -51,6 +53,8 @@ const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 
 const audioChunks = [];
 let mediaRecorder = null; // MediaRecorder 객체를 저장할 변수
 let audioBlob = null; // 녹음된 오디오 데이터를 저장할 Blob
+let mp3Blob = null; // mp3 변환된 오디오 데이터를 저장할 Blob
+let mp3Url = null; // mp3 변환 후 url
 
 const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
 
@@ -147,6 +151,8 @@ const startRecording = async () => {
       if (audioPlayer.value) {
         audioPlayer.value.loadAudio(audioUrl.value);
         console.log("Loaded recorded audio to player")
+      } else {
+        console.log("Failed")
       }
 
       audioChunks.length = 0;
@@ -176,16 +182,29 @@ const startRecording = async () => {
 
 // 녹음을 중지하는 메서드
 const stopRecording = () => {
-  console.log('Stop Recording')  // 콘솔 로그 확인
-  mediaRecorder.stop()
-  isRecording.value = false
-
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop(); // 녹음 중지
+    console.log("Stopped recording");
+  }
+  isRecording.value = false;
 }
 
 // 위치 정보 가져오기
 const locationMessage = ref('');
 
-function saveRecord() {
+async function saveRecord() {
+  if (!audioBlob) return;
+  
+  mp3Blob = await convertWavToMp3(audioBlob);
+  mp3Url = URL.createObjectURL(mp3Blob);
+
+  // MP3 다운로드
+  const downloadLink = document.createElement('a');
+  downloadLink.href = mp3Url;
+  downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
+  downloadLink.click();
+  console.log("Started downloading");
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition, showError);
   } else {
@@ -220,6 +239,28 @@ function showError(error) {
   }
   isRecording.value = false;
 };
+
+
+
+const spreadStore = useSpreadStore() 
+function sendVoiceInfoToServer(lat, lon) {
+  const formData = new FormData();
+  formData.append('voiceType', spreadStore.activeTab);
+  formData.append('latitude', lat);
+  formData.append('longitude', lon);
+  formData.append('voiceUrl', mp3Url.value);
+  formData.append('voiceFile', mp3Blob);  // 'audio.wav'는 파일 이름
+
+  axios.post('http://localhost:8080/api-record/record', formData)
+  .then(response => {
+    console.log('Location sent to server:', response.data);
+  })
+  .catch(error => {
+    console.error('Error sending location to server:', error);
+  });
+}
+
+
 
 // 오디오 파형을 그리는 메서드
 const startDrawing = () => {
@@ -261,21 +302,6 @@ const startDrawing = () => {
     canvasCtx.lineTo(canvas.width, canvas.height / 2);
     canvasCtx.stroke();
   }, 66);
-};
-
-// 녹음을 저장하고 MP3로 변환하는 메서드
-const saveRecording = async () => {
-  if (!audioBlob) return;
-
-  const mp3Blob = await convertWavToMp3(audioBlob);
-  const url = URL.createObjectURL(mp3Blob);
-
-  // MP3 다운로드
-  const downloadLink = document.createElement('a');
-  downloadLink.href = url;
-  downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
-  downloadLink.click();
-  console.log("Started downloading");
 };
 
 // WAV 파일을 MP3로 변환하는 메서드
@@ -325,6 +351,8 @@ async function convertWavToMp3(wavBlob) {
     reader.readAsArrayBuffer(wavBlob);
   });
 }
+
+
 </script>
 
 
