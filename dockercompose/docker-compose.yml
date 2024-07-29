@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  mysql:
+  mysql:  
     image: mysql:8.0
     container_name: mysql-container
     restart: unless-stopped
@@ -67,19 +67,6 @@ services:
       - 5601:5601
     networks:
       - elastic
-  # coturn:
-  #   image: coturn/coturn
-  #   network_mode: host
-  #   ports:
-  #     - 3478:3478
-  #   environment:
-  #     - TURN_PORT=3478
-  #     - TURN_PORT_START=49152
-  #     - TURN_PORT_END=49200
-  #     - TURN_REALM=myturn.com
-  #     - TURN_USERNAME=testuser
-  #     - TURN_PASSWORD=testpassword
-  #   restart: always
 volumes:
   esdata1:
     driver: local
