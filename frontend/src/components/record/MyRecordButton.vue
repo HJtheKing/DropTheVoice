@@ -1,9 +1,7 @@
 <template>
   <v-container fluid>
     <v-row justify="center" class="my-4">
-        <v-card class="d-flex justify-center align-center pa-2">
           <canvas ref="canvas" width="400" height="400"></canvas>
-        </v-card>
     </v-row>
 
     <v-row justify="center" class="my-4">
@@ -16,17 +14,13 @@
           rounded
           large
         >
-          <v-icon>mdi-record-circle</v-icon>
+          <v-icon>mdi-microphone-outline</v-icon>
         </v-btn>
       </v-col>
     </v-row>
-
     <v-row justify="center" class="my-4">
-        <v-card class="pa-2">
-          <audio-player v-if="audioUrl && !isRecording" ref="audioPlayer"></audio-player>
-        </v-card>
+        <audio-player ref="audioPlayer"></audio-player>
     </v-row>
-
     <v-row justify="center">
         <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
           저장
@@ -279,7 +273,7 @@ const startDrawing = () => {
 
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
     canvasCtx.lineWidth = 3;
-    canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+    canvasCtx.strokeStyle = 'rgb(139, 146, 223)';
 
     canvasCtx.beginPath();
     // 파형 폭 계산하기
@@ -379,7 +373,7 @@ async function convertWavToMp3(wavBlob) {
 }
 
 canvas {
-  border: 1px solid black;
+  border: 10px solid #fff;
 }
 
 .record-button {

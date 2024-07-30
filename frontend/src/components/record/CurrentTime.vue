@@ -1,14 +1,6 @@
 <template>
   <v-container class="current-time" fluid>
-    <v-row justify="center">
-      <v-col cols="12" sm="6" md="4">
-        <v-card>
-          <v-card-text>
-            <span>{{ currentTime }}</span>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <span>{{ currentTime }}</span>
   </v-container>
 </template>
 
