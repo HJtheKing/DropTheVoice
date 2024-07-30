@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+
 @Slf4j
 @Component
 public class JwtRequestFilter extends HttpFilter {
@@ -22,6 +23,7 @@ public class JwtRequestFilter extends HttpFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
@@ -29,31 +31,30 @@ public class JwtRequestFilter extends HttpFilter {
 
         // 예외 URL 설정
         if (path.equals("/api-user/login") || path.equals("/api-user/signup")) {
-            chain.doFilter(request, response);
             log.info("예외 URL");
+            chain.doFilter(request, response);
             return;
         }
 
         final String authorizationHeader = request.getHeader("Authorization");
         final String refreshToken = getRefreshTokenFromCookie(request);
 
-        log.info("dofilter");
+        log.info("doFilter 시작");
+        log.info(refreshToken);
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String jwt = authorizationHeader.substring(7);
             try {
                 Jws<Claims> claims = jwtUtil.validate(jwt);
                 request.setAttribute("userId", claims.getBody().get("id"));
-                System.out.println("access token 확인 완료");
+                log.info("access token 확인 완료");
                 chain.doFilter(request, response);
                 return;
             } catch (JwtException e) {
-                // Access Token이 유효하지 않은 경우
-                log.info("access token 확인 불가");
+                log.info("access token 확인 불가: {}", e.getMessage());
             }
         }
 
-        // Access Token이 없거나 유효하지 않은 경우
         if (refreshToken != null && !refreshToken.isEmpty()) {
             try {
                 Jws<Claims> refreshClaims = jwtUtil.validate(refreshToken);
@@ -62,19 +63,23 @@ public class JwtRequestFilter extends HttpFilter {
                 request.setAttribute("Authorization", "Bearer " + newAccessToken);
                 log.info("refresh token 확인 완료");
                 chain.doFilter(request, response);
+                return;
             } catch (JwtException ex) {
+                log.info("refresh token 확인 불가: {}", ex.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Refresh Token");
+                return;
             }
-        } else {
-            log.info("refresh token 확인 불가");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
         }
+
+        log.info("access token 및 refresh token 확인 불가");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
     }
 
     private String getRefreshTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals("refreshToken")) {
+                    log.info("yes");
                     return cookie.getValue();
                 }
             }

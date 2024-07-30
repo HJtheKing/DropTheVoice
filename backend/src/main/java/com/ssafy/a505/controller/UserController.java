@@ -49,7 +49,7 @@ public class UserController {
                     .secure(false) // true in production
                     .path("/")
                     .maxAge(60 * 60 * 24 * 30) // 30일
-                    .sameSite("Strict") // "Strict" for more security
+                    .sameSite("None") // "Strict" for more security
                     .build();
 
             System.out.println("로그인 성공");
