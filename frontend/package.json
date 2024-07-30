@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:prod": "BACKEND_URI=ubuntu@i11a505.p.ssafy.io vite build",
+    "build": "BACKEND_URI=ubuntu@i11a505.p.ssafy.io vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
