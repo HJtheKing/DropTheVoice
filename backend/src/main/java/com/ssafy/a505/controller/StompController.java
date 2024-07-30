@@ -17,7 +17,7 @@ import java.util.*;
 @RestController
 //@RequiredArgsConstructor
 @RequestMapping("/")
-@CrossOrigin(origins = "localhost:3000/*", allowCredentials = "true")
+@CrossOrigin(origins = {"*"})
 @Slf4j
 public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
