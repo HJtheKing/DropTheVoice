@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "BACKEND_URI=ubuntu@i11a505.p.ssafy.io vite build",
+    "build": "BACKEND_URI=i11a505.p.ssafy.io vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "dev:prod": "BACKEND_URI=ubuntu@i11a505.p.ssafy.io vite"
+    "dev:prod": "BACKEND_URI=i11a505.p.ssafy.io vite"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
