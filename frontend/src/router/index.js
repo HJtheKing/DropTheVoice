@@ -62,6 +62,11 @@ const router = createRouter({
             name: "storage",
             component: () => import('@/views/StorageView.vue')
         },
+        {
+            path: "/rtc",
+            name: "rtc",
+            component: () => import('@/views/MyRtcView.vue')
+        },
     ]
 })
 
