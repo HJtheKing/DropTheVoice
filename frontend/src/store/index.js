@@ -24,7 +24,8 @@ export default createStore({
     },
     actions: {
         connectWebSocket({ commit }) {
-            const socket = new SockJS('http://localhost:8080/stomp/handshake');
+            const uri = process.env.BACKEND_URI || 'localhost';
+            const socket = new SockJS('http://'+uri+':8080/stomp/handshake');
             const stompClient = Webstomp.over(socket);
 
             stompClient.connect({}, () => {
