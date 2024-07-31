@@ -1,6 +1,6 @@
 package com.ssafy.a505.filter;
 
-import com.ssafy.a505.util.JwtUtil;
+import com.ssafy.a505.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;

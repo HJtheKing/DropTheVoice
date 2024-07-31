@@ -1,18 +1,4 @@
-<<<<<<< HEAD
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue';
-import SpreadView from '@/views/SpreadView.vue';
-import UserLoginView from "@/views/UserLoginView.vue";
-import UserSignUpView from "@/views/UserSignUpView.vue";
-import UserMypageView from "@/views/UserMypageView.vue";
-import AudioPlayView from '@/views/AudioPlayView.vue';
-import PlayListVue from '@/views/PlayListVue.vue';
-import RecordView from '@/views/RecordView.vue';
-import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
-import PickItUpView from '@/views/PickItUpView.vue';
-=======
 import {createRouter, createWebHistory} from 'vue-router'
->>>>>>> master
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,20 +20,12 @@ const router = createRouter({
         {
             path: "/login",
             name: "login",
-<<<<<<< HEAD
-            component: UserLoginView,
-=======
             component: () => import('@/views/UserLoginView.vue')
->>>>>>> master
         },
         {
             path: "/signup",
             name: "signup",
-<<<<<<< HEAD
-            component: UserSignUpView,
-=======
             component: () => import('@/views/UserSignUpView.vue'),
->>>>>>> master
         },
         {
             path: '/finder',
@@ -67,11 +45,7 @@ const router = createRouter({
         {
             path: "/mypage",
             name: "mypage",
-<<<<<<< HEAD
-            component: UserMypageView,
-=======
             component: () => import('@/views/UserMypageView.vue')
->>>>>>> master
         },
         {
             path: "/record",
