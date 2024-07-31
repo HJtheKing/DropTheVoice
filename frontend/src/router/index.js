@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue';
 import SpreadView from '@/views/SpreadView.vue';
@@ -9,6 +10,9 @@ import PlayListVue from '@/views/PlayListVue.vue';
 import RecordView from '@/views/RecordView.vue';
 import ChangeVoiceView from '@/views/ChangeVoiceView.vue';
 import PickItUpView from '@/views/PickItUpView.vue';
+=======
+import {createRouter, createWebHistory} from 'vue-router'
+>>>>>>> master
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,52 +24,69 @@ const router = createRouter({
         {
             path: '/home',
             name: 'home',
-            component: HomeView
+            component: () => import('@/views/HomeView.vue')
         },
         {
             path: '/spread',
             name: 'spread',
-            component: SpreadView
+            component: () => import('@/views/SpreadView.vue')
         },
         {
             path: "/login",
             name: "login",
+<<<<<<< HEAD
             component: UserLoginView,
+=======
+            component: () => import('@/views/UserLoginView.vue')
+>>>>>>> master
         },
         {
             path: "/signup",
             name: "signup",
+<<<<<<< HEAD
             component: UserSignUpView,
+=======
+            component: () => import('@/views/UserSignUpView.vue'),
+>>>>>>> master
         },
         {
-            path: '/search',
-            name: 'search',
-            component: PickItUpView
+            path: '/finder',
+            name: 'finder',
+            component: () => import('@/views/VoiceFinderView.vue')
         },
         {
             path: "/playlist",
             name: "playlist",
-            component: PlayListVue,
+            component: () => import('@/views/PlayListView.vue')
         },
         {
             path: "/audioplayer",
             name: "audioplayer",
-            component: AudioPlayView,
+            component: () => import('@/views/AudioPlayView.vue')
         },
         {
             path: "/mypage",
             name: "mypage",
+<<<<<<< HEAD
             component: UserMypageView,
+=======
+            component: () => import('@/views/UserMypageView.vue')
+>>>>>>> master
         },
         {
             path: "/record",
             name: "record",
-            component: RecordView,
+            component: () => import('@/views/RecordView.vue')
         },
         {
             path: "/change",
             name: "change",
-            component: ChangeVoiceView,
+            component: () => import('@/views/ChangeVoiceView.vue')
+        },
+        {
+            path: "/storage",
+            name: "storage",
+            component: () => import('@/views/StorageView.vue')
         },
     ]
 })
