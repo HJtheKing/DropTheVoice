@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { useUserStore } from '@/store/user';
 import router from '@/router';
@@ -34,3 +35,4 @@ axiosInstance.interceptors.request.use(
 );
 
 export default axiosInstance;
+

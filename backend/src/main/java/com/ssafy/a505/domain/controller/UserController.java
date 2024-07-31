@@ -1,3 +1,4 @@
+
 package com.ssafy.a505.domain.controller;
 
 import com.ssafy.a505.domain.entity.User;
@@ -48,7 +49,7 @@ public class UserController {
                     .secure(false) // true in production
                     .path("/")
                     .maxAge(60 * 60 * 24 * 30) // 30일
-                    .sameSite("None") // "Strict" for more security
+                    .sameSite("Strict") // "Strict, None" for more security
                     .build();
 
             System.out.println("로그인 성공");
