@@ -40,9 +40,10 @@
       navigateTo(routeName) {
         if (this.$route.name === routeName) {
         // 이미 해당 경로에 있는 경우 스크롤을 맨 위로 이동
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
         } else {
         this.$router.push({ name: routeName });
+        window.scrollTo({ top: 0, behavior: 'instant' });
         }
       },
     },
