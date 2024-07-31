@@ -1,7 +1,7 @@
 package com.ssafy.a505.RedisTest;
 
-import com.ssafy.a505.repository.RedisUtils;
-import com.ssafy.a505.domain.Member;
+import com.ssafy.a505.global.util.RedisUtils;
+import com.ssafy.a505.domain.entity.Member;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
