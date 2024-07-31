@@ -3,7 +3,6 @@
     <v-row justify="center" class="my-4">
           <canvas ref="canvas" width="400" height="400"></canvas>
     </v-row>
-
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">
         <v-btn
@@ -22,23 +21,30 @@
         <audio-player ref="audioPlayer"></audio-player>
     </v-row>
     <v-row justify="center">
-        <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
+        <!-- <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
           저장
-        </v-btn>
+        </v-btn> -->
     </v-row>
   </v-container>
 </template>
 
 <script setup>
-import { useSpreadStore } from '@/store/spread';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, defineExpose } from 'vue';
 import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
-import * as lamejs from '@breezystack/lamejs';
 import AudioPlayer from "@/components/AudioPlayer.vue";
-import axios from 'axios';
+
+// 녹음 데이터를 반환하는 메서드
+function getAudioBlob() {
+  return audioBlob.value;
+}
+
+// expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
+defineExpose({
+  getAudioBlob
+});
 
 const recordStore = useRecordStore();
 const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 참조
@@ -46,9 +52,7 @@ const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 
 // 녹음된 오디오 청크를 저장하는 배열
 const audioChunks = [];
 let mediaRecorder = null; // MediaRecorder 객체를 저장할 변수
-let audioBlob = null; // 녹음된 오디오 데이터를 저장할 Blob
-let mp3Blob = null; // mp3 변환된 오디오 데이터를 저장할 Blob
-let mp3Url = null; // mp3 변환 후 url
+const audioBlob = ref(null); // 녹음된 오디오 데이터를 저장할 Blob
 
 const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
 
@@ -139,8 +143,8 @@ const startRecording = async () => {
     };
 
     mediaRecorder.onstop = () => {
-      audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-      audioUrl.value = URL.createObjectURL(audioBlob);
+      audioBlob.value = new Blob(audioChunks, { type: 'audio/wav' });
+      audioUrl.value = URL.createObjectURL(audioBlob.value);
 
       if (audioPlayer.value) {
         audioPlayer.value.loadAudio(audioUrl.value);
@@ -182,78 +186,6 @@ const stopRecording = () => {
   }
   isRecording.value = false;
 }
-
-// 위치 정보 가져오기
-const locationMessage = ref('');
-
-async function saveRecord() {
-  if (!audioBlob) return;
-  
-  mp3Blob = await convertWavToMp3(audioBlob);
-  mp3Url = URL.createObjectURL(mp3Blob);
-
-  // MP3 다운로드
-  const downloadLink = document.createElement('a');
-  downloadLink.href = mp3Url;
-  downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
-  downloadLink.click();
-  console.log("Started downloading");
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition, showError);
-  } else {
-    locationMessage.value = 'Geolocation is not supported by this browser.';
-  }
-}
-
-function showPosition(position) {
-  const latitude = position.coords.latitude;
-  const longitude = position.coords.longitude;
-  locationMessage.value = `Latitude: ${latitude} | Longitude: ${longitude}`;
-  console.log(locationMessage.value);
-  
-  // 서버로 위치 데이터 전송
-  sendVoiceInfoToServer(latitude, longitude);
-}
-
-function showError(error) {
-  switch(error.code) {
-    case error.PERMISSION_DENIED:
-      locationMessage.value = 'User denied the request for Geolocation.';
-      break;
-    case error.POSITION_UNAVAILABLE:
-      locationMessage.value = 'Location information is unavailable.';
-      break;
-    case error.TIMEOUT:
-      locationMessage.value = 'The request to get user location timed out.';
-      break;
-    case error.UNKNOWN_ERROR:
-      locationMessage.value = 'An unknown error occurred.';
-      break;
-  }
-  isRecording.value = false;
-};
-
-
-
-const spreadStore = useSpreadStore() 
-function sendVoiceInfoToServer(lat, lon) {
-  const formData = new FormData();
-  formData.append('voiceType', spreadStore.activeTab);
-  formData.append('latitude', lat);
-  formData.append('longitude', lon);
-  formData.append('voiceUrl', mp3Url.value);
-  formData.append('voiceFile', mp3Blob);  // 'audio.wav'는 파일 이름
-
-  axios.post('http://localhost:8080/api-record/record', formData)
-  .then(response => {
-    console.log('Location sent to server:', response.data);
-  })
-  .catch(error => {
-    console.error('Error sending location to server:', error);
-  });
-}
-
 
 
 // 오디오 파형을 그리는 메서드
@@ -297,56 +229,6 @@ const startDrawing = () => {
     canvasCtx.stroke();
   }, 66);
 };
-
-// WAV 파일을 MP3로 변환하는 메서드
-async function convertWavToMp3(wavBlob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function () {
-      const arrayBuffer = this.result;
-      const wavHeader = lamejs.WavHeader.readHeader(new DataView(arrayBuffer));
-      // 모노 채널로 설정 (1 채널)
-      const wavSamples = new Int16Array(arrayBuffer, wavHeader.dataOffset, wavHeader.dataLen / 2);
-      
-      // 모노로 인코딩 설정
-      const channels = 1; // 모노
-      const sampleRate = wavHeader.sampleRate; // 원본 샘플링 레이트 사용
-      const bitRate = 128; // 비트 전송률 128kbps
-
-      // MP3 인코더 초기화
-      const mp3Encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitRate);
-      const mp3Data = [];
-
-      // 샘플 블록 크기를 더 크게 설정 (클수록 속도 커짐, 메모리 더 많이 씀)
-      const sampleBlockSize = 1152 * 4; // 기본값의 4배
-      
-      let mp3Buffer;
-      for (let i = 0; i < wavSamples.length; i += sampleBlockSize) {
-        // 샘플 블록 크기를 사용하여 버퍼 인코딩
-        mp3Buffer = mp3Encoder.encodeBuffer(wavSamples.subarray(i, i + sampleBlockSize));
-        if (mp3Buffer.length > 0) {
-          mp3Data.push(new Int8Array(mp3Buffer));
-        }
-      }
-
-      // 인코딩 완료 후 남은 데이터 플러시
-      mp3Buffer = mp3Encoder.flush();
-      if (mp3Buffer.length > 0) {
-        mp3Data.push(new Int8Array(mp3Buffer));
-      }
-
-      // 최종 MP3 Blob 생성
-      const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
-      resolve(mp3Blob);
-      console.log("Successfully converted to mp3");
-    };
-
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(wavBlob);
-  });
-}
-
-
 </script>
 
 

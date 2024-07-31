@@ -1,6 +1,6 @@
 <template>
-  <v-container class="timer-container" :class="{ hidden: !isRecording }" fluid>
-    <v-row justify="center">
+  <v-container class="timer-container" fluid>
+    <v-row justify="center" :class="{ hidden: !isRecording }">
         <div class="d-flex justify-center align-center">
           <v-icon color="red" class="mr-2">mdi-record-circle</v-icon>
           <span class="timer-text">{{ formatTime(timer) }}</span>

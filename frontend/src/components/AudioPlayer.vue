@@ -5,16 +5,14 @@
       Your browser does not support the audio element.
     </audio>
     <v-container class="controls" justify="center">
-      <v-row class="time">
+      <v-row justify="center" class="time">
         {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
       </v-row>
-      <v-row class="bar-row" justify="center">
-        <!-- <v-col cols="12" sm="8" md="6"> -->
-          <input class="play-bar" type="range" min="0" :max="duration" step="0.01" v-model="currentTime" @input="seekAudio">
-        <!-- </v-col> -->
-      </v-row>
-      <v-row class="btn-row" justify="space-between">
-        <v-col>
+      <v-row justify="center" class="bar-row">
+        <input class="play-bar" type="range" min="0" :max="duration" step="0.01" v-model="currentTime" @input="seekAudio">
+      </v-row> 
+      <v-container justify="center" class="btn-row">
+        <v-row justify="space-between">
           <v-btn class="player-btn" @click="goToStart">
             <v-icon>mdi-skip-backward</v-icon>
           </v-btn>
@@ -30,8 +28,8 @@
           <v-btn class="player-btn" @click="goToEnd">
             <v-icon>mdi-skip-forward</v-icon>
           </v-btn>
-        </v-col>
-      </v-row>
+        </v-row>
+      </v-container>
     </v-container>
   </v-container>
 </template>
@@ -49,6 +47,7 @@ export default {
     const rewindInterval = ref(null);
     const longPressTimeout = ref(null);
     const longPressThreshold = 300; // 밀리초
+    const mouseDownTime = ref(0);
 
     const togglePlay = () => {
       if (audio.value.paused) {
@@ -106,25 +105,34 @@ export default {
     }
 
     const handleMouseDown = (action) => {
+      console.log("btn pressed");
+      // isLongPress.value = false;
+      mouseDownTime.value = Date.now();
       longPressTimeout.value = setTimeout(() => {
-        console.log("Mouse Holded")
+        console.log("Mouse Hold");
+        // isLongPress.value = true;
         if (action === 'rewind') {
           rewindAudio();
         } else if (action === 'forward') {
-          setPlaybackRate(2);
+          // setPlaybackRate(2);
+          fastForwardAudio();
         }
       }, longPressThreshold);
     };
 
     const handleMouseUp = (action) => {
-      if (longPressTimeout.value <= longPressThreshold) {
-        if (action === 'rewind') {
-          jumpBackwardAudio();
-        } else if (action === 'forward') {
-          jumpForwardAudio();
-        }
+      const clickDuration = Date.now() - mouseDownTime.value; // 클릭 지속 시간 계산
+      if (clickDuration < longPressThreshold) {
+        // if (!isLongPress.value) {
+          if (action === 'rewind') {
+            jumpBackwardAudio();
+          } else if (action === 'forward') {
+            jumpForwardAudio();
+          }
+        // }
         clearTimeout(longPressTimeout.value);
         longPressTimeout.value = null;
+
       }
       
       stopRewind();
@@ -150,6 +158,17 @@ export default {
         }
       }, 100);
       console.log("Going backward")
+    };
+
+    const fastForwardAudio = () => {
+      rewindInterval.value = setInterval(() => {
+        if (audio.value.currentTime < audio.value.duration) {
+          audio.value.currentTime += 0.2;
+        } else {
+          clearInterval(rewindInterval.value);
+        }
+      }, 100);
+      console.log("Going forward")
     };
 
     const jumpForwardAudio = () => {
@@ -212,6 +231,7 @@ export default {
   flex-direction: column;
   align-items: center;
 }
+
 .time {
   margin-bottom: 10px;
   align-items: center;
@@ -220,6 +240,7 @@ export default {
   margin-bottom: 30px;
 }
 .btn-row {
+  width: 100%;
   max-width: 500px;
 }
 .player-btn {
@@ -237,9 +258,10 @@ export default {
   color: #000;
   font-weight: bold;
 }
+
 .play-bar {
-      overflow: hidden;
-      width: 500px;
-      accent-color: #8B92DF;
+  width: 100%;
+  max-width: 500px;
+  accent-color: #8B92DF;
 }
 </style>
