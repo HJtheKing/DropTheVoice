@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid>
+  <v-container fluid>
     <v-row justify="center">
       <v-col cols="12" class="text-center">
         <h1>보관함</h1>
@@ -7,11 +7,12 @@
     </v-row>
 
     <v-row justify="center">
-      <v-col cols="12" sm="8" md="6" >
+      <v-col cols="12" sm="8" md="6">
         <v-row justify="center">
-        <v-tabs v-model="activeTab" centered background-color="primary" class="mb-4">
-          <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">{{ tab.label }}</v-tab>
-        </v-tabs>
+          <v-tabs v-model="activeTab" centered background-color="primary" class="mb-4" @click="store.changeTab(activeTab)">
+            <v-tab value="all">줍한 음성 목록</v-tab>
+            <v-tab value="liked">좋아요 음성 목록</v-tab>
+          </v-tabs>
         </v-row>
       </v-col>
     </v-row>
@@ -37,31 +38,38 @@
   </v-container>
 </template>
 
+
+
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useStorageStore } from '@/store/storage';
 
+const store = useStorageStore();
+
 const activeTab = ref('all');
-const voiceStore = useStorageStore();
 
-const allVoices = computed(() => voiceStore.allVoices);
-const likedVoices = computed(() => voiceStore.likedVoices);
-
+const allVoices = computed(() => store.allVoices);
+const likedVoices = computed(() => store.likedVoices);
 
 const filteredVoices = computed(() => {
   return activeTab.value === 'all' ? allVoices.value : likedVoices.value;
 });
 
-const tabs = [
-  { value: 'all', label: '줍한 음성 목록' },
-  { value: 'liked', label: '좋아요 음성 목록' },
-];
+const handleScroll = () => {
+  const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 10;
+  if (bottomOfWindow && !store.isFetching) {
+    store.loadMoreVoices();
+  }
+};
 
-onMounted(async () => {
-  await voiceStore.fetchAllVoices();
-  await voiceStore.fetchLikedVoices();
+onMounted(() => {
+  store.fetchAllVoices(); // 초기에는 'all' 탭의 첫 페이지 데이터를 불러옴
+  window.addEventListener('scroll', handleScroll);
 });
+
 </script>
+
+
 
 <style>
 body {
