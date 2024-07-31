@@ -38,7 +38,7 @@ public class StorageController {
 
     public List<Voice> makeDummy(String str){
         List<Voice> result = new ArrayList<>();
-        for(int i = 1; i <= 20; i++){
+        for(int i = 1; i <= 100; i++){
             Voice voice = new Voice();
             voice.setTitle(str + i);
             result.add(voice);
