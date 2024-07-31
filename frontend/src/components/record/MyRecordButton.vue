@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row justify="center" class="my-4">
-          <canvas ref="canvas" width="400" height="400"></canvas>
+      <canvas ref="canvas" width="400" height="400"></canvas>
     </v-row>
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">

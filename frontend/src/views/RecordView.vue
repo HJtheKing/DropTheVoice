@@ -7,9 +7,7 @@
           <v-icon @click="saveRecord">mdi-upload</v-icon>
         </v-row>
         <v-row justify="center">
-          <v-col cols="12" sm="8" md="6">
-            <CurrentTime />
-          </v-col>
+          <CurrentTime />
         </v-row>
         <MyTimer />
         <MyRecordButton ref="myRecordButton" />
@@ -143,7 +141,8 @@ async function convertWavToMp3(wavBlob) {
 
 <style scoped>
 .custom-container {
-  max-width: 800px;
+  width: 100%;
+  max-width: 500px;
   margin: 0 auto;
   padding-bottom: 80px;
 }

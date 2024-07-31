@@ -1,6 +1,6 @@
 <template>
   <v-container class="current-time" fluid>
-    <span>{{ currentTime }}</span>
+    <h2>{{ currentTime }}</h2>
   </v-container>
 </template>
 
@@ -23,7 +23,7 @@ onMounted(() => {
 
 <style scoped>
 .current-time {
-  font-size: 24px;
+  /* font-size: 24px; */
   color: #1e90ff;
   padding: 10px;
   border-radius: 5px;
