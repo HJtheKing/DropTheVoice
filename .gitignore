@@ -31,3 +31,5 @@ coverage
 
 */dockercompose/data/
 dockercompose/data/
+
+application-local.properties
