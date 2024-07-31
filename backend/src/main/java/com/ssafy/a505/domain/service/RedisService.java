@@ -1,6 +1,6 @@
-package com.ssafy.a505.global.service;
+package com.ssafy.a505.domain.service;
 
-import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.entity.Coordinate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.*;
 import org.springframework.data.redis.connection.RedisGeoCommands;
@@ -20,10 +20,10 @@ import static org.springframework.data.redis.connection.RedisGeoCommands.GeoRadi
 public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, Member> redisMemberTemplate;
+    private final RedisTemplate<String, Coordinate> redisMemberTemplate;
 
     @Autowired
-    public RedisService(RedisTemplate<String, Member> redisMemberTemplate, RedisTemplate<String, Object> redisTemplate) {
+    public RedisService(RedisTemplate<String, Coordinate> redisMemberTemplate, RedisTemplate<String, Object> redisTemplate) {
         this.redisMemberTemplate = redisMemberTemplate;
         this.redisTemplate = redisTemplate;
     }
@@ -33,7 +33,7 @@ public class RedisService {
 
     // key GEO_KEY에 value 위도, 경도, member 값 추가 V1
     public void addLocationV1(String name, Double longitude, Double latitude ){
-        redisMemberTemplate.opsForGeo().add(GEO_KEY, new Point(longitude, latitude), new Member(name, longitude, latitude));
+        redisMemberTemplate.opsForGeo().add(GEO_KEY, new Point(longitude, latitude), new Coordinate(name, longitude, latitude));
     }
 
     // key GEO_KEY에 value 위도, 경도, member 값 추가 V2
@@ -64,29 +64,29 @@ public class RedisService {
     }
 
     //  member의 반경 내의 다른 멤버 조회 V1
-    public List<Member> getMembersByRadius(Double longitude, Double latitude, Double radiusInKm, String msgId, int cnt){
+    public List<Coordinate> getMembersByRadius(Double longitude, Double latitude, Double radiusInKm, String msgId, int cnt){
         Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
-        GeoResults<GeoLocation<Member>> geoResults = redisMemberTemplate.opsForGeo().radius(GEO_KEY, within);
-        List<Member> members = geoResults.getContent().stream() // stream<GeoResult<Member> 로 변환
+        GeoResults<GeoLocation<Coordinate>> geoResults = redisMemberTemplate.opsForGeo().radius(GEO_KEY, within);
+        List<Coordinate> coordinates = geoResults.getContent().stream() // stream<GeoResult<Member> 로 변환
                 .map(result -> result.getContent().getName()) // stream<Member> 로 변환
                 .filter(m -> !isReceived(msgId, m.getName())) // 해당 음성을 수신했는지 filter
                 .collect(Collectors.toList());
-        Collections.shuffle(members);
-        return members.stream().limit(cnt).collect(Collectors.toList());
+        Collections.shuffle(coordinates);
+        return coordinates.stream().limit(cnt).collect(Collectors.toList());
     }
 
     //  member의 반경 내의 다른 멤버 조회 V2
-    public List<Member> getMembersByRadiusV2(Double longitude, Double latitude, Double radiusInKm, String msgId, int cnt){
+    public List<Coordinate> getMembersByRadiusV2(Double longitude, Double latitude, Double radiusInKm, String msgId, int cnt){
         Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
         GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
         GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(GEO_KEY, within, args);
 
-        List<Member> result = geoResults.getContent().stream()
+        List<Coordinate> result = geoResults.getContent().stream()
                 .map(geoResult -> {
                     GeoLocation<Object> content = geoResult.getContent();
                     String name = content.getName().toString();
                     Point point = content.getPoint();
-                    return new Member(name, point.getX(), point.getY());
+                    return new Coordinate(name, point.getX(), point.getY());
                 })
                 .filter(m -> !isReceived(msgId, m.getName()))
                 .collect(Collectors.toList());

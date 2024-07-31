@@ -1,8 +1,8 @@
 /*
 package com.ssafy.a505.global.config;
 
-import com.ssafy.a505.filter.CustomCorsFilter;
-import com.ssafy.a505.filter.JwtRequestFilter;
+import com.ssafy.a505.global.filter.CustomCorsFilter;
+import com.ssafy.a505.global.filter.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
