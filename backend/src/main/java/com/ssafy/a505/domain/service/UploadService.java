@@ -6,7 +6,8 @@ import com.ssafy.a505.domain.entity.Voice;
 
 public interface UploadService {
 
-    Voice uploadAndSendVoice(VoiceCreateRequestDTO voiceCreateRequestDTO, int pitchShift) throws JsonProcessingException;
+    Voice uploadAndSendVoice(VoiceCreateRequestDTO voiceCreateRequestDTO, float pitchShift) throws JsonProcessingException;
 
-    String sendToFlask(Voice voice, int pitchShift) throws JsonProcessingException;
+    String sendToFlask(Voice voice, float pitchShift) throws JsonProcessingException;
+
 }

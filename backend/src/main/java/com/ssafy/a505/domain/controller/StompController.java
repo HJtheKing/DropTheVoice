@@ -1,6 +1,6 @@
 package com.ssafy.a505.domain.controller;
 
-import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.entity.Coordinate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
@@ -31,19 +31,19 @@ public class StompController {
 
     /**
      *
-     * @param member
+     * @param coordinate
      * @param message
      *
      * 매 10초마다 프론트엔드에서 호출되는 메서드.
      * 사용자 위치정보를 계속해서 업데이트한다
      */
     @MessageMapping(value = "/position")
-    public void message(Member member, Message<Member> message) {
+    public void message(Coordinate coordinate, Message<Coordinate> message) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
         String sessionId = headerAccessor.getSessionId();
 
         log.info(sessionId+"is sessionId");
-        log.info("Session Logged In Member Info: "+member.toString());
+        log.info("Session Logged In Member Info: "+ coordinate.toString());
 
         //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자.
         //redisService.update(member,lat,lng);
