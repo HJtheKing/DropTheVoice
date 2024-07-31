@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api-voice")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class VoiceController {
     public Voice voice;
     public List<Voice> voices;

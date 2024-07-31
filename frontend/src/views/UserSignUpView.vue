@@ -1,137 +1,126 @@
 <template>
-  <div class="signup-container">
-    <h2>회원가입</h2>
-    <p>가입을 통해 더 다양한 서비스를 만나보세요!</p>
-    <form>
-      <div class="input-group">
-        <input type="text" placeholder="아이디 입력 (6 ~ 20자)"/>
-        <button type="button" class="check-button">중복 확인</button>
-      </div>
-      <div class="input-group">
-        <input type="password" placeholder="비밀번호 입력 (특수문자 포함 8~20자)" />
-      </div>
-      <div class="input-group">
-        <input type="password" placeholder="비밀번호 재입력" />
-      </div>
-      <div class="input-group">
-        <input type="email" placeholder="이메일 주소" />
-        <span>@</span>
-        <select>
-          <option value="naver.com">naver.com</option>
-          <option value="gmail.com">gmail.com</option>
-          <option value="daum.net">daum.net</option>
-          <option value="daum.net">직접 입력</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <input type="tel" placeholder="휴대폰 번호 입력('-' 제외 11자리 입력)" />
-      </div>
-      <button type="button" class="submit-button">가입하기</button>
-    </form>
-  </div>
+  <v-container class="signup-container" max-width="400px">
+    <v-form>
+      <v-card>
+        <v-card-title class="text-left">
+          <h2>회원가입</h2>
+        </v-card-title>
+        <v-card-text>
+          <p>가입을 통해 더 다양한 서비스를 만나보세요!</p>
+          <v-row class="input-group ma-1">
+            <v-col cols="9">
+              <v-text-field
+                v-model="userId"
+                :rules="[rules.required, rules.min(6), rules.max(20)]"
+                placeholder="아이디 입력 (6 ~ 20자)"
+                outlined
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3" class="d-flex align-center">
+              <v-btn class="check-button" @click="checkDuplicate" height="40px">중복 확인</v-btn>
+            </v-col>
+          </v-row>
+          <v-text-field
+            v-model="password"
+            :rules="[rules.required, rules.min(8), rules.max(20), rules.password]"
+            placeholder="비밀번호 입력 (특수문자 포함 8~20자)"
+            type="password"
+            outlined
+          ></v-text-field>
+          <v-text-field
+            v-model="confirmPassword"
+            :rules="[rules.required, rules.matchPassword]"
+            placeholder="비밀번호 재입력"
+            type="password"
+            outlined
+          ></v-text-field>
+          <v-row class="input-group ma-1">
+            <v-col cols="6">
+              <v-text-field
+                v-model="email"
+                :rules="[rules.required, rules.email]"
+                placeholder="이메일 주소"
+                outlined
+              ></v-text-field>
+            </v-col>
+            <v-col cols="1" class="d-flex align-center justify-center">
+              <span>@</span>
+            </v-col>
+            <v-col cols="5">
+              <v-select
+                v-model="emailDomain"
+                :items="emailDomains"
+                outlined
+              ></v-select>
+            </v-col>
+          </v-row>
+          <v-text-field
+            v-model="phone"
+            :rules="[rules.required, rules.phone]"
+            placeholder="휴대폰 번호 입력('-' 제외 11자리 입력)"
+            outlined
+          ></v-text-field>
+          <v-btn block color="primary" @click="submitForm">가입하기</v-btn>
+        </v-card-text>
+      </v-card>
+    </v-form>
+  </v-container>
 </template>
 
-<script>
-import { ref } from "vue";
-import { useUserStore } from "@/store/user";
+<script setup>
+import { ref } from 'vue';
 
-export default {
-  setup() {
-    
-    const store = useUserStore();
-    const id = ref("");
-    const pw = ref("");
+const userId = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+const email = ref("");
+const emailDomain = ref("naver.com");
+const phone = ref("");
 
-    const login = () => {
-      store.userLogin(id.value, pw.value);
-    };
+const emailDomains = ["naver.com", "gmail.com", "daum.net", "직접 입력"];
 
-    return {
-      id,
-      pw,
-      login
-    };
-  }
+const rules = {
+  required: (value) => !!value || "필수 입력 항목입니다.",
+  min: (min) => (value) => value.length >= min || `${min}자 이상 입력하세요.`,
+  max: (max) => (value) => value.length <= max || `${max}자 이하로 입력하세요.`,
+  email: (value) => /.+@.+\..+/.test(value) || "유효한 이메일 주소를 입력하세요.",
+  phone: (value) => /^\d{11}$/.test(value) || "휴대폰 번호를 정확히 입력하세요.",
+  password: (value) => /(?=.*\W)/.test(value) || "특수문자를 포함해야 합니다.",
+  matchPassword: (value) => value === password.value || "비밀번호가 일치하지 않습니다.",
+};
+
+const checkDuplicate = () => {
+  // 아이디 중복 확인 로직
+  alert("아이디 중복 확인");
+};
+
+const submitForm = () => {
+  // 가입하기 버튼 클릭 시 폼 제출 로직
+  alert("가입하기");
 };
 </script>
 
 <style scoped>
 .signup-container {
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
 }
 
-h2 {
-  text-align: left;
-  margin-bottom: 10px;
-}
-
-p {
-  text-align: left;
-  margin-bottom: 20px;
+.v-btn {
+  margin-top: 10px;
+  color: white;
 }
 
 .input-group {
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="tel"] {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-input.input-with-button {
-  padding-right: 90px; /* Adjust padding to accommodate the button */
+  margin-bottom: 10px;
 }
 
 .check-button {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  padding: 8px;
   background-color: #8a2be2;
   color: white;
-  border: none;
-  cursor: pointer;
   font-size: 14px;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-select {
-  width: 150px;
-  padding: 8px;
-  box-sizing: border-box;
-  margin-left: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-span {
-  margin-left: 5px;
-}
-
-.submit-button {
-  width: 100%;
-  padding: 10px;
-  background-color: rgb(55, 53, 53);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  border-radius: 4px;
 }
 
 input::placeholder {
