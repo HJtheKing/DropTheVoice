@@ -22,10 +22,10 @@ public class UploadController {
     /**
      * Flask로 데이터 전송
      */
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload")
     public ResponseEntity<?> uploadVoice(@RequestPart(value = "audioFile", required = false) MultipartFile audioFile,
-                                         @RequestPart(value = "title") String title
-            ,@RequestParam("pitchShift") int pitchShift) throws JsonProcessingException {
+                                         @RequestPart(value = "title") String title,
+                                         @RequestParam("pitchShift") float pitchShift) throws JsonProcessingException {
         VoiceCreateRequestDTO voiceCreateRequestDTO = new VoiceCreateRequestDTO(title, audioFile);
         Voice voice = uploadService.uploadAndSendVoice(voiceCreateRequestDTO, pitchShift);
         return new ResponseEntity<>(voice, HttpStatus.CREATED);

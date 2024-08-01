@@ -1,5 +1,6 @@
 package com.ssafy.a505.domain.controller;
 
+import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.entity.VoiceType;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +17,21 @@ public class VoiceController {
     public List<Voice> voices;
 
     public VoiceController(){
+        Member member = Member.builder()
+                .memberId(1L)
+                .userEmail("user1@example.com")
+                .userName("김병관")
+                .userPassword("")
+                .profileImgUrl("")
+                .remainChangeCount(5)
+                .totalSpreadCount(10)
+                .totalUploadCount(15)
+                .build();
+
         voice = new Voice();
         voice.setVoiceId(1);
-        voice.setUserId(3);
-        voice.setHeart(3);
-        voice.setUserName("김병관");
+        voice.setMember(member);
+        voice.setMember(member);
         voice.setListenCount(Math.round(Math.random()*100000));
         voice.setLatitude(50);
         voice.setLongitude(50);

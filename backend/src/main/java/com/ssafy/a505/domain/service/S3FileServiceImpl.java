@@ -1,4 +1,4 @@
-package com.ssafy.a505.global.service;
+package com.ssafy.a505.domain.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
@@ -61,7 +61,7 @@ public class S3FileServiceImpl implements S3FileService {
         }
 
         String extension = filename.substring(lastDotIndex + 1).toLowerCase();
-        List<String> allowedExtensionList = Arrays.asList("mp3");
+        List<String> allowedExtensionList = Arrays.asList("mp3", "jpg", "jpeg", "png", "gif");
 
         if (!allowedExtensionList.contains(extension)) {
             throw new AmazonS3Exception("확장자명에 문제가 있습니다");
