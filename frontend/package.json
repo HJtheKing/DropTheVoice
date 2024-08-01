@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "BACKEND_URI=i11a505.p.ssafy.io vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "dev:prod": "BACKEND_URI=i11a505.p.ssafy.io vite"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
