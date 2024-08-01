@@ -1,5 +1,5 @@
 
-package com.ssafy.a505.filter;
+package com.ssafy.a505.global.filter;
 
 import com.ssafy.a505.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;

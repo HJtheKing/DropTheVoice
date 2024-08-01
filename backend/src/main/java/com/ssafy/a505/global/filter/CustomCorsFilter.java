@@ -1,4 +1,4 @@
-package com.ssafy.a505.filter;
+package com.ssafy.a505.global.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
