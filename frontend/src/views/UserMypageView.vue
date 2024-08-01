@@ -1,41 +1,47 @@
 <template>
-  <div class="profile-container">
-    <div class="profile-header">
-      <img src="@/assets/images/user.png" alt="Profile Image" class="profile-image" />
-      <div class="profile-info">
-        <h2>김싸피</h2>
-        <p>@a505</p>
-      </div>
-      <img src="@/assets/images/goldtier.png" alt="Badge" class="badge-image" />
-    </div>
-    <div class="profile-stats">
-      <p>음성 업로드 수 :</p>
-      <p>음성 확산 수 :</p>
-    </div>
-    <div class="profile-links">
-      <div class="service">
-        <h3>문의</h3>
-        <div class="thick-divider"></div>
-        <div class="menu-item" @click="navigate('customer-service')">
-          <span>고객센터</span>
+  <v-container class="profile-container">
+    <v-card>
+      <v-card-title class="profile-header">
+        <v-avatar size="50">
+          <img src="@/assets/images/user.png" alt="Profile Image" class="profile-image" />
+        </v-avatar>
+        <div class="profile-info">
+          <h2>김싸피</h2>
+          <p>@a505</p>
         </div>
-        <div class="menu-item" @click="navigate('privacy-policy')">
-          <span>개인 정보 처리 방침</span>
-        </div>
-      </div>
-      <br>
-      <div class="service">
-        <h3>회원정보 변경</h3>
-        <div class="thick-divider"></div>
-        <div class="menu-item" @click="navigate('password-change')">
-          <span>비밀번호 변경</span>
-        </div>
-        <div class="menu-item" @click="navigate('account-deletion')">
-          <span>회원 탈퇴</span>
-        </div>
-      </div>
-    </div>
-  </div>
+        <v-avatar size="50">
+          <img src="@/assets/images/goldtier.png" alt="Badge" class="badge-image" />
+        </v-avatar>
+      </v-card-title>
+      <v-card-subtitle class="profile-stats">
+        <p>음성 업로드 수 :</p>
+        <p>음성 확산 수 :</p>
+      </v-card-subtitle>
+      <v-divider></v-divider>
+      <v-card-text class="profile-links">
+        <v-list>
+          <v-subheader>문의</v-subheader>
+          <v-divider class="thick-divider"></v-divider>
+          <v-list-item @click="navigate('customer-service')">
+            <v-list-item-title>고객센터</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="navigate('privacy-policy')">
+            <v-list-item-title>개인 정보 처리 방침</v-list-item-title>
+          </v-list-item>
+        </v-list>
+        <v-list>
+          <v-subheader>회원정보 변경</v-subheader>
+          <v-divider class="thick-divider"></v-divider>
+          <v-list-item @click="navigate('password-change')">
+            <v-list-item-title>비밀번호 변경</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="navigate('account-deletion')">
+            <v-list-item-title>회원 탈퇴</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
@@ -51,7 +57,7 @@ export default {
 
 <style scoped>
 .profile-container {
-  width: 400px;
+  max-width: 400px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
 }
@@ -66,8 +72,6 @@ export default {
 }
 
 .profile-image {
-  width: 50px;
-  height: 50px;
   border-radius: 50%;
 }
 
@@ -88,8 +92,7 @@ export default {
 }
 
 .badge-image {
-  width: 50px;
-  height: 50px;
+  border-radius: 50%;
 }
 
 .profile-stats {
@@ -97,6 +100,7 @@ export default {
   color: white;
   padding: 20px;
   font-size: 14px;
+  text-align: left;
 }
 
 .profile-links {
@@ -105,25 +109,22 @@ export default {
   padding: 20px;
 }
 
-.profile-links h3 {
-  margin: 0 0 10px 0;
+.v-subheader {
+  margin: 0;
   font-size: 16px;
 }
 
-.menu-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.v-list-item {
   padding: 10px 0;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.menu-item:hover {
+.v-list-item:hover {
   background-color: #f0f0f0;
 }
 
-.menu-item span {
+.v-list-item-title {
   font-size: 14px;
 }
 

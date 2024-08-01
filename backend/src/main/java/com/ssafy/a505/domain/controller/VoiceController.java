@@ -1,8 +1,9 @@
 package com.ssafy.a505.domain.controller;
 
+import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.entity.VoiceType;
-import com.ssafy.a505.repository.VoiceRepository;
+import com.ssafy.a505.domain.repository.VoiceRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
 @RequestMapping("/api-voice")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class VoiceController {
 
     private final VoiceRepository voiceRepository;
@@ -28,10 +27,12 @@ public class VoiceController {
     @PostConstruct
     public void init() {
         for(int i=0;i<30;i++){
+            Member member = new Member();
+            member.setUserName("김병관");
+
             Voice voice = new Voice();
-            voice.setUserId(1);
-            voice.setHeart(3);
-            voice.setUserName("김병관");
+            voice.setMember(member);
+            voice.setHeartCount(3L);
             voice.setListenCount(Math.round(Math.random()*100000));
             voice.setLatitude(50);
             voice.setLongitude(50);
@@ -61,7 +62,8 @@ public class VoiceController {
             throw new RuntimeException(e);
         }
         PageRequest pageRequest = PageRequest.of(page - 1, size);
-        List<Voice> result = voiceRepository.findAllByUserId(1L, pageRequest);
+        List<Voice> result = voiceRepository.findAllByUserName("김병관", pageRequest);
+//        List<Voice> result = voiceRepository.findAllByUserId(1L, pageRequest);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

@@ -1,6 +1,6 @@
 package com.ssafy.a505.global.config;
 
-import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.entity.Coordinate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +39,8 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Member> redisMemberTemplate(){
-        RedisTemplate<String, Member> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, Coordinate> redisMemberTemplate(){
+        RedisTemplate<String, Coordinate> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
 
         redisTemplate.setKeySerializer(new StringRedisSerializer());

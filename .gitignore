@@ -33,3 +33,5 @@ coverage
 dockercompose/data/
 
 application-local.properties
+
+__pycache__/

@@ -1,8 +1,9 @@
 package com.ssafy.a505.domain.controller;
 
 import com.ssafy.a505.domain.entity.Voice;
-import com.ssafy.a505.repository.VoiceRepository;
+import com.ssafy.a505.domain.repository.VoiceRepository;
 import jakarta.annotation.PostConstruct;
+import com.ssafy.a505.domain.service.VoiceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -10,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -22,6 +21,7 @@ import java.util.List;
 public class StorageController {
 
     private final VoiceRepository voiceRepository;
+    private final VoiceService voiceService;
 
     @PostConstruct
     public void init() {
@@ -66,7 +66,7 @@ public class StorageController {
         return new ResponseEntity<>(likeList, HttpStatus.OK);
     }
     @GetMapping("like/{page}/{size}")
-    public ResponseEntity<?> findLikeWithPage(@PathVariable("page") int page, @PathVariable("size") int size){
+    public ResponseEntity<?> findLikeWithPage(@PathVariable("page") int page, @PathVariable("size") int size) {
         log.info("findLikeWithPage");
         try {
             Thread.sleep(500);
@@ -77,5 +77,14 @@ public class StorageController {
         List<Voice> spreadList = voiceRepository.findByTitleContaining("like", pageRequest);
 
         return new ResponseEntity<>(spreadList, HttpStatus.OK);
+    }
+
+    @GetMapping("like/{memberId}")
+    public ResponseEntity<?> getLikedVoices(@RequestParam("memberId") Long memberId) {
+        List<Voice> heartedVoices = voiceService.findHeartedByMember(memberId);
+        if (heartedVoices.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(heartedVoices, HttpStatus.OK);
     }
 }

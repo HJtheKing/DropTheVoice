@@ -1,4 +1,4 @@
-package com.ssafy.a505.repository;
+package com.ssafy.a505.domain.repository;
 
 import com.ssafy.a505.domain.entity.Voice;
 import org.springframework.data.domain.Page;
@@ -11,4 +11,5 @@ public interface VoiceRepository extends JpaRepository<Voice, Long> {
     List<Voice> findByTitleContaining(String userNam, Pageable pageable);
     List<Voice> findByTitleContaining(String userNam);
     List<Voice> findAllByUserId(Long userId, Pageable pageable);
+    List<Voice> findAllByUserName(String userName, Pageable pageable);
 }
