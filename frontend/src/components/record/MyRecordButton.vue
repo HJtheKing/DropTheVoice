@@ -2,15 +2,11 @@
   <v-container fluid>
     <!-- 오디오 관련 -->
     <v-row justify="center" class="my-4">
-      <v-col cols="12" class="d-flex justify-center align-center">
-        <v-card class="d-flex justify-center align-center pa-2">
-          <div class="visualizer">
-            <div class="bars">
-              <div v-for="n in 15" :key="n" class="bar" :class="{ active: n <= activeBars }"></div>
-            </div>
+        <div class="visualizer">
+          <div class="bars">
+            <div v-for="n in 20" :key="n" class="bar" :class="{ active: n <= activeBars }"></div>
           </div>
-        </v-card>
-      </v-col>
+        </div>
     </v-row>
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">
@@ -33,6 +29,7 @@
         <!-- <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
           저장
         </v-btn> -->
+        <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기</v-btn>
     </v-row>
   </v-container>
 </template>
@@ -40,21 +37,38 @@
 
 <script setup>
 import { ref,} from 'vue';
-import { useSpreadStore } from '@/store/spread';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
 import AudioPlayer from "@/components/AudioPlayer.vue";
 
+// 테스트용 import, load
+import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
+function playSampleAudio() {
+  if (audioPlayer.value) {
+    audioPlayer.value.loadAudio(audioFile);
+  }
+}
+
 // 녹음 데이터를 반환하는 메서드
 function getAudioBlob() {
   return audioBlob.value;
 }
 
+function getAnalyser() {
+  return analyser;
+}
+
+function getDataArray() {
+  return dataArray;
+}
+
 // expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
 defineExpose({
-  getAudioBlob
+  getAudioBlob,
+  getAnalyser,
+  getDataArray
 });
 
 const recordStore = useRecordStore();
@@ -184,7 +198,6 @@ const stopRecording = () => {
   isRecording.value = false;
 }
 
-
 // 오디오 파형을 그리는 메서드
 const startDrawing = () => {
   console.log("Started drawing")
@@ -307,26 +320,26 @@ const startDrawing = () => {
   background-color: #2980b9;
 }
 
-  .visualizer {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-  }
-  
-  .bars {
-    display: flex;
-    gap: 4px;
-  }
-  
-  .bar {
-    width: 8px;
-    height: 20px;
-    background-color: #444; /* Gray color for all bars */
-  }
-  
-  .bar.active {
-    background-color: #0f0;
-  }
+.visualizer {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.bars {
+  display: flex;
+  gap: 4px;
+}
+
+.bar {
+  width: 8px;
+  height: 20px;
+  background-color: #5d5c5c; /* Gray color for all bars */
+}
+
+.bar.active {
+  background-color: #8B92DF;
+}
 
 
 
