@@ -12,7 +12,7 @@ COPY --from=build-stage /app/dist /usr/share/nginx/html
 #COPY ./nginx.conf /etc/nginx/nginx.conf
 #COPY ./localhost.key /etc/nginx/ssl/localhost.key
 #COPY ./localhost.crt /etc/nginx/ssl/localhost.crt
-COPY ./private.key /etc/nginx/ssl/private.key
+COPY ./privatekey.pem /etc/nginx/ssl/privatekey.pem
 COPY ./fullchain.pem /etc/nginx/ssl/fullchain.pem
 COPY ./nginx-prod.conf /etc/nginx/nginx.conf
 
