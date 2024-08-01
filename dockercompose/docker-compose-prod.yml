@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   back:
-    image: gbds234/back:latest
+    build:
+      context: "../backend"
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     container_name: back
@@ -10,17 +12,18 @@ services:
     depends_on:
     - mysql
     - redis
-    - mongodb
   front:
-    image: gbds234/front:latest
+    build:
+      context: "../frontend"
+      dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "80:80"
+      - "443:443"
     container_name: front
     restart: always
     depends_on:
     - mysql
     - redis
-    - mongodb
   mysql:
     image: mysql:8.0
     container_name: mysql-container
@@ -43,63 +46,6 @@ services:
     ports:
       - 6379:6379
 
-  mongodb:
-    image: mongo
-    restart: always
-    container_name: mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
-    volumes:
-      - ./data/mongodb:/data/db
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
-    container_name: elasticsearch
-    environment:
-      - node.name=elasticsearch
-      - cluster.name=es-cluster
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - esdata1:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-      - 9300:9300
-    networks:
-      - elastic
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.10.0
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-    ports:
-      - 5601:5601
-    networks:
-      - elastic
-  # coturn:
-  #   image: coturn/coturn
-  #   network_mode: host
-  #   ports:
-  #     - 3478:3478
-  #   environment:
-  #     - TURN_PORT=3478
-  #     - TURN_PORT_START=49152
-  #     - TURN_PORT_END=49200
-  #     - TURN_REALM=myturn.com
-  #     - TURN_USERNAME=testuser
-  #     - TURN_PASSWORD=testpassword
-  #   restart: always
 volumes:
   esdata1:
     driver: local
