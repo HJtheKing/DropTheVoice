@@ -24,8 +24,8 @@ export default createStore({
     },
     actions: {
         connectWebSocket({ commit }) {
-            //const uri = process.env.BACKEND_URI || 'localhost';
-            const uri = 'localhost';
+            const uri = 'i11a505.p.ssafy.io';
+            //const uri = 'localhost';
             const socket = new SockJS('https://'+uri+':8080/stomp/handshake');
             const stompClient = Webstomp.over(socket);
 
