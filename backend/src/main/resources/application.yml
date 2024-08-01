@@ -36,3 +36,7 @@ spring:
 logging:
   level:
     root: info
+
+ffmpeg:
+  path: "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
+

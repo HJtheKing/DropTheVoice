@@ -1,9 +1,9 @@
 <template>
-  <v-container class="timer-container" :class="{ hidden: !isRecording }" fluid>
-    <v-row justify="center">
+  <v-container class="timer-container" fluid>
+    <v-row justify="center" :class="{ hidden: !isRecording }">
         <div class="d-flex justify-center align-center">
           <v-icon color="red" class="mr-2">mdi-record-circle</v-icon>
-          <span class="timer-text">[녹음 중] {{ timer.toFixed(2) }} 초</span>
+          <span class="timer-text">{{ formatTime(timer) }}</span>
         </div>
     </v-row>
   </v-container>
@@ -31,6 +31,12 @@ const startTimer = () => {
 const stopTimer = () => {
   clearInterval(intervalId)
   timer.value = 0.00
+}
+
+const formatTime = (time) => {
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 onMounted(() => {
@@ -63,7 +69,7 @@ onUnmounted(() => {
 
 .timer-text {
   font-size: 16px;
-  color: red;
+  color: #fff;
   white-space: nowrap;
 }
 </style>

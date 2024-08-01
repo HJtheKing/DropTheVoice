@@ -1,4 +1,4 @@
-package com.ssafy.a505.repository;
+package com.ssafy.a505.domain.repository;
 
 import com.ssafy.a505.domain.entity.Voice;
 import org.springframework.data.jpa.repository.JpaRepository;

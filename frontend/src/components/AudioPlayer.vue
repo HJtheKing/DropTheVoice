@@ -1,19 +1,37 @@
 <template>
-  <div class="audio-player">
+  <v-container class="audio-player">
     <audio ref="audio" @timeupdate="updateTime" @loadedmetadata="updateDuration" @ended="resetPlayer" @error="handleError">
       <source :src="audioSrc" type="audio/mp3">
       Your browser does not support the audio element.
     </audio>
-    <div class="controls">
-      <button class="play-btn" @click="togglePlay">
-        <v-icon>{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}</v-icon>
-      </button>
-      <input class="play-bar" type="range" min="0" :max="duration" step="0.01" v-model="currentTime" @input="seekAudio">
-    </div>
-    <div class="time">
-      {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-    </div>
-  </div>
+    <v-container class="controls" justify="center">
+      <v-row justify="center" class="time">
+        {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+      </v-row>
+      <v-row justify="center" class="bar-row">
+        <input class="play-bar" type="range" min="0" :max="duration" step="0.01" v-model="currentTime" @input="seekAudio">
+      </v-row> 
+      <v-container justify="center" class="btn-row">
+        <v-row justify="space-between">
+          <v-btn class="player-btn" @click="goToStart">
+            <v-icon>mdi-skip-backward</v-icon>
+          </v-btn>
+          <v-btn class="player-btn" @mousedown="handleMouseDown('rewind')" @mouseup="handleMouseUp('rewind')">
+            <v-icon>mdi-rewind</v-icon>
+          </v-btn>
+          <v-btn class="player-btn" @click="togglePlay">
+            <v-icon>{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}</v-icon>
+          </v-btn>
+          <v-btn class="player-btn" @mousedown="handleMouseDown('forward')" @mouseup="handleMouseUp('forward')">
+            <v-icon>mdi-fast-forward</v-icon>
+          </v-btn>
+          <v-btn class="player-btn" @click="goToEnd">
+            <v-icon>mdi-skip-forward</v-icon>
+          </v-btn>
+        </v-row>
+      </v-container>
+    </v-container>
+  </v-container>
 </template>
 
 <script>
@@ -26,6 +44,10 @@ export default {
     const isPlaying = ref(false);
     const currentTime = ref(0);
     const duration = ref(0);
+    const rewindInterval = ref(null);
+    const longPressTimeout = ref(null);
+    const longPressThreshold = 300; // 밀리초
+    const mouseDownTime = ref(0);
 
     const togglePlay = () => {
       if (audio.value.paused) {
@@ -72,6 +94,105 @@ export default {
       console.error('Audio playback error:', event);
     };
 
+    const goToStart = () => {
+      audio.value.currentTime = 0;
+      audio.value.pause();
+      isPlaying.value = false;
+    }
+
+    const goToEnd = () => {
+      audio.value.currentTime = audio.value.duration;
+    }
+
+    const handleMouseDown = (action) => {
+      console.log("btn pressed");
+      // isLongPress.value = false;
+      mouseDownTime.value = Date.now();
+      longPressTimeout.value = setTimeout(() => {
+        console.log("Mouse Hold");
+        // isLongPress.value = true;
+        if (action === 'rewind') {
+          rewindAudio();
+        } else if (action === 'forward') {
+          // setPlaybackRate(2);
+          fastForwardAudio();
+        }
+      }, longPressThreshold);
+    };
+
+    const handleMouseUp = (action) => {
+      const clickDuration = Date.now() - mouseDownTime.value; // 클릭 지속 시간 계산
+      if (clickDuration < longPressThreshold) {
+        // if (!isLongPress.value) {
+          if (action === 'rewind') {
+            jumpBackwardAudio();
+          } else if (action === 'forward') {
+            jumpForwardAudio();
+          }
+        // }
+        clearTimeout(longPressTimeout.value);
+        longPressTimeout.value = null;
+
+      }
+      
+      stopRewind();
+      resetPlaybackRate();
+    };
+
+    const setPlaybackRate = (rate) => {
+      console.log("Speedo Up")
+      audio.value.playbackRate = rate;
+    };
+
+    const resetPlaybackRate = () => {
+      console.log("Speedo Normalized")
+      audio.value.playbackRate = 1;
+    };
+
+    const rewindAudio = () => {
+      rewindInterval.value = setInterval(() => {
+        if (audio.value.currentTime > 0) {
+          audio.value.currentTime -= 0.2;
+        } else {
+          clearInterval(rewindInterval.value);
+        }
+      }, 100);
+      console.log("Going backward")
+    };
+
+    const fastForwardAudio = () => {
+      rewindInterval.value = setInterval(() => {
+        if (audio.value.currentTime < audio.value.duration) {
+          audio.value.currentTime += 0.2;
+        } else {
+          clearInterval(rewindInterval.value);
+        }
+      }, 100);
+      console.log("Going forward")
+    };
+
+    const jumpForwardAudio = () => {
+      if (audio.value.currentTime + 3 < audio.value.duration) {
+        audio.value.currentTime += 3;
+      } else {
+        audio.value.currentTime = audio.value.duration;
+      }
+      console.log("Jumped Forward")
+    };
+
+    const jumpBackwardAudio = () => {
+      if (audio.value.currentTime - 3 > 0) {
+        audio.value.currentTime -= 3;
+      } else {
+        audio.value.currentTime = 0;
+      }
+      console.log("Jumped Backward")
+    };
+
+    const stopRewind = () => {
+      clearInterval(rewindInterval.value);
+    };
+
     return {
       audio,
       audioSrc,
@@ -85,11 +206,22 @@ export default {
       formatTime,
       resetPlayer,
       loadAudio,
-      handleError
+      handleError,
+      goToStart,
+      goToEnd,
+      handleMouseDown,
+      handleMouseUp,
+      setPlaybackRate,
+      resetPlaybackRate,
+      rewindAudio,
+      stopRewind,
+      jumpForwardAudio,
+      jumpBackwardAudio
     };
   }
 };
 </script>
+
 
 
 
@@ -99,14 +231,19 @@ export default {
   flex-direction: column;
   align-items: center;
 }
-.controls {
-  display: flex;
+
+.time {
+  margin-bottom: 10px;
   align-items: center;
 }
-.time {
-  margin-top: 10px;
+.bar-row {
+  margin-bottom: 30px;
 }
-button {
+.btn-row {
+  width: 100%;
+  max-width: 500px;
+}
+.player-btn {
   margin-right: 10px;
   padding: 10px 20px;
   background-color: #f3b549;
@@ -116,14 +253,15 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
-button:hover {
+.player-btn:hover {
   background-color: #f3b549;
   color: #000;
   font-weight: bold;
 }
-input {
-      overflow: hidden;
-      width: 80px;
-      accent-color: #8B92DF;
+
+.play-bar {
+  width: 100%;
+  max-width: 500px;
+  accent-color: #8B92DF;
 }
 </style>

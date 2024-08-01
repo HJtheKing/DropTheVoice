@@ -1,6 +1,6 @@
 package com.ssafy.a505.global.util;
 
-import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.entity.Coordinate;
 import io.lettuce.core.RedisCommandExecutionException;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 public class RedisUtils {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, Member> redisMemberTemplate;
+    private final RedisTemplate<String, Coordinate> redisMemberTemplate;
 
 
-    public RedisUtils(RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Member> redisMemberTemplate) {
+    public RedisUtils(RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, Coordinate> redisMemberTemplate) {
         this.redisTemplate = redisTemplate;
         this.redisMemberTemplate = redisMemberTemplate;
     }
@@ -56,29 +56,29 @@ public class RedisUtils {
     }
 
     public void addLocation(String key,Double latitude, Double longitude) {
-        GeoOperations<String, Member> geoOps = redisMemberTemplate.opsForGeo();
+        GeoOperations<String, Coordinate> geoOps = redisMemberTemplate.opsForGeo();
         Point point = new Point(latitude,longitude);
-        geoOps.add(key, new RedisGeoCommands.GeoLocation<Member>(new Member(UUID.randomUUID().toString(),latitude,longitude), point));
+        geoOps.add(key, new RedisGeoCommands.GeoLocation<Coordinate>(new Coordinate(UUID.randomUUID() + "",latitude,longitude), point));
     }
 
-    public List<Member> getLocationsWithinRadius(String key, double longitude, double latitude, double radius) {
-        GeoOperations<String, Member> geoOps = redisMemberTemplate.opsForGeo();
+    public List<Coordinate> getLocationsWithinRadius(String key, double longitude, double latitude, double radius) {
+        GeoOperations<String, Coordinate> geoOps = redisMemberTemplate.opsForGeo();
         Circle within = new Circle(new Point(longitude, latitude), new Distance(radius, RedisGeoCommands.DistanceUnit.KILOMETERS));
-        GeoResults<RedisGeoCommands.GeoLocation<Member>> geoResults = geoOps.radius(key, within);
+        GeoResults<RedisGeoCommands.GeoLocation<Coordinate>> geoResults = geoOps.radius(key, within);
         return geoResults.getContent().stream()
                 .map(result -> result.getContent().getName())
                 .collect(Collectors.toList());
     }
 
-    public void deleteGeoInfos(List<Member> members){
-        for(Member member: members){
-            deleteGeoInfo(member);
+    public void deleteGeoInfos(List<Coordinate> coordinates){
+        for(Coordinate coordinate : coordinates){
+            deleteGeoInfo(coordinate);
         }
     }
 
-    public void deleteGeoInfo(Member member){
-        GeoOperations<String, Member> geoOps = redisMemberTemplate.opsForGeo();
-        geoOps.remove("geotest", member);
+    public void deleteGeoInfo(Coordinate coordinate){
+        GeoOperations<String, Coordinate> geoOps = redisMemberTemplate.opsForGeo();
+        geoOps.remove("geotest", coordinate);
     }
 
     // 저장된 위치의 좌표 가져오기

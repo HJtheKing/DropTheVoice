@@ -1,4 +1,4 @@
-package com.ssafy.a505.global.service;
+package com.ssafy.a505.domain.service;
 
 import com.ssafy.a505.domain.entity.VoiceType;
 import org.springframework.web.multipart.MultipartFile;
