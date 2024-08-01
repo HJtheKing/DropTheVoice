@@ -1,7 +1,7 @@
 package com.ssafy.a505.RedisTest;
 
-import com.ssafy.a505.repository.RedisService;
-import com.ssafy.a505.domain.Member;
+import com.ssafy.a505.domain.service.RedisService;
+import com.ssafy.a505.domain.entity.Coordinate;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +47,8 @@ public class RedisGeoSpatialServiceTest {
     @Test
     public void markMsgReceivedTest(){
         String msgId = "1";
-        List<Member> members = redisService.getMembersByRadiusV2(TestLatitude, TestLongitude, 0.5d, msgId, 3);
-        for (Member m : members) {
+        List<Coordinate> coordinates = redisService.getMembersByRadiusV2(TestLatitude, TestLongitude, 0.5d, msgId, 3);
+        for (Coordinate m : coordinates) {
             redisService.markReceived(msgId, m.getName());
         }
     }
@@ -62,15 +62,15 @@ public class RedisGeoSpatialServiceTest {
     @Test
     public void getWithRadiusTestV1(){
         redisService.addLocationV1("test5", TestLatitude + 0.00052, TestLongitude + 0.00052);
-        List<Member> result = redisService.getMembersByRadius(TestLatitude, TestLongitude, 1d, "1", 3);
-        for (Member m : result) {
+        List<Coordinate> result = redisService.getMembersByRadius(TestLatitude, TestLongitude, 1d, "1", 3);
+        for (Coordinate m : result) {
             System.out.println("name : " + m.getName() + " coord : " + m.getX() + " " + m.getY());
         }
     }
     @Test
     public void getWithRadiusTestV2(){
-        List<Member> result = redisService.getMembersByRadiusV2(TestLatitude, TestLongitude, 1d, "1", 3);
-        for (Member m : result) {
+        List<Coordinate> result = redisService.getMembersByRadiusV2(TestLatitude, TestLongitude, 1d, "1", 3);
+        for (Coordinate m : result) {
             System.out.println("name : " + m.getName() + " coord : " + m.getX() + " " + m.getY());
         }
     }

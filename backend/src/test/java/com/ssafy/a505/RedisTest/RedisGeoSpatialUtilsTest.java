@@ -1,7 +1,7 @@
 package com.ssafy.a505.RedisTest;
 
-import com.ssafy.a505.repository.RedisUtils;
-import com.ssafy.a505.domain.Member;
+import com.ssafy.a505.global.util.RedisUtils;
+import com.ssafy.a505.domain.entity.Coordinate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,9 @@ public class RedisGeoSpatialUtilsTest {
         redisUtils.addLocation("geotest",TestLatitude+plus,TestLongitude+plus);
     }
 
-    public List<Member> getMembers(){
+    public List<Coordinate> getMembers(){
         System.out.println("get test at "+System.nanoTime());
-        List<Member> positions = redisUtils.getLocationsWithinRadius("geotest",TestLatitude,TestLongitude,1);
+        List<Coordinate> positions = redisUtils.getLocationsWithinRadius("geotest",TestLatitude,TestLongitude,1);
         return positions;
     }
 
@@ -34,8 +34,8 @@ public class RedisGeoSpatialUtilsTest {
         for(int i=0;i<10000;i++){
             addMember(i*0.00001);
         }
-        List<Member> members = getMembers();
-        System.out.println("total size is "+members.size());
-        Assertions.assertEquals(757,members.size());
+        List<Coordinate> coordinates = getMembers();
+        System.out.println("total size is "+ coordinates.size());
+        Assertions.assertEquals(757, coordinates.size());
     }
 }
