@@ -10,4 +10,5 @@ import java.util.List;
 public interface VoiceRepository extends JpaRepository<Voice, Long> {
     List<Voice> findByTitleContaining(String userNam, Pageable pageable);
     List<Voice> findByTitleContaining(String userNam);
+    List<Voice> findAllByUserId(Long userId, Pageable pageable);
 }

@@ -44,18 +44,16 @@ public class StorageController {
         return new ResponseEntity<>(spreadList, HttpStatus.OK);
     }
     @GetMapping("all/{page}/{size}")
-    public ResponseEntity<?> findAllwithPage(@PathVariable("page") int page, @PathVariable("size") int size){
-        log.info("findAllwithPage");
+    public ResponseEntity<?> findAllWithPage(@PathVariable("page") int page, @PathVariable("size") int size){
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         PageRequest pageRequest = PageRequest.of(page - 1, size);
+        log.info("findAllWithPage page={}", page - 1);
         List<Voice> spreadList = voiceRepository.findByTitleContaining("spread", pageRequest);
-
-
-//        if(spreadList.size() < (page - 1) * size){
-//            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-//        }
-//        int cnt = page * size > spreadList.size() ? spreadList.size() - (page - 1) * size : size;
-//
-//        List<Voice> result = spreadList.subList((page - 1) * size, (page - 1) * size + cnt);
 
         return new ResponseEntity<>(spreadList, HttpStatus.OK);
     }
@@ -67,15 +65,17 @@ public class StorageController {
         List<Voice> likeList = voiceRepository.findByTitleContaining("like");
         return new ResponseEntity<>(likeList, HttpStatus.OK);
     }
+    @GetMapping("like/{page}/{size}")
+    public ResponseEntity<?> findLikeWithPage(@PathVariable("page") int page, @PathVariable("size") int size){
+        log.info("findLikeWithPage");
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        List<Voice> spreadList = voiceRepository.findByTitleContaining("like", pageRequest);
 
-//    public List<Voice> makeDummy(String str){
-//        List<Voice> result = new ArrayList<>();
-//        for(int i = 1; i <= 100; i++){
-//            Voice voice = new Voice();
-//            voice.setTitle(str + i);
-//            result.add(voice);
-//        }
-//        return result;
-//    }
-
+        return new ResponseEntity<>(spreadList, HttpStatus.OK);
+    }
 }
