@@ -1,6 +1,9 @@
 server:
   port: 8080
 
+ffmpeg:
+  path: "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
+
 spring:
   profiles:
     active: local
@@ -37,6 +40,4 @@ logging:
   level:
     root: info
 
-ffmpeg:
-  path: "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
 
