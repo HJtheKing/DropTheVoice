@@ -70,28 +70,22 @@ public class UserController {
         }
     }
 
+    // 요청에서 refreshToken 찾고 검증 발급 메서드로 보냄
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refreshAccessToken(HttpServletRequest request) {
-        String refreshToken = null;
+    public ResponseEntity<Map<String, String>> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        String newAccessToken = response.getHeader("New-Access-Token");
 
-        if (request.getCookies() != null) {
-            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("refreshToken")) {
-                    refreshToken = cookie.getValue();
-                }
-            }
-        }
-
-        if (refreshToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
         if (newAccessToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        return ResponseEntity.ok(Map.of("access-token", newAccessToken));
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("access-token", newAccessToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("New-Access-Token", newAccessToken);
+
+        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
     }
 
 

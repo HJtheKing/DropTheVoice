@@ -1,4 +1,4 @@
-/*
+
 package com.ssafy.a505.filter;
 
 import com.ssafy.a505.global.util.JwtUtil;
@@ -30,6 +30,7 @@ public class JwtRequestFilter extends HttpFilter {
 
         String path = request.getServletPath();
 
+        System.out.println();
         log.info("doFilter 시작");
 
         // 예외 URL 설정
@@ -42,8 +43,10 @@ public class JwtRequestFilter extends HttpFilter {
         final String authorizationHeader = request.getHeader("Authorization");
         final String refreshToken = getRefreshTokenFromCookie(request);
 
-        log.info(refreshToken);
-
+        log.info("access token : "+authorizationHeader);
+        log.info("refresh token : "+refreshToken);
+        
+        // 먼저 accessToken 유무를 확인
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String accessToken = authorizationHeader.substring(7);
             try {
@@ -57,6 +60,7 @@ public class JwtRequestFilter extends HttpFilter {
             }
         }
 
+        // 없으면 refreshToken
         if (refreshToken != null && !refreshToken.isEmpty()) {
             try {
                 Jws<Claims> refreshClaims = jwtUtil.validate(refreshToken);
@@ -99,4 +103,3 @@ public class JwtRequestFilter extends HttpFilter {
         // 필터 종료 작업
     }
 }
-*/
