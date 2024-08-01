@@ -1,4 +1,4 @@
-/*
+
 package com.ssafy.a505.global.config;
 
 import com.ssafy.a505.global.filter.CustomCorsFilter;
@@ -35,4 +35,3 @@ public class FilterConfig {
         return registrationBean;
     }
 }
-*/

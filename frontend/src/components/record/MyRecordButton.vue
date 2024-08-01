@@ -1,7 +1,16 @@
 <template>
   <v-container fluid>
+    <!-- 오디오 관련 -->
     <v-row justify="center" class="my-4">
-      <canvas ref="canvas" width="400" height="400"></canvas>
+      <v-col cols="12" class="d-flex justify-center align-center">
+        <v-card class="d-flex justify-center align-center pa-2">
+          <div class="visualizer">
+            <div class="bars">
+              <div v-for="n in 15" :key="n" class="bar" :class="{ active: n <= activeBars }"></div>
+            </div>
+          </div>
+        </v-card>
+      </v-col>
     </v-row>
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">
@@ -28,10 +37,12 @@
   </v-container>
 </template>
 
+
 <script setup>
+import { ref,} from 'vue';
+import { useSpreadStore } from '@/store/spread';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
-import { ref, onMounted, onUnmounted, defineExpose } from 'vue';
 import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
 import AudioPlayer from "@/components/AudioPlayer.vue";
@@ -57,37 +68,18 @@ const audioBlob = ref(null); // 녹음된 오디오 데이터를 저장할 Blob
 const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
 
 // Web Audio API 관련 변수
+const activeBars = ref(0);
 let audioContext = null; // AudioContext 객체를 저장할 변수
 let analyser = null; // 오디오 분석기 (AnalyserNode) 객체를 저장할 변수
 let dataArray = null; // 오디오 데이터 배열을 저장할 변수
 let bufferLength = null; // 분석할 데이터의 크기를 저장할 변수
-let drawInterval = null; // 주기적으로 그리기 작업을 수행하기 위한 interval ID를 저장할 변수
 let stream = null; // MediaStream 객체를 저장할 변수 (오디오 입력 스트림)
+
+let javascriptNode = null;
 
 // 인코더 등록 상태 추적
 let isEncoderRegistered = false;
 
-// canvas 요소에 대한 ref
-const canvasRef = ref(null);
-
-onMounted(() => {
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', resizeCanvas);
-  clearInterval(drawInterval);
-});
-
-const resizeCanvas = () => {
-  const canvas = canvasRef.value;
-  if (canvas) {
-    const container = canvas.parentElement;
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-  }
-};
 
 // 녹음 시작 및 중지 토글 메서드
 const toggleRecording = () => {
@@ -134,7 +126,14 @@ const startRecording = async () => {
     bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
 
+    javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+    analyser.smoothingTimeConstant = 0.3;
+    analyser.fftSize = 2048;
+
     source.connect(analyser);
+    analyser.connect(javascriptNode);
+    javascriptNode.connect(audioContext.destination);
 
     // MediaRecorder 설정 및 시작
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
@@ -154,7 +153,6 @@ const startRecording = async () => {
       }
 
       audioChunks.length = 0;
-      clearInterval(drawInterval);
       if (audioContext) {
         audioContext.close();
         audioContext = null;
@@ -167,12 +165,11 @@ const startRecording = async () => {
       }
     };
 
-    // 파형 그리기 시작
     startDrawing(); // 파형 그리기 함수 먼저 호출
 
     mediaRecorder.start(); // 녹음 시작
     isRecording.value = true;
-
+    
   } catch (error) {
     console.error('Error starting recording:', error);
   }
@@ -192,42 +189,16 @@ const stopRecording = () => {
 const startDrawing = () => {
   console.log("Started drawing")
 
-  const canvas = document.querySelector('canvas');
-  if (!canvas) return;
+  if (!analyser) return;
 
-  const canvasCtx = canvas.getContext('2d');
-  if (!canvasCtx) return;
-
-  drawInterval = setInterval(() => {
-    if (!analyser) return;
-
-    analyser.getByteTimeDomainData(dataArray); // 오디오 데이터 가져오기
-
-    canvasCtx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
-    canvasCtx.lineWidth = 3;
-    canvasCtx.strokeStyle = 'rgb(139, 146, 223)';
-
-    canvasCtx.beginPath();
-    // 파형 폭 계산하기
-    const sliceWidth = (canvas.width * 1.0) / (bufferLength / 8);
-    let x = 0;
-
-    // 오디오 데이터를 기반으로 파형 그리기
-    for (let i = 0; i < bufferLength; i += 8) {
-      const v = (dataArray[i] / 128.0);
-      const y = (v * canvas.height / 2);
-
-      if (i === 0) {
-        canvasCtx.moveTo(x, y);
-      } else {
-        canvasCtx.lineTo(x, y);
-      }
-      x += sliceWidth;
+  javascriptNode.onaudioprocess = () => {
+    if (isRecording.value) {
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+      activeBars.value = Math.floor(average / 4);
     }
-
-    canvasCtx.lineTo(canvas.width, canvas.height / 2);
-    canvasCtx.stroke();
-  }, 66);
+  };
 };
 </script>
 
@@ -254,9 +225,7 @@ const startDrawing = () => {
   margin-bottom: 20px; /* 녹음 버튼과 오디오 플레이어 사이의 간격 */
 }
 
-canvas {
-  border: 10px solid #fff;
-}
+
 
 .record-button {
   width: 60px;
@@ -338,25 +307,27 @@ canvas {
   background-color: #2980b9;
 }
 
+  .visualizer {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  .bars {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .bar {
+    width: 8px;
+    height: 20px;
+    background-color: #444; /* Gray color for all bars */
+  }
+  
+  .bar.active {
+    background-color: #0f0;
+  }
 
-.canvas-container {
-  width: 100%;
-  height: 100%;
-  max-width: 300px;
-  max-height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-canvas {
-  border: 1px solid black;
-  border-radius: 50%;
-  width: 100%;
-  height: 100%;
-  max-width: 500px;
-  max-height: 500px;
-}
 
 
 </style>
