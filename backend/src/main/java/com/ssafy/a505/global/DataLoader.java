@@ -5,12 +5,15 @@ import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.entity.VoiceType;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 @Configuration
 @RequiredArgsConstructor
@@ -79,6 +82,34 @@ public class DataLoader {
 
             voiceRepository.save(voice1);
             voiceRepository.save(voice2);
+
+            for(int i = 1; i <= 43; i++){
+                Voice voice = new Voice();
+                voice.setMember(member1);
+                voice.setTitle("spread" + i);
+                voiceRepository.save(voice);
+            }
+            for(int i = 1; i <= 43; i++){
+                Voice voice = new Voice();
+                voice.setMember(member1);
+                voice.setTitle("like" + i);
+                voiceRepository.save(voice);
+            }
+
+            for(int i=0;i<30;i++){
+                Voice voice = new Voice();
+                voice.setMember(member1);
+                voice.setHeartCount(3L);
+                voice.setListenCount(Math.round(Math.random()*100000));
+                voice.setLatitude(50);
+                voice.setLongitude(50);
+                voice.setTitle("나는 두부를 좋아함");
+                voice.setVoiceType(VoiceType.NormalVoice);
+                voice.setDateTime(LocalDateTime.now());
+                voice.setSavePath("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
+                voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
+                voiceRepository.save(voice);
+            }
         };
     }
 }

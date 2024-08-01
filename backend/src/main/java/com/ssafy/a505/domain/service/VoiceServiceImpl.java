@@ -10,6 +10,7 @@ import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,4 +38,18 @@ public class VoiceServiceImpl implements VoiceService {
         return hearts.stream().map(Heart::getVoice).collect(Collectors.toList());
     }
 
+    @Override
+    public List<Voice> findByTitleContaining(String userNam, Pageable pageable) {
+        return voiceRepository.findByTitleContaining(userNam, pageable);
+    }
+
+    @Override
+    public List<Voice> findALlByTitle(String title, Pageable pageable) {
+        return voiceRepository.findALlByTitle(title, pageable);
+    }
+
+    @Override
+    public Voice findById(Long id) {
+        return voiceRepository.findById(id).get();
+    }
 }

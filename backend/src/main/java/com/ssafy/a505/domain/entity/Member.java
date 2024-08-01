@@ -30,11 +30,11 @@ public class Member {
     @Embedded
     private Coordinate coordinate;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = false)
     @Builder.Default
     private List<Voice> voices = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = false)
     @OrderBy("heartAt ASC")
     private Set<Heart> hearts = new LinkedHashSet<>();
 

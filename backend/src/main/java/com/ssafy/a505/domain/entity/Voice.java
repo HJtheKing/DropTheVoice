@@ -51,11 +51,11 @@ public class Voice {
     @Enumerated(EnumType.STRING)
     private VoiceType voiceType;
 
-    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = false)
     @Builder.Default
     private List<ProcessedVoice> processedVoices = new ArrayList<>();
 
-    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = false)
     @OrderBy("heartAt ASC")
     private Set<Heart> hearts = new LinkedHashSet<>();
 
