@@ -36,7 +36,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         //the url is for Websocket handshake
         registry.addEndpoint("/stomp/handshake") //handshake가 될 endpoint지정
                 //.setAllowedOrigins("http://localhost:3000", "http://localhost", "http://i11a505.p.ssafy.io")
-                .setAllowedOriginPatterns("*","http://localhost","https://localhost","http://i11a505.p.ssafy.io","https://i11a505.p.ssafy.io","https://localhost:8443", "http://localhost:8080")
+                .setAllowedOriginPatterns("*","http://localhost","https://localhost","http://i11a505.p.ssafy.io","https://i11a505.p.ssafy.io","https://localhost:8443", "http://localhost:8080","https://localhost:8080")
                 .withSockJS(); //SockJS사용
     }
 
