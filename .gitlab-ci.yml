@@ -19,6 +19,6 @@ build:
     #- docker build -t gbds234/front:latest --push ~/S11P12A505/frontend #$DOCKER_IMAGE .
     #- docker build -t gbds234/back:latest --push ~/S11P12A505/backend #$DOCKER_IMAGE .
     - cd ~/S11P12A505/dockercompose
-    - docker-compose -f docker-compose-prod.yml up -d --build
+    - docker compose -f docker-compose-prod.yml up -d --build
   only:
     - master
