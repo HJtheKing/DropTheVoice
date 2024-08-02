@@ -34,56 +34,69 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import { ref, watch } from 'vue';
+import { useRecordStore } from '@/store/record';
 
-export default {
-  setup() {
-    const audio = ref(null);
-    const audioSrc = ref(null);
-    const isPlaying = ref(false);
-    const currentTime = ref(0);
-    const duration = ref(0);
-    const rewindInterval = ref(null);
-    const longPressTimeout = ref(null);
-    const longPressThreshold = 300; // 밀리초
-    const mouseDownTime = ref(0);
+const props = defineProps({
+  audioSrc: String,
+});
 
-    const togglePlay = () => {
-      if (audio.value.paused) {
-        audio.value.play();
-        isPlaying.value = true;
-      } else {
-        audio.value.pause();
-        isPlaying.value = false;
-      }
-    };
+const recordStore = useRecordStore();
+const { isPlaying, setPlayingState, playbackAnalyser, setPlaybackAnalyser, audioContext } = recordStore;
 
-    const updateTime = () => {
-      currentTime.value = audio.value.currentTime;
-    };
+const audio = ref(null);
+const currentTime = ref(0);
+const duration = ref(0);
+let analyser = null;
 
-    const updateDuration = () => {
-      duration.value = audio.value.duration;
-    };
+watch(() => props.audioSrc, (newSrc) => {
+  if (newSrc && audio.value) {
+    audio.value.src = newSrc;
+    audio.value.load();
 
-    const seekAudio = () => {
-      audio.value.currentTime = currentTime.value;
-    };
+    const source = audioContext.value.createMediaElementSource(audio.value);
+    analyser = audioContext.value.createAnalyser();
+    setPlaybackAnalyser(analyser);
+    source.connect(analyser);
+    analyser.connect(audioContext.value.destination);
+  }
+});
 
-    const formatTime = (seconds) => {
-      const minutes = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+const togglePlay = () => {
+  if (audio.value.paused) {
+    audio.value.play();
+    setPlayingState(true);
+  } else {
+    audio.value.pause();
+    setPlayingState(false);
+  }
+};
 
-    };
+const updateTime = () => {
+  currentTime.value = audio.value.currentTime;
+};
 
-    const resetPlayer = () => {
-      isPlaying.value = false;
-      currentTime.value = 0;
-    };
+const updateDuration = () => {
+  duration.value = audio.value.duration;
+};
 
-    const loadAudio = (audioUrl) => {
+const seekAudio = () => {
+  audio.value.currentTime = currentTime.value;
+};
+
+const formatTime = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
+const resetPlayer = () => {
+  setPlayingState(false);
+  currentTime.value = 0;
+};
+
+const loadAudio = (audioUrl) => {
       audioSrc.value = audioUrl;
       audio.value.load();
       audio.value.onloadedmetadata = () => {
@@ -91,135 +104,93 @@ export default {
       };
     };
 
-    const handleError = (event) => {
-      console.error('Audio playback error:', event);
-    };
+const handleError = (event) => {
+  console.error('Audio playback error:', event);
+};
 
-    const goToStart = () => {
-      audio.value.currentTime = 0;
-      audio.value.pause();
-      isPlaying.value = false;
+const goToStart = () => {
+  audio.value.currentTime = 0;
+  audio.value.pause();
+  setPlayingState(false);
+};
+
+const goToEnd = () => {
+  audio.value.currentTime = audio.value.duration;
+};
+
+const handleMouseDown = (action) => {
+  mouseDownTime.value = Date.now();
+  longPressTimeout.value = setTimeout(() => {
+    if (action === 'rewind') {
+      rewindAudio();
+    } else if (action === 'forward') {
+      fastForwardAudio();
     }
+  }, longPressThreshold);
+};
 
-    const goToEnd = () => {
-      audio.value.currentTime = audio.value.duration;
+const handleMouseUp = (action) => {
+  const clickDuration = Date.now() - mouseDownTime.value;
+  if (clickDuration < longPressThreshold) {
+    if (action === 'rewind') {
+      jumpBackwardAudio();
+    } else if (action === 'forward') {
+      jumpForwardAudio();
     }
-
-    const handleMouseDown = (action) => {
-      console.log("btn pressed");
-      // isLongPress.value = false;
-      mouseDownTime.value = Date.now();
-      longPressTimeout.value = setTimeout(() => {
-        console.log("Mouse Hold");
-        // isLongPress.value = true;
-        if (action === 'rewind') {
-          rewindAudio();
-        } else if (action === 'forward') {
-          // setPlaybackRate(2);
-          fastForwardAudio();
-        }
-      }, longPressThreshold);
-    };
-
-    const handleMouseUp = (action) => {
-      const clickDuration = Date.now() - mouseDownTime.value; // 클릭 지속 시간 계산
-      if (clickDuration < longPressThreshold) {
-        // if (!isLongPress.value) {
-          if (action === 'rewind') {
-            jumpBackwardAudio();
-          } else if (action === 'forward') {
-            jumpForwardAudio();
-          }
-        // }
-        clearTimeout(longPressTimeout.value);
-        longPressTimeout.value = null;
-
-      }
-      
-      stopRewind();
-      resetPlaybackRate();
-    };
-
-    const setPlaybackRate = (rate) => {
-      console.log("Speedo Up")
-      audio.value.playbackRate = rate;
-    };
-
-    const resetPlaybackRate = () => {
-      console.log("Speedo Normalized")
-      audio.value.playbackRate = 1;
-    };
-
-    const rewindAudio = () => {
-      rewindInterval.value = setInterval(() => {
-        if (audio.value.currentTime > 0) {
-          audio.value.currentTime -= 0.2;
-        } else {
-          clearInterval(rewindInterval.value);
-        }
-      }, 100);
-      console.log("Going backward")
-    };
-
-    const fastForwardAudio = () => {
-      rewindInterval.value = setInterval(() => {
-        if (audio.value.currentTime < audio.value.duration) {
-          audio.value.currentTime += 0.2;
-        } else {
-          clearInterval(rewindInterval.value);
-        }
-      }, 100);
-      console.log("Going forward")
-    };
-
-    const jumpForwardAudio = () => {
-      if (audio.value.currentTime + 3 < audio.value.duration) {
-        audio.value.currentTime += 3;
-      } else {
-        audio.value.currentTime = audio.value.duration;
-      }
-      console.log("Jumped Forward")
-    };
-
-    const jumpBackwardAudio = () => {
-      if (audio.value.currentTime - 3 > 0) {
-        audio.value.currentTime -= 3;
-      } else {
-        audio.value.currentTime = 0;
-      }
-      console.log("Jumped Backward")
-    };
-
-    const stopRewind = () => {
-      clearInterval(rewindInterval.value);
-    };
-
-    return {
-      audio,
-      audioSrc,
-      isPlaying,
-      currentTime,
-      duration,
-      togglePlay,
-      updateTime,
-      updateDuration,
-      seekAudio,
-      formatTime,
-      resetPlayer,
-      loadAudio,
-      handleError,
-      goToStart,
-      goToEnd,
-      handleMouseDown,
-      handleMouseUp,
-      setPlaybackRate,
-      resetPlaybackRate,
-      rewindAudio,
-      stopRewind,
-      jumpForwardAudio,
-      jumpBackwardAudio
-    };
+    clearTimeout(longPressTimeout.value);
+    longPressTimeout.value = null;
   }
+  
+  stopRewind();
+  resetPlaybackRate();
+};
+
+const setPlaybackRate = (rate) => {
+  audio.value.playbackRate = rate;
+};
+
+const resetPlaybackRate = () => {
+  audio.value.playbackRate = 1;
+};
+
+const rewindAudio = () => {
+  rewindInterval.value = setInterval(() => {
+    if (audio.value.currentTime > 0) {
+      audio.value.currentTime -= 0.2;
+    } else {
+      clearInterval(rewindInterval.value);
+    }
+  }, 100);
+};
+
+const fastForwardAudio = () => {
+  rewindInterval.value = setInterval(() => {
+    if (audio.value.currentTime < audio.value.duration) {
+      audio.value.currentTime += 0.2;
+    } else {
+      clearInterval(rewindInterval.value);
+    }
+  }, 100);
+};
+
+const jumpForwardAudio = () => {
+  if (audio.value.currentTime + 3 < audio.value.duration) {
+    audio.value.currentTime += 3;
+  } else {
+    audio.value.currentTime = audio.value.duration;
+  }
+};
+
+const jumpBackwardAudio = () => {
+  if (audio.value.currentTime - 3 > 0) {
+    audio.value.currentTime -= 3;
+  } else {
+    audio.value.currentTime = 0;
+  }
+};
+
+const stopRewind = () => {
+  clearInterval(rewindInterval.value);
 };
 </script>
 

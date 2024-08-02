@@ -1,37 +1,60 @@
 <template>
-    <div class="visualizer">
-        <div class="bars">
-            <div v-for="n in 20" :key="n" class="bar" :class="{ active: n <= activeBars }"></div>
-        </div>
+  <div class="visualizer">
+    <div class="bars">
+      <div v-for="n in 20" :key="n" class="bar" :class="{ active: n <= activeBars }"></div>
     </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
-let analyser = null; // 오디오 분석기 (AnalyserNode) 객체를 저장할 변수
-let dataArray = null; // 오디오 데이터 배열을 저장할 변수
-
-// expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
-defineExpose({
-  startDrawing
+const props = defineProps({
+  isRecording: Boolean,
+  recordingAnalyser: Object,
+  isPlaying: Boolean,
+  playbackAnalyser: Object,
 });
 
-// 오디오 파형을 그리는 메서드
-const startDrawing = () => {
-  console.log("Started drawing")
+const activeBars = ref(0);
+let analyser = null;
+let dataArray = new Uint8Array();
 
+const updateAnalyser = () => {
+  if (props.isRecording && props.recordingAnalyser) {
+    analyser = props.recordingAnalyser;
+  } else if (props.isPlaying && props.playbackAnalyser) {
+    analyser = props.playbackAnalyser;
+  } else {
+    analyser = null;
+  }
+
+  if (analyser) {
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    startDrawing();
+  }
+};
+
+const startDrawing = () => {
   if (!analyser) return;
 
-  javascriptNode.onaudioprocess = () => {
-    if (isRecording.value) {
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      activeBars.value = Math.floor(average / 4);
-    }
+  const draw = () => {
+    if (!analyser) return;
+
+    analyser.getByteFrequencyData(dataArray);
+    const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+    activeBars.value = Math.floor(average / 4);
+
+    requestAnimationFrame(draw);
   };
+
+  draw();
 };
+
+watch(() => props.isRecording, updateAnalyser);
+watch(() => props.isPlaying, updateAnalyser);
+watch(() => props.recordingAnalyser, updateAnalyser);
+watch(() => props.playbackAnalyser, updateAnalyser);
 </script>
 
 <style scoped>

@@ -10,6 +10,12 @@
           <CurrentTime />
         </v-row>
         <MyTimer />
+        <WaveFormDisplay 
+          :isRecording="isRecording"
+          :recordAnalyser="recordingAnalyser"
+          :isPlaying="isPlaying"
+          :playbackAnalyser="playbackAnalyser"
+        />
         <MyRecordButton ref="myRecordButton" />
       </v-container>
     </v-main>
@@ -17,30 +23,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import CurrentTime from '@/components/record/CurrentTime.vue';
 import MyTimer from '@/components/record/MyTimer.vue';
+import WaveFormDisplay from '@/components/record/WaveFormDisplay.vue';
 import MyRecordButton from '@/components/record/MyRecordButton.vue';
-import { useSpreadStore } from '@/store/spread';
+import { useRecordStore } from '@/store/record';
 import * as lamejs from '@breezystack/lamejs';
 import axios from 'axios';
 
 const myRecordButton = ref(null);
 const locationMessage = ref('');
-const spreadStore = useSpreadStore();
+const recordStore = useRecordStore();
 
-let mp3Blob = null; // mp3 변환된 오디오 데이터를 저장할 Blob
-let mp3Url = null; // mp3 변환 후 url
+const { isRecording, isPlaying, recordingAnalyser, playbackAnalyser, audioContext, setAudioContext } = recordStore;
+
+let mp3Blob = null;
+let mp3Url = null;
 
 const saveRecord = async () => {
   if (myRecordButton.value) {
-    const audioBlob = myRecordButton.value.getAudioBlob(); // MyRecordButton의 getAudioBlob 메서드 호출
+    const audioBlob = myRecordButton.value.getAudioBlob();
     if (!audioBlob) return;
 
     mp3Blob = await convertWavToMp3(audioBlob);
     mp3Url = URL.createObjectURL(mp3Blob);
 
-    // MP3 다운로드
     const downloadLink = document.createElement('a');
     downloadLink.href = mp3Url;
     downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
@@ -60,8 +68,6 @@ const showPosition = (position) => {
   const longitude = position.coords.longitude;
   locationMessage.value = `Latitude: ${latitude} | Longitude: ${longitude}`;
   console.log(locationMessage.value);
-
-  // 서버로 위치 데이터 전송
   sendVoiceInfoToServer(latitude, longitude);
 };
 
@@ -84,7 +90,7 @@ const showError = (error) => {
 
 const sendVoiceInfoToServer = (lat, lon) => {
   const formData = new FormData();
-  formData.append('voiceType', spreadStore.activeTab);
+  formData.append('voiceType', recordStore.activeTab);
   formData.append('latitude', lat);
   formData.append('longitude', lon);
   formData.append('voiceUrl', mp3Url);
@@ -136,8 +142,14 @@ async function convertWavToMp3(wavBlob) {
     reader.readAsArrayBuffer(wavBlob);
   });
 }
-</script>
 
+// onMounted(() => {
+//   if (!audioContext.value) {
+//     const context = new AudioContext();
+//     setAudioContext(context);
+//   }
+// });
+</script>
 
 <style scoped>
 .custom-container {
