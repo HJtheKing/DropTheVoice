@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   back:
-    build:
-      context: "../backend"
-      dockerfile: Dockerfile
+    image: gbds234/back:latest
     ports:
       - "8080:8080"
     container_name: back
@@ -13,9 +11,7 @@ services:
     - mysql
     - redis
   front:
-    build:
-      context: "../frontend"
-      dockerfile: Dockerfile
+    image: gbds234/front:latest
     ports:
       - "80:80"
       - "443:443"
