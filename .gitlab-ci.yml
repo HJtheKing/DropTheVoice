@@ -14,7 +14,7 @@ build:
   stage: build
   script:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@lab.ssafy.com/s11-webmobile1-sub2/S11P12A505.git
-    - git pull
+    - git pull origin master
     #- cd ~/S11P12A505/frontend
     #- npm install
     #- docker build -t gbds234/front:latest --push ~/S11P12A505/frontend #$DOCKER_IMAGE .
