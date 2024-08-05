@@ -63,7 +63,7 @@ export const useStorageStore = defineStore('storage', {
       try {
         const response = await axios.get(`http://localhost:8080/api-storage/heart/${page}/${this.pageSize}`, {
           params: {
-            memberId: 2, // 테스트용. jwt 인증 구현 되면 밑에꺼 쓰면 됨
+            memberId: 1, // 테스트용. jwt 인증 구현 되면 밑에꺼 쓰면 됨
             // memberId: useStore.loginUserId,
           } 
         });
