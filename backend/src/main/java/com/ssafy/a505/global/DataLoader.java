@@ -1,9 +1,9 @@
 package com.ssafy.a505.global;
 
-import com.ssafy.a505.domain.entity.Member;
-import com.ssafy.a505.domain.entity.Voice;
-import com.ssafy.a505.domain.entity.VoiceType;
+import com.ssafy.a505.domain.entity.*;
+import com.ssafy.a505.domain.repository.HeartRepository;
 import com.ssafy.a505.domain.repository.MemberRepository;
+import com.ssafy.a505.domain.repository.SpreadRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class DataLoader {
     private final VoiceRepository voiceRepository;
 
     @Bean
-    public CommandLineRunner loadData() {
+    public CommandLineRunner loadData(HeartRepository heartRepository, SpreadRepository spreadRepository) {
         return args -> {
             // 멤버 데이터 생성 및 저장
             Member member1 = Member.builder()
@@ -110,6 +110,37 @@ public class DataLoader {
                 voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
                 voiceRepository.save(voice);
             }
+
+            Heart heart1 = new Heart();
+            heart1.setMember(member1);
+            heart1.setVoice(voice1);
+            heartRepository.save(heart1);
+
+            Heart heart2 = new Heart();
+            heart2.setMember(member1);
+            heart2.setVoice(voice2);
+            heartRepository.save(heart2);
+
+            Heart heart3 = new Heart();
+            heart3.setMember(member2);
+            heart3.setVoice(voice1);
+            heartRepository.save(heart3);
+
+            Heart heart4 = new Heart();
+            heart4.setMember(member2);
+            heart4.setVoice(voice2);
+            heartRepository.save(heart4);
+
+            Spread spread1 = new Spread();
+            spread1.setMember(member1);
+            spread1.setVoice(voice1);
+            spreadRepository.save(spread1);
+
+            Spread spread2 = new Spread();
+            spread2.setMember(member1);
+            spread2.setVoice(voice2);
+            spreadRepository.save(spread2);
+
         };
     }
 }

@@ -1,6 +1,5 @@
 package com.ssafy.a505.domain.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -13,11 +12,10 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @NoArgsConstructor
-public class Heart {
-
+public class Spread {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long heartId;
+    private Long SpreadId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -29,5 +27,5 @@ public class Heart {
     @JsonBackReference
     private Voice voice;
 
-    private LocalDateTime heartAt;
+    private LocalDateTime spreadAt;
 }

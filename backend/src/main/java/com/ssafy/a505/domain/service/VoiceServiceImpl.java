@@ -20,10 +20,25 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class VoiceServiceImpl implements VoiceService {
-
-    private final VoiceRepository voiceRepository;
     private final HeartRepository heartRepository;
     private final MemberRepository memberRepository;
+
+    @Override
+    public List<Voice> findByMemberWithSpread(Long memberId, Pageable pageable) {
+        return voiceRepository.findByMemberWithSpread(memberId, pageable);
+    }
+
+    @Override
+    public List<Voice> findByMemberWithHeart(Long memberId, Pageable pageable) {
+        return voiceRepository.findByMemberWithHeart(memberId, pageable);
+    }
+    private final VoiceRepository voiceRepository;
+
+
+    @Override
+    public List<Voice> findAllByMember_MemberId(Long memberId, Pageable pageable) {
+        return voiceRepository.findAllByMember_MemberId(memberId, pageable);
+    }
 
     @Override
     public List<Voice> findAllVoice() {
