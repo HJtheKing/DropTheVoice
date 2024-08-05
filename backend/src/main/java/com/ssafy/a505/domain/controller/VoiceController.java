@@ -1,48 +1,41 @@
 package com.ssafy.a505.domain.controller;
 
 import com.ssafy.a505.domain.entity.Voice;
-import com.ssafy.a505.domain.entity.VoiceType;
+import com.ssafy.a505.domain.repository.MemberRepository;
+import com.ssafy.a505.domain.service.VoiceService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api-voice")
+@RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000")
 public class VoiceController {
-    public Voice voice;
-    public List<Voice> voices;
 
-    public VoiceController(){
-        voice = new Voice();
-        voice.setVoiceId(1);
-        voice.setUserId(3);
-        voice.setHeart(3);
-        voice.setUserName("김병관");
-        voice.setListenCount(Math.round(Math.random()*100000));
-        voice.setLatitude(50);
-        voice.setLongitude(50);
-        voice.setTitle("나는 두부를 좋아함");
-        voice.setVoiceType(VoiceType.NormalVoice);
-        voice.setDateTime(LocalDateTime.now());
-        voice.setSavePath("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
-        voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
+    private final VoiceService voiceService;
 
-        voices = new LinkedList<>();
-        for(int i=0;i<10;i++){
-            voices.add(voice);
+    @GetMapping("/best-voice/{page}/{size}")
+    public ResponseEntity<?> getBestVoicesV2(@PathVariable("page") int page, @PathVariable("size") int size) {
+        log.info("getBestVoicesV2");
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    @GetMapping("/best-voice")
-    public List<Voice> getBestVoices() {
-        return voices;
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        List<Voice> result = voiceService.findALlByTitle("나는 두부를 좋아함", pageRequest);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/best-voice/{voice_id}")
-    public Voice getVoiceDetail(@PathVariable("voice_id") int voiceId){
-        return voice;
+    public ResponseEntity<?> getVoiceDetail(@PathVariable("voice_id") Long voiceId){
+        Voice result = voiceService.findById(voiceId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

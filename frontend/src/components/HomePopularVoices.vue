@@ -1,40 +1,66 @@
 <script setup>
-import {ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
-
-onMounted(() => {
-  fetchBestVoices(); // <div>
-})
 
 const voices = ref([]);
 const voiceDetail = ref();
+const currentPage = ref(1);
+const pageSize = ref(10);
+const isFetching = ref(false);
+const hasMoreVoices = ref(true);
 
 async function fetchVoiceDetail(voiceId) {
   try {
-    await axios.get(`http://localhost:8080/api-voice/best-voice/${voiceId}`)
-    .then((res)=>{
-      voiceDetail.value = res.data;
-      console.log(res.data);
-    });
+    const res = await axios.get(`http://localhost:8080/api-voice/best-voice/${voiceId}`);
+    voiceDetail.value = res.data;
+    console.log(res.data);
   } catch (error) {
     console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
   }
 }
 
-async function fetchBestVoices() {
+async function fetchBestVoices(page = 1) {
+  if (isFetching.value || !hasMoreVoices.value) return;
+  isFetching.value = true;
+
   try {
-    await axios.get('http://localhost:8080/api-voice/best-voice')
-                                .then((res) =>{
-                                  voices.value = res.data;
-                                });
+    const res = await axios.get(`http://localhost:8080/api-voice/best-voice/${page}/${pageSize.value}`);
+    if (res.data.length < pageSize.value) {
+      hasMoreVoices.value = false;
+    }
+    voices.value.push(...res.data);
   } catch (error) {
     console.error('Error fetching best voices:', error);
+  } finally {
+    isFetching.value = false;
   }
 }
 
-function getDetail(id){
+function getDetail(id) {
   fetchVoiceDetail(id);
 }
+
+const handleScroll = () => {
+  const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 10;
+  if (bottomOfWindow && !isFetching.value && hasMoreVoices.value) {
+    currentPage.value++;
+    fetchBestVoices(currentPage.value);
+  }
+};
+
+function resetPagination() {
+  voices.value = [];
+  currentPage.value = 1;
+  hasMoreVoices.value = true;
+  isFetching.value = false;
+}
+
+onMounted(() => {
+  resetPagination();
+  fetchBestVoices(); // 초기 데이터를 가져옴
+  window.addEventListener('scroll', handleScroll);
+});
+
 </script>
 
 <template>
@@ -69,6 +95,16 @@ function getDetail(id){
           </v-row>
         </v-card>
       </v-col>
+    </v-row>
+
+    <!-- 로딩 애니메이션 -->
+    <v-row justify="center" v-if="isFetching">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-row>
+
+    <!-- 더 이상 데이터가 없을 때 표시할 메시지 -->
+    <v-row justify="center" v-if="!hasMoreVoices && !isFetching">
+      <p>더 이상 불러올 데이터가 없습니다.</p>
     </v-row>
   </div>
 </template>
