@@ -19,7 +19,6 @@ import java.util.List;
 public class StorageController {
 
     private final VoiceService voiceService;
-    private final VoiceRepository voiceRepository;
 
     @GetMapping("spread/{page}/{size}")
     public ResponseEntity<?> findAllWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size){
@@ -30,7 +29,7 @@ public class StorageController {
         }
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         log.info("findAllWithPage page={}", page - 1);
-        List<Voice> result = voiceRepository.findByMemberWithSpread(memberId, pageRequest);
+        List<Voice> result = voiceService.findByMemberWithSpread(memberId, pageRequest);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -44,7 +43,7 @@ public class StorageController {
         }
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         log.info("findAllWithPage page={}", page - 1);
-        List<Voice> result = voiceRepository.findByMemberWithHeart(memberId, pageRequest);
+        List<Voice> result = voiceService.findByMemberWithHeart(memberId, pageRequest);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
