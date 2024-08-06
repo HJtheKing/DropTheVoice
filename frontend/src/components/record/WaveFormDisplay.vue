@@ -7,54 +7,39 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRecordStore } from '@/store/record';
+import { storeToRefs } from 'pinia';
 
-const props = defineProps({
-  isRecording: Boolean,
-  recordingAnalyser: Object,
-  isPlaying: Boolean,
-  playbackAnalyser: Object,
-});
-
-const activeBars = ref(0);
-let analyser = null;
-let dataArray = new Uint8Array();
-
-const updateAnalyser = () => {
-  if (props.isRecording && props.recordingAnalyser) {
-    analyser = props.recordingAnalyser;
-  } else if (props.isPlaying && props.playbackAnalyser) {
-    analyser = props.playbackAnalyser;
-  } else {
-    analyser = null;
-  }
-
-  if (analyser) {
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-    startDrawing();
-  }
-};
+const recordStore = useRecordStore();
+const { analyser, dataArray, isRecording, activeBars, javascriptNode } = storeToRefs(recordStore);
 
 const startDrawing = () => {
-  if (!analyser) return;
+  console.log("Started drawing");
 
-  const draw = () => {
-    if (!analyser) return;
+  if (!analyser.value) return;
 
-    analyser.getByteFrequencyData(dataArray);
-    const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-    activeBars.value = Math.floor(average / 4);
-
-    requestAnimationFrame(draw);
-  };
-
-  draw();
+  if (javascriptNode.value) {
+    javascriptNode.value.onaudioprocess = () => {
+      if (isRecording.value) {
+        dataArray.value = new Uint8Array(analyser.value.frequencyBinCount);
+        analyser.value.getByteFrequencyData(dataArray.value);
+        const average = dataArray.value.reduce((a, b) => a + b, 0) / dataArray.value.length;
+        activeBars.value = Math.floor(average / 4);
+      }
+    };
+  } else {
+    console.error("javascriptNode is not initialized");
+  }
 };
 
-watch(() => props.isRecording, updateAnalyser);
-watch(() => props.isPlaying, updateAnalyser);
-watch(() => props.recordingAnalyser, updateAnalyser);
-watch(() => props.playbackAnalyser, updateAnalyser);
+onMounted(() => {
+  watch([isRecording, javascriptNode], ([newRecording, newJavascriptNode]) => {
+    if (newRecording && newJavascriptNode) {
+      startDrawing();
+    }
+  });
+});
 </script>
 
 <style scoped>

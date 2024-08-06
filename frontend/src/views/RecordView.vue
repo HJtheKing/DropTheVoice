@@ -10,12 +10,6 @@
           <CurrentTime />
         </v-row>
         <MyTimer />
-        <WaveFormDisplay 
-          :isRecording="isRecording"
-          :recordAnalyser="recordingAnalyser"
-          :isPlaying="isPlaying"
-          :playbackAnalyser="playbackAnalyser"
-        />
         <MyRecordButton ref="myRecordButton" />
       </v-container>
     </v-main>
@@ -26,24 +20,27 @@
 import { ref, onMounted } from 'vue';
 import CurrentTime from '@/components/record/CurrentTime.vue';
 import MyTimer from '@/components/record/MyTimer.vue';
-import WaveFormDisplay from '@/components/record/WaveFormDisplay.vue';
 import MyRecordButton from '@/components/record/MyRecordButton.vue';
+import { useSpreadStore } from '@/store/spread';
 import { useRecordStore } from '@/store/record';
+import { storeToRefs } from 'pinia';
 import * as lamejs from '@breezystack/lamejs';
 import axios from 'axios';
 
 const myRecordButton = ref(null);
 const locationMessage = ref('');
+const spreadStore = useSpreadStore();
 const recordStore = useRecordStore();
 
-const { isRecording, isPlaying, recordingAnalyser, playbackAnalyser, audioContext, setAudioContext } = recordStore;
+const { audioBlob, dataArray, isRecording, activeBars, javascriptNode } = storeToRefs(recordStore);
+
 
 let mp3Blob = null;
 let mp3Url = null;
 
 const saveRecord = async () => {
-  if (myRecordButton.value) {
-    const audioBlob = myRecordButton.value.getAudioBlob();
+  // if (myRecordButton.value) {
+    // const audioBlob = myRecordButton.value.getAudioBlob(); // MyRecordButton의 getAudioBlob 메서드 호출
     if (!audioBlob) return;
 
     mp3Blob = await convertWavToMp3(audioBlob);
@@ -60,7 +57,7 @@ const saveRecord = async () => {
     } else {
       locationMessage.value = 'Geolocation is not supported by this browser.';
     }
-  }
+  // }
 };
 
 const showPosition = (position) => {

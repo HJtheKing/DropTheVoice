@@ -35,30 +35,32 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, defineExpose } from 'vue';
 import { useRecordStore } from '@/store/record';
-
-const props = defineProps({
-  audioSrc: String,
-});
+import { storeToRefs } from 'pinia';
 
 const recordStore = useRecordStore();
-const { isPlaying, setPlayingState, playbackAnalyser, setPlaybackAnalyser, audioContext } = recordStore;
+const { isPlaying, audioUrl, analyser, audioContext } = storeToRefs(recordStore);
 
 const audio = ref(null);
 const currentTime = ref(0);
 const duration = ref(0);
-let analyser = null;
 
-watch(() => props.audioSrc, (newSrc) => {
+const audioSrc = ref(null);
+const rewindInterval = ref(null);
+const longPressTimeout = ref(null);
+const longPressThreshold = 300; // 밀리초
+const mouseDownTime = ref(0);
+
+watch(() => audioUrl, (newSrc) => {
   if (newSrc && audio.value) {
     audio.value.src = newSrc;
     audio.value.load();
 
     const source = audioContext.value.createMediaElementSource(audio.value);
-    analyser = audioContext.value.createAnalyser();
-    setPlaybackAnalyser(analyser);
-    source.connect(analyser);
+    analyser.value = audioContext.value.createAnalyser();
+    setPlaybackAnalyser(analyser.value);
+    source.connect(analyser.value);
     analyser.connect(audioContext.value.destination);
   }
 });
@@ -66,10 +68,10 @@ watch(() => props.audioSrc, (newSrc) => {
 const togglePlay = () => {
   if (audio.value.paused) {
     audio.value.play();
-    setPlayingState(true);
+    isPlaying.value = true;
   } else {
     audio.value.pause();
-    setPlayingState(false);
+    isPlaying.value = false;
   }
 };
 
@@ -97,12 +99,16 @@ const resetPlayer = () => {
 };
 
 const loadAudio = (audioUrl) => {
-      audioSrc.value = audioUrl;
-      audio.value.load();
-      audio.value.onloadedmetadata = () => {
-        duration.value = audio.value.duration;
-      };
-    };
+  audio.value.src = audioUrl;
+  audio.value.load();
+  audio.value.onloadedmetadata = () => {
+    duration.value = audio.value.duration;
+  };
+};
+
+defineExpose({
+  loadAudio
+});
 
 const handleError = (event) => {
   console.error('Audio playback error:', event);

@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row justify="center" class="my-4">
-      <!-- WaveFormDisplay는 RecordView에서 직접 사용됨 -->
+        <wave-form-display />
     </v-row>
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">
@@ -27,39 +27,66 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRecordStore } from '@/store/record';
+import { storeToRefs } from 'pinia';
 import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
 import AudioPlayer from "@/components/AudioPlayer.vue";
+import WaveFormDisplay from './WaveFormDisplay.vue';
 
-const emit = defineEmits(['audioRecorded']);
-
-const recordStore = useRecordStore();
-const { isRecording, recordingAnalyser, toggleRecordingState, setAudioUrl, audioContext, setRecordingAnalyser } = recordStore;
-
-const audioChunks = [];
-let mediaRecorder = null;
-const audioBlob = ref(null);
-const audioPlayer = ref(null);
-let analyser = null;
-let stream = null;
-
-const playSampleAudio = () => {
+// 테스트용 import, load
+import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
+function playSampleAudio() {
   if (audioPlayer.value) {
-    audioPlayer.value.loadAudio('@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm');
+    audioPlayer.value.loadAudio(audioFile);
   }
-};
+}
 
-const getAudioBlob = () => {
-  return audioBlob.value;
-};
+// 녹음 데이터를 반환하는 메서드
+function getAudioBlob() {
+  return recordStore.audioBlob.value;
+}
+
+function getAnalyser() {
+  return recordStore.analyser.value;
+}
+
+function getDataArray() {
+  return recordStore.dataArray.value;
+}
 
 // expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
 defineExpose({
-  getAudioBlob
+  getAudioBlob,
+  getAnalyser,
+  getDataArray
 });
 
+const recordStore = useRecordStore();
+const { isRecording, audioUrl, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
+// const { isRecording, audioUrl, audioBlob, activeBars, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore);
+
+watch([analyser, dataArray, bufferLength, stream, javascriptNode], (newValues) => {
+  if (!analyser.value) analyser.value = null;
+  if (!dataArray.value) dataArray.value = new Uint8Array(0);
+  if (!bufferLength.value) bufferLength.value = 0;
+  if (!stream.value) stream.value = null;
+  if (!javascriptNode.value) javascriptNode.value = null;
+});
+
+// Web Audio API 관련 변수
+let audioContext = null; // AudioContext 객체를 저장할 변수
+
+const audioChunks = [];
+let mediaRecorder = null; // MediaRecorder 객체를 저장할 변수
+
+const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
+
+// 인코더 등록 상태 추적
+let isEncoderRegistered = false;
+
+// 녹음 시작 및 중지 토글 메서드
 const toggleRecording = () => {
   if (isRecording.value) {
     stopRecording();
@@ -68,61 +95,97 @@ const toggleRecording = () => {
   }
 };
 
+// 녹음을 시작하는 메서드
 const startRecording = async () => {
   try {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      stream = null;
+    console.log("Started Recording")
+    // 기존 스트림과 오디오 컨텍스트 종료
+    if (stream.value) {
+      stream.value.getTracks().forEach(track => track.stop());
+      stream.value = null;
+    }
+    if (audioContext) {
+      audioContext.close();
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
 
-    if (audioContext.value.state === 'suspended') {
-      await audioContext.value.resume();
+    // 오디오 플레이어 초기화
+    if (audioPlayer.value) {
+      audioPlayer.value.loadAudio('');
     }
 
-    await register(await connect());
+    // 인코더가 등록되지 않은 경우에만 등록
+    if (!isEncoderRegistered) {
+      await register(await connect());
+      isEncoderRegistered = true; // 등록 상태 설정
+    }
 
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // 오디오 입력 스트림 가져오기
+    stream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    const source = audioContext.value.createMediaStreamSource(stream);
-    analyser = audioContext.value.createAnalyser();
-    analyser.fftSize = 2048;
+    // Web Audio API 설정
+    audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(stream.value);
+    analyser.value = audioContext.createAnalyser();
+    analyser.value.fftSize = 2048;
+    bufferLength.value = analyser.value.frequencyBinCount;
+    dataArray.value = new Uint8Array(bufferLength.value);
 
-    source.connect(analyser);
-    setRecordingAnalyser(analyser);
+    javascriptNode.value = audioContext.createScriptProcessor(2048, 1, 1);
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
+    analyser.value.smoothingTimeConstant = 0.3;
+    analyser.value.fftSize = 2048;
+
+    source.connect(analyser.value);
+    analyser.value.connect(javascriptNode.value);
+    javascriptNode.value.connect(audioContext.destination);
+
+    // MediaRecorder 설정 및 시작
+    mediaRecorder = new MediaRecorder(stream.value, { mimeType: 'audio/wav' });
     mediaRecorder.ondataavailable = event => {
       audioChunks.push(event.data);
     };
 
     mediaRecorder.onstop = () => {
       audioBlob.value = new Blob(audioChunks, { type: 'audio/wav' });
-      const url = URL.createObjectURL(audioBlob.value);
-      setAudioUrl(url);
-      emit('audioRecorded', url);
+      audioUrl.value = URL.createObjectURL(audioBlob.value);
+
+      if (audioPlayer.value) {
+        audioPlayer.value.loadAudio(audioUrl.value);
+        console.log("Loaded recorded audio to player")
+      } else {
+        console.log("Failed")
+      }
 
       audioChunks.length = 0;
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
 
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
+      // 스트림의 모든 트랙을 종료
+      if (stream.value) {
+        stream.value.getTracks().forEach(track => track.stop());
+        stream.value = null;
       }
     };
 
-    mediaRecorder.start();
-    toggleRecordingState();
+    mediaRecorder.start(); // 녹음 시작
+    isRecording.value = true;
     
   } catch (error) {
     console.error('Error starting recording:', error);
   }
 };
 
+// 녹음을 중지하는 메서드
 const stopRecording = () => {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
+    mediaRecorder.stop(); // 녹음 중지
+    console.log("Stopped recording");
   }
-  toggleRecordingState();
-};
+  isRecording.value = false;
+}
 </script>
 
 
