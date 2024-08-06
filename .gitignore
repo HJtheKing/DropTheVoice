@@ -35,3 +35,5 @@ dockercompose/data/
 application-local.properties
 
 __pycache__/
+
+.env

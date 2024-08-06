@@ -7,14 +7,29 @@ const props = defineProps({
 </script>
 
 <template>
-    <div style="background-color: lightgray; border-radius: 5px; height: 80px; display: flex;">
-        <div style="min-width: 95%; max-width: 95%; display: flex; flex-direction: row; align-items: center;">
-            <div style="min-width: 40%; max-width: 40%;">
-                <img :src="props.item.imgUrl" style="border: 2px solid gray; padding: 2%;  min-width: 90%; max-width: 90%;  height:70px; border-radius: 5%;" />
-            </div>
-            {{ item.title }}
-        </div>
-    </div>
+  <v-card outlined class="custom-card">
+    <v-img :src="item.imageUrl" class="custom-image" aspect-ratio="1.7" />
+    <v-card-title class="custom-title">
+      {{ item.title }}
+    </v-card-title>
+  </v-card>
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped>
+.custom-card {
+  padding: 10px;
+  border-radius: 10px;
+  background-color: black;
+}
+
+.custom-image {
+  border: 2px solid gray;
+  border-radius: 5px;
+}
+
+.custom-title {
+  color: white;
+  text-align: center;
+  margin-top: 10px;
+}
+</style>

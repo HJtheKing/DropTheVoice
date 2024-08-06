@@ -12,18 +12,16 @@ spring:
     url: ${MYSQL_URL}
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
-#    driver-class-name: org.h2.Driver
 
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
-#    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: flase
   data:
     redis:
       host: ${REDIS_HOST}
@@ -36,7 +34,3 @@ spring:
 logging:
   level:
     root: info
-
-ffmpeg:
-  path: "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
-

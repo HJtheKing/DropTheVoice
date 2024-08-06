@@ -46,7 +46,9 @@ function sendMessage() {
     <v-main>
       <v-container class="custom-container">
         <v-row justify="center" class="py-4">
+          <v-col cols="12" class="text-center">
           <h1 class="title">Drop The Voice</h1>
+          </v-col>
         </v-row>
         <HomeSpreadOrCatch />
         <HomePopularVoices />
@@ -71,5 +73,26 @@ function sendMessage() {
   color: #fff;
   font-weight: bold;
   font-size: 24px;
+}
+
+
+@media (min-width: 601px) and (max-width: 960px) {
+  .title {
+    font-size: 22px;
+  }
+  .custom-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (min-width: 961px) {
+  .title {
+    font-size: 24px;
+  }
+  .custom-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
 }
 </style>

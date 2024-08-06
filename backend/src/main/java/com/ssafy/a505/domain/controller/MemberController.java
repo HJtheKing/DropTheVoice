@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ssafy.a505.domain.dto.request.MemberDto;
+import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.global.util.JwtUtil;
@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,17 +54,17 @@ public class MemberController {
     // 로그인 요청 검증
     @Operation(summary = "로그인 요청 검증")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody MemberDto memberDto) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody MemberRequestDTO memberRequestDTO) {
 
         HttpStatus status = null;
         Map<String, Object> result = new HashMap<>();
 
         System.out.println("로그인 시도");
-        long memberID = memberService.login(memberDto);
+        long memberID = memberService.login(memberRequestDTO);
         if(memberID != -1) {
             // 토큰 만들어서 넘김
             result.put("message", SUCCESS);
-            result.put("access-token", jwtUtil.createToken(memberDto.getMemberName(), memberID));
+            result.put("access-token", jwtUtil.createToken(memberRequestDTO.getMemberName(), memberID));
             // id 같이 보내면 덜 번거로움
             status = HttpStatus.ACCEPTED;
         }else {
