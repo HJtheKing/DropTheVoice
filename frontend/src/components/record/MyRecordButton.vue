@@ -1,11 +1,17 @@
 <template>
   <v-container fluid>
+    <!-- 오디오 관련 -->
     <v-row justify="center" class="my-4">
+      <v-col cols="12" class="d-flex justify-center align-center">
         <v-card class="d-flex justify-center align-center pa-2">
-          <canvas ref="canvas" width="400" height="400"></canvas>
+          <div class="visualizer">
+            <div class="bars">
+              <div v-for="n in 15" :key="n" class="bar" :class="{ active: n <= activeBars }"></div>
+            </div>
+          </div>
         </v-card>
+      </v-col>
     </v-row>
-
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">
         <v-btn
@@ -16,35 +22,40 @@
           rounded
           large
         >
-          <v-icon>mdi-record-circle</v-icon>
+          <v-icon>mdi-microphone-outline</v-icon>
         </v-btn>
       </v-col>
     </v-row>
-
     <v-row justify="center" class="my-4">
-        <v-card class="pa-2">
-          <audio-player v-if="audioUrl && !isRecording" ref="audioPlayer"></audio-player>
-        </v-card>
+        <audio-player ref="audioPlayer"></audio-player>
     </v-row>
-
     <v-row justify="center">
-        <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
+        <!-- <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
           저장
-        </v-btn>
+        </v-btn> -->
     </v-row>
   </v-container>
 </template>
 
+
 <script setup>
+import { ref,} from 'vue';
 import { useSpreadStore } from '@/store/spread';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
-import { ref, onMounted, onUnmounted } from 'vue';
 import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
-import * as lamejs from '@breezystack/lamejs';
 import AudioPlayer from "@/components/AudioPlayer.vue";
-import axios from 'axios';
+
+// 녹음 데이터를 반환하는 메서드
+function getAudioBlob() {
+  return audioBlob.value;
+}
+
+// expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
+defineExpose({
+  getAudioBlob
+});
 
 const recordStore = useRecordStore();
 const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 참조
@@ -52,44 +63,23 @@ const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 
 // 녹음된 오디오 청크를 저장하는 배열
 const audioChunks = [];
 let mediaRecorder = null; // MediaRecorder 객체를 저장할 변수
-let audioBlob = null; // 녹음된 오디오 데이터를 저장할 Blob
-let mp3Blob = null; // mp3 변환된 오디오 데이터를 저장할 Blob
-let mp3Url = null; // mp3 변환 후 url
+const audioBlob = ref(null); // 녹음된 오디오 데이터를 저장할 Blob
 
 const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
 
 // Web Audio API 관련 변수
+const activeBars = ref(0);
 let audioContext = null; // AudioContext 객체를 저장할 변수
 let analyser = null; // 오디오 분석기 (AnalyserNode) 객체를 저장할 변수
 let dataArray = null; // 오디오 데이터 배열을 저장할 변수
 let bufferLength = null; // 분석할 데이터의 크기를 저장할 변수
-let drawInterval = null; // 주기적으로 그리기 작업을 수행하기 위한 interval ID를 저장할 변수
 let stream = null; // MediaStream 객체를 저장할 변수 (오디오 입력 스트림)
+
+let javascriptNode = null;
 
 // 인코더 등록 상태 추적
 let isEncoderRegistered = false;
 
-// canvas 요소에 대한 ref
-const canvasRef = ref(null);
-
-onMounted(() => {
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', resizeCanvas);
-  clearInterval(drawInterval);
-});
-
-const resizeCanvas = () => {
-  const canvas = canvasRef.value;
-  if (canvas) {
-    const container = canvas.parentElement;
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-  }
-};
 
 // 녹음 시작 및 중지 토글 메서드
 const toggleRecording = () => {
@@ -136,7 +126,14 @@ const startRecording = async () => {
     bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
 
+    javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+    analyser.smoothingTimeConstant = 0.3;
+    analyser.fftSize = 2048;
+
     source.connect(analyser);
+    analyser.connect(javascriptNode);
+    javascriptNode.connect(audioContext.destination);
 
     // MediaRecorder 설정 및 시작
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
@@ -145,8 +142,8 @@ const startRecording = async () => {
     };
 
     mediaRecorder.onstop = () => {
-      audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-      audioUrl.value = URL.createObjectURL(audioBlob);
+      audioBlob.value = new Blob(audioChunks, { type: 'audio/wav' });
+      audioUrl.value = URL.createObjectURL(audioBlob.value);
 
       if (audioPlayer.value) {
         audioPlayer.value.loadAudio(audioUrl.value);
@@ -156,7 +153,6 @@ const startRecording = async () => {
       }
 
       audioChunks.length = 0;
-      clearInterval(drawInterval);
       if (audioContext) {
         audioContext.close();
         audioContext = null;
@@ -169,12 +165,11 @@ const startRecording = async () => {
       }
     };
 
-    // 파형 그리기 시작
     startDrawing(); // 파형 그리기 함수 먼저 호출
 
     mediaRecorder.start(); // 녹음 시작
     isRecording.value = true;
-
+    
   } catch (error) {
     console.error('Error starting recording:', error);
   }
@@ -189,168 +184,22 @@ const stopRecording = () => {
   isRecording.value = false;
 }
 
-// 위치 정보 가져오기
-const locationMessage = ref('');
-
-async function saveRecord() {
-  if (!audioBlob) return;
-  
-  mp3Blob = await convertWavToMp3(audioBlob);
-  mp3Url = URL.createObjectURL(mp3Blob);
-
-  // MP3 다운로드
-  const downloadLink = document.createElement('a');
-  downloadLink.href = mp3Url;
-  downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
-  downloadLink.click();
-  console.log("Started downloading");
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition, showError);
-  } else {
-    locationMessage.value = 'Geolocation is not supported by this browser.';
-  }
-}
-
-function showPosition(position) {
-  const latitude = position.coords.latitude;
-  const longitude = position.coords.longitude;
-  locationMessage.value = `Latitude: ${latitude} | Longitude: ${longitude}`;
-  console.log(locationMessage.value);
-  
-  // 서버로 위치 데이터 전송
-  sendVoiceInfoToServer(latitude, longitude);
-}
-
-function showError(error) {
-  switch(error.code) {
-    case error.PERMISSION_DENIED:
-      locationMessage.value = 'User denied the request for Geolocation.';
-      break;
-    case error.POSITION_UNAVAILABLE:
-      locationMessage.value = 'Location information is unavailable.';
-      break;
-    case error.TIMEOUT:
-      locationMessage.value = 'The request to get user location timed out.';
-      break;
-    case error.UNKNOWN_ERROR:
-      locationMessage.value = 'An unknown error occurred.';
-      break;
-  }
-  isRecording.value = false;
-};
-
-const spreadStore = useSpreadStore() 
-function sendVoiceInfoToServer(lat, lon) {
-  const formData = new FormData();
-  formData.append('voiceType', spreadStore.activeTab);
-  formData.append('latitude', lat);
-  formData.append('longitude', lon);
-  formData.append('voiceUrl', mp3Url.value);
-  formData.append('voiceFile', mp3Blob);  // 'audio.wav'는 파일 이름
-
-  axios.post('http://localhost:8080/api-upload/upload', formData)
-  .then(response => {
-    console.log('Location sent to server:', response.data);
-  })
-  .catch(error => {
-    console.error('Error sending location to server:', error);
-  });
-}
-
-
 
 // 오디오 파형을 그리는 메서드
 const startDrawing = () => {
   console.log("Started drawing")
 
-  const canvas = document.querySelector('canvas');
-  if (!canvas) return;
+  if (!analyser) return;
 
-  const canvasCtx = canvas.getContext('2d');
-  if (!canvasCtx) return;
-
-  drawInterval = setInterval(() => {
-    if (!analyser) return;
-
-    analyser.getByteTimeDomainData(dataArray); // 오디오 데이터 가져오기
-
-    canvasCtx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
-    canvasCtx.lineWidth = 3;
-    canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
-
-    canvasCtx.beginPath();
-    // 파형 폭 계산하기
-    const sliceWidth = (canvas.width * 1.0) / (bufferLength / 8);
-    let x = 0;
-
-    // 오디오 데이터를 기반으로 파형 그리기
-    for (let i = 0; i < bufferLength; i += 8) {
-      const v = (dataArray[i] / 128.0);
-      const y = (v * canvas.height / 2);
-
-      if (i === 0) {
-        canvasCtx.moveTo(x, y);
-      } else {
-        canvasCtx.lineTo(x, y);
-      }
-      x += sliceWidth;
+  javascriptNode.onaudioprocess = () => {
+    if (isRecording.value) {
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+      activeBars.value = Math.floor(average / 4);
     }
-
-    canvasCtx.lineTo(canvas.width, canvas.height / 2);
-    canvasCtx.stroke();
-  }, 66);
+  };
 };
-
-// WAV 파일을 MP3로 변환하는 메서드
-async function convertWavToMp3(wavBlob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function () {
-      const arrayBuffer = this.result;
-      const wavHeader = lamejs.WavHeader.readHeader(new DataView(arrayBuffer));
-      // 모노 채널로 설정 (1 채널)
-      const wavSamples = new Int16Array(arrayBuffer, wavHeader.dataOffset, wavHeader.dataLen / 2);
-      
-      // 모노로 인코딩 설정
-      const channels = 1; // 모노
-      const sampleRate = wavHeader.sampleRate; // 원본 샘플링 레이트 사용
-      const bitRate = 128; // 비트 전송률 128kbps
-
-      // MP3 인코더 초기화
-      const mp3Encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitRate);
-      const mp3Data = [];
-
-      // 샘플 블록 크기를 더 크게 설정 (클수록 속도 커짐, 메모리 더 많이 씀)
-      const sampleBlockSize = 1152 * 4; // 기본값의 4배
-      
-      let mp3Buffer;
-      for (let i = 0; i < wavSamples.length; i += sampleBlockSize) {
-        // 샘플 블록 크기를 사용하여 버퍼 인코딩
-        mp3Buffer = mp3Encoder.encodeBuffer(wavSamples.subarray(i, i + sampleBlockSize));
-        if (mp3Buffer.length > 0) {
-          mp3Data.push(new Int8Array(mp3Buffer));
-        }
-      }
-
-      // 인코딩 완료 후 남은 데이터 플러시
-      mp3Buffer = mp3Encoder.flush();
-      if (mp3Buffer.length > 0) {
-        mp3Data.push(new Int8Array(mp3Buffer));
-      }
-
-      // 최종 MP3 Blob 생성
-      const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
-      resolve(mp3Blob);
-      console.log("Successfully converted to mp3");
-    };
-
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(wavBlob);
-  });
-}
-
-
 </script>
 
 
@@ -376,9 +225,7 @@ async function convertWavToMp3(wavBlob) {
   margin-bottom: 20px; /* 녹음 버튼과 오디오 플레이어 사이의 간격 */
 }
 
-canvas {
-  border: 1px solid black;
-}
+
 
 .record-button {
   width: 60px;
@@ -460,25 +307,27 @@ canvas {
   background-color: #2980b9;
 }
 
+  .visualizer {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  .bars {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .bar {
+    width: 8px;
+    height: 20px;
+    background-color: #444; /* Gray color for all bars */
+  }
+  
+  .bar.active {
+    background-color: #0f0;
+  }
 
-.canvas-container {
-  width: 100%;
-  height: 100%;
-  max-width: 300px;
-  max-height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-canvas {
-  border: 1px solid black;
-  border-radius: 50%;
-  width: 100%;
-  height: 100%;
-  max-width: 500px;
-  max-height: 500px;
-}
 
 
 </style>
