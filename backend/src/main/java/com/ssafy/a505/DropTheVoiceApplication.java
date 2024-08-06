@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class dropthevoiceApplication {
+public class DropTheVoiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(dropthevoiceApplication.class, args);
+		SpringApplication.run(DropTheVoiceApplication.class, args);
 	}
 
 }

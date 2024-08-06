@@ -1,14 +1,24 @@
 package com.ssafy.a505.domain.repository;
 
 import com.ssafy.a505.domain.entity.Voice;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface VoiceRepository extends JpaRepository<Voice, Long> {
     List<Voice> findByTitleContaining(String userNam, Pageable pageable);
+
+    List<Voice> findAllByTitle(String title, Pageable pageable);
+
+    List<Voice> findAllByOrderByHeartCountDesc(Pageable pageable);
+
+    @Query("SELECT v FROM Voice v WHERE v.title LIKE %:keyword%")
+    Page<Voice> findVoicesWithKeyword(@Param("keyword") String keyword, Pageable pageable);
+
     List<Voice> findALlByTitle(String title, Pageable pageable);
 
     List<Voice> findAllByMember_MemberId(Long memberId, Pageable pageable);

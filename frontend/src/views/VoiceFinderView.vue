@@ -1,8 +1,17 @@
 <template>
-  <v-app class="black-background">
-    <v-container class="custom-container">
-      <main>
-        <naver-map style="width: 100%; height: 400px" :mapOptions="mapOptions" :initLayers="initLayers"
+  <v-app class="bg-black">
+    <v-main>
+      <v-container class="custom-container">
+        <v-row justify="center" class="py-4">
+          <v-col cols="12" class="text-center">
+            <h1 class="title">주변 음성 듣기</h1>
+          </v-col>
+        </v-row>
+        
+        <div class="tab-container">
+          <h2>주변 음성 듣기</h2>
+        </div>
+        <naver-map style="width: 100%; height: 400px; margin-bottom: 20px;" :mapOptions="mapOptions" :initLayers="initLayers"
                    @onLoad="onLoadMap($event)">
           <section>
             <naver-marker v-if="nowPosition" :latitude="nowPosition.latitude"
@@ -23,76 +32,77 @@
             </naver-info-window>
           </section>
         </naver-map>
-      </main>
 
-      <main>
-        <div>
-          <v-row>
-            <v-col>
-              <h2>주변 음성 목록</h2>
-            </v-col>
-            <v-select aria-selected="true" class="text-right" :items="radiusCandidates" item-title="distance" label="반경"
-                      :max-width="200">
-              <v-list-item item></v-list-item>
-            </v-select>
-          </v-row>
-          <section>
+        <main>
+          <div>
             <v-row>
-              <v-col cols="12">
-                <v-infinite-scroll @load="loadInfinite">
-                  <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in aroundVoices" :key="index">
-                    <v-row no-gutters @click="selectMarker(item,index)">
-                      <v-col cols="4">
-                        <v-img :src="THUMBNAIL_IMAGE" height="150px" contain></v-img>
-                      </v-col>
-                      <v-col cols="8">
-                        <v-card-title>
-                          <div class="content">
-                            <v-row class="mb-6">
-                              <v-col cols="4">
-                                <h3 class="pa-2 ma-2"> {{item.title}} </h3>
-                              </v-col>
-                              <v-col cols="4" offset="4">
-                                <button class="pa-2 ma-2" @click="listen"> 듣기 </button>
-                              </v-col>
-                            </v-row>
-                            <p> {{item.latitude}} 위도</p>
-                            <p>{{ item.longitude }} 경도</p>
-                          </div>
-                        </v-card-title>
-                      </v-col>
-                    </v-row>
-                  </v-card>
-
-                  <template v-slot:loading>
-                    <v-progress-circular color="primary" indeterminate></v-progress-circular>
-                  </template>
-
-                  <template v-if="myMarker" v-slot:empty>
-                    <v-alert type="info">모두 다 발견되었어요 🌈</v-alert>
-                  </template>
-                </v-infinite-scroll>
+              <v-col cols="8">
+                <h2>음성 목록</h2>
+              </v-col>
+              <v-col cols="4" class="text-right">
+                <v-select aria-selected="true" class="radius-select" :items="radiusCandidates" item-title="distance" label="반경"
+                          v-model="selectedRadius" @change="updateRadius">
+                  <v-list-item item></v-list-item>
+                </v-select>
               </v-col>
             </v-row>
-          </section>
-        </div>
-      </main>
-    </v-container>
+            <section>
+              <v-row>
+                <v-col cols="12">
+                  <v-infinite-scroll @load="loadInfinite">
+                    <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in aroundVoices" :key="index">
+                      <v-row no-gutters @click="selectMarker(item, index)">
+                        <v-col cols="4">
+                          <v-img :src="THUMBNAIL_IMAGE" height="150px" contain></v-img>
+                        </v-col>
+                        <v-col cols="8">
+                          <v-card-title>
+                            <div class="content">
+                              <v-row class="mb-6">
+                                <v-col cols="4">
+                                  <h3 class="pa-2 ma-2"> {{ item.title }} </h3>
+                                </v-col>
+                                <v-col cols="4" offset="4">
+                                  <button class="pa-2 ma-2" @click="listen"> 듣기 </button>
+                                </v-col>
+                              </v-row>
+                              <p> {{ item.latitude }} 위도</p>
+                              <p>{{ item.longitude }} 경도</p>
+                            </div>
+                          </v-card-title>
+                        </v-col>
+                      </v-row>
+                    </v-card>
+
+                    <template v-slot:loading>
+                      <v-progress-circular color="primary" indeterminate></v-progress-circular>
+                    </template>
+
+                    <template v-if="myMarker" v-slot:empty>
+                      <v-alert type="info">모두 다 발견되었어요 🌈</v-alert>
+                    </template>
+                  </v-infinite-scroll>
+                </v-col>
+              </v-row>
+            </section>
+          </div>
+        </main>
+      </v-container>
+    </v-main>
   </v-app>
 </template>
-
-
 <script setup>
 import MY_POSITION_IMAGE from '@/assets/map/my-marker.png';
 import THUMBNAIL_IMAGE from '@/assets/images/thumb2.jpg';
-import {computed, ref, watch} from "vue";
-import {NaverCircle, NaverInfoWindow, NaverMap, NaverMarker} from "vue3-naver-maps";
+import { computed, ref, watch } from "vue";
+import { NaverCircle, NaverInfoWindow, NaverMap, NaverMarker } from "vue3-naver-maps";
 
 const map = ref(null);
 const myMarker = ref(null);
-const nowPosition = ref({latitude: 37.51347, longitude: 127.041722});
+const nowPosition = ref({ latitude: 37.51347, longitude: 127.041722 });
 const limitedRadius = ref(1000);
 const circle = ref(null);
+const selectedRadius = ref('1km (default)');
 
 const randomVoiceMarkers = computed(() => {
   return aroundVoices.value;
@@ -102,16 +112,16 @@ const flag = ref(true);
 let aroundVoices = ref(null);
 
 let randomVoice = ref([]);
-randomVoice.value.push({id: 1, title: '가', latitude: 37.522875557050604, longitude: 126.73707428498797});
-randomVoice.value.push({id: 2, title: '나', latitude: 37.5216328910883, longitude: 126.73739538716526});
-randomVoice.value.push({id: 3, title: '다', latitude: 37.52031663531412, longitude: 126.7370380163574});
-randomVoice.value.push({id: 4, title: '라', latitude: 37.52070632570098, longitude: 126.7421496981059});
+randomVoice.value.push({ id: 1, title: '가', latitude: 37.522875557050604, longitude: 126.73707428498797 });
+randomVoice.value.push({ id: 2, title: '나', latitude: 37.5216328910883, longitude: 126.73739538716526 });
+randomVoice.value.push({ id: 3, title: '다', latitude: 37.52031663531412, longitude: 126.7370380163574 });
+randomVoice.value.push({ id: 4, title: '라', latitude: 37.52070632570098, longitude: 126.7421496981059 });
 
 let randomVoice2 = ref([]);
-randomVoice2.value.push({id: 5, title: '마', latitude: 37.50186257688321, longitude: 127.03732898332551});
-randomVoice2.value.push({id: 6, title: '바', latitude: 37.50116063547292, longitude: 127.03455789540513});
-randomVoice2.value.push({id: 7, title: '사', latitude: 37.50036670550219, longitude: 127.03796154358065});
-randomVoice2.value.push({id: 8, title: '아', latitude: 37.499682460030634, longitude: 127.03631009579408});
+randomVoice2.value.push({ id: 5, title: '마', latitude: 37.50186257688321, longitude: 127.03732898332551 });
+randomVoice2.value.push({ id: 6, title: '바', latitude: 37.50116063547292, longitude: 127.03455789540513 });
+randomVoice2.value.push({ id: 7, title: '사', latitude: 37.50036670550219, longitude: 127.03796154358065 });
+randomVoice2.value.push({ id: 8, title: '아', latitude: 37.499682460030634, longitude: 127.03631009579408 });
 
 const getNearByVoice = async (lat, lng) => {
   try {
@@ -134,7 +144,7 @@ watch(nowPosition, (newPosition) => {
   }
   if (circle.value) {
     circle.value.setCenter(new naver.maps.LatLng(newPosition.latitude, newPosition.longitude));
-    circle.value.setRadius = limitedRadius.value;
+    circle.value.setRadius(limitedRadius.value);
   }
   if (map.value) {
     map.value.setCenter(new naver.maps.LatLng(newPosition.latitude, newPosition.longitude));
@@ -142,7 +152,13 @@ watch(nowPosition, (newPosition) => {
 
   nowPosition.value = newPosition;
   getNearByVoice(newPosition.latitude, newPosition.longitude);
-})
+});
+
+watch(limitedRadius, (newRadius) => {
+  if (circle.value) {
+    circle.value.setRadius(newRadius);
+  }
+});
 
 const mapOptions = {
   latitude: 37.51347,
@@ -150,7 +166,7 @@ const mapOptions = {
   zoom: 14,
   minZoom: 14,
   zoomControl: false,
-  zoomControlOptions: {position: "TOP_RIGHT"},
+  zoomControlOptions: { position: "TOP_RIGHT" },
 };
 
 const initLayers = [
@@ -168,12 +184,13 @@ const onLoadMap = (mapObject) => {
 
 const onLoadMyMarker = (markerObject) => {
   myMarker.value = markerObject;
-  myMarker.value.setIcon({url: MY_POSITION_IMAGE});
+  myMarker.value.setIcon({ url: MY_POSITION_IMAGE });
   myMarker.value.setAnimation(naver.maps.Animation.BOUNCE);
 };
 
 const onLoadCircle = (circleObject) => {
-  circle.value = circleObject
+  circle.value = circleObject;
+  circle.value.setRadius(limitedRadius.value); // 초기 반경 설정
 };
 
 const moveNowPosition = () => {
@@ -181,7 +198,7 @@ const moveNowPosition = () => {
     navigator.geolocation.getCurrentPosition((position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-      nowPosition.value = {latitude: lat, longitude: lng};
+      nowPosition.value = { latitude: lat, longitude: lng };
       const currentLocation = new naver.maps.LatLng(lat, lng);
       if (map.value) {
         map.value.setCenter(currentLocation);
@@ -194,14 +211,14 @@ const moveNowPosition = () => {
   }
 };
 
-const listen = ()=>{
-  alert('listen')
-}
+const listen = () => {
+  alert('listen');
+};
 
 const voiceMarkerMetas = ref([]);
 const isOpenMarker = ref([]);
 const onLoadMarker = (markerObject, index) => {
-  voiceMarkerMetas.value[index] = markerObject
+  voiceMarkerMetas.value[index] = markerObject;
   isOpenMarker.value[index] = false;
 };
 
@@ -211,29 +228,31 @@ const selectMarker = (voice, index) => {
   selectedVoiceMarker.value = voice;
 };
 
-const loadInfinite = ({done}) => {
+const loadInfinite = ({ done }) => {
   setTimeout(() => {
-    done('empty')
+    done('empty');
   }, 2000);
-}
+};
 
 const radiusCandidates = [
   {
     distance: '1km (default)',
-    isPurchased: 'true'
+    value: 1000
   },
   {
     distance: '5km',
-    isPurchased: 'false',
-
+    value: 5000
   },
   {
     distance: '10km',
-    isPurchased: 'false',
+    value: 10000
   },
-]
-</script>
+];
 
+const updateRadius = (selectedItem) => {
+  limitedRadius.value = selectedItem.value;
+};
+</script>
 <style scoped>
 .custom-container {
   max-width: 800px;
@@ -255,17 +274,107 @@ h3 {
   margin: 0;
 }
 
+.tab-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  background-color: #333;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+
 p {
   color: #ccc;
   margin: 0;
 }
+
 button {
   color: #ccc;
   margin: 0;
 }
 
-
 .list-items {
   background-color: #000;
+}
+
+.radius-select {
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  .custom-container {
+    padding: 0 10px;
+  }
+  .infowindow-style {
+    font-size: 16px;
+  }
+  h3 {
+    font-size: 14px;
+  }
+  p {
+    font-size: 12px;
+  }
+  button {
+    font-size: 12px;
+  }
+  .v-btn .v-icon {
+    font-size: 20px;
+  }
+  .v-btn span {
+    font-size: 10px;
+  }
+  .radius-select {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 960px) {
+  .infowindow-style {
+    font-size: 18px;
+  }
+  h3 {
+    font-size: 16px;
+  }
+  p {
+    font-size: 14px;
+  }
+  button {
+    font-size: 14px;
+  }
+  .v-btn .v-icon {
+    font-size: 22px;
+  }
+  .v-btn span {
+    font-size: 11px;
+  }
+  .radius-select {
+    max-width: 200px;
+  }
+}
+
+@media (min-width: 961px) {
+  .infowindow-style {
+    font-size: 20px;
+  }
+  h3 {
+    font-size: 18px;
+  }
+  p {
+    font-size: 16px;
+  }
+  button {
+    font-size: 16px;
+  }
+  .v-btn .v-icon {
+    font-size: 24px;
+  }
+  .v-btn span {
+    font-size: 12px;
+  }
+  .radius-select {
+    max-width: 200px;
+  }
 }
 </style>
