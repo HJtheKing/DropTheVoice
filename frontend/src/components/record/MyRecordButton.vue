@@ -48,19 +48,10 @@ function getAudioBlob() {
   return recordStore.audioBlob.value;
 }
 
-function getAnalyser() {
-  return recordStore.analyser.value;
-}
-
-function getDataArray() {
-  return recordStore.dataArray.value;
-}
 
 // expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
 defineExpose({
-  getAudioBlob,
-  getAnalyser,
-  getDataArray
+  getAudioBlob
 });
 
 const recordStore = useRecordStore();

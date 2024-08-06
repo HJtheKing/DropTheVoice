@@ -40,7 +40,7 @@ import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 
 const recordStore = useRecordStore();
-const { isPlaying, audioUrl, analyser, audioContext } = storeToRefs(recordStore);
+const { isPlaying, audioUrl, analyser, javascriptNode } = storeToRefs(recordStore);
 
 const audio = ref(null);
 const currentTime = ref(0);
@@ -56,12 +56,20 @@ watch(() => audioUrl, (newSrc) => {
   if (newSrc && audio.value) {
     audio.value.src = newSrc;
     audio.value.load();
+    let audioContext = new AudioContext();
 
-    const source = audioContext.value.createMediaElementSource(audio.value);
-    analyser.value = audioContext.value.createAnalyser();
-    setPlaybackAnalyser(analyser.value);
+    // const source = audioContext.value.createMediaElementSource(audio.value);
+    // analyser.value = audioContext.value.createAnalyser();
+    // source.connect(analyser.value);
+    // analyser.value.connect(audioContext.value.destination);
+    const source = audioContext.createMediaElementSource(audio.value);
+    analyser.value = audioContext.createAnalyser();
+    javascriptNode.value = audioContext.createScriptProcessor(2048, 1, 1);
+
     source.connect(analyser.value);
-    analyser.connect(audioContext.value.destination);
+    analyser.value.connect(javascriptNode.value);
+    javascriptNode.value.connect(audioContext.value.destination);
+  
   }
 });
 

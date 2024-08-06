@@ -12,16 +12,29 @@ import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 
 const recordStore = useRecordStore();
-const { analyser, dataArray, isRecording, activeBars, javascriptNode } = storeToRefs(recordStore);
+const { isPlaying, analyser, dataArray, isRecording, activeBars, javascriptNode } = storeToRefs(recordStore);
 
 const startDrawing = () => {
   console.log("Started drawing");
 
   if (!analyser.value) return;
 
+  // const draw = () => {
+  //   if (isRecording.value || isPlaying.value) {
+  //     dataArray.value = new Uint8Array(analyser.value.frequencyBinCount);
+  //     analyser.value.getByteFrequencyData(dataArray.value);
+  //     const average = dataArray.value.reduce((a, b) => a + b, 0) / dataArray.value.length;
+  //     activeBars.value = Math.floor(average / 4);
+
+  //     requestAnimationFrame(draw);
+  //   }
+  // }
+
+  // draw();
+
   if (javascriptNode.value) {
     javascriptNode.value.onaudioprocess = () => {
-      if (isRecording.value) {
+      if (isRecording.value || isPlaying.value) {
         dataArray.value = new Uint8Array(analyser.value.frequencyBinCount);
         analyser.value.getByteFrequencyData(dataArray.value);
         const average = dataArray.value.reduce((a, b) => a + b, 0) / dataArray.value.length;
@@ -34,8 +47,8 @@ const startDrawing = () => {
 };
 
 onMounted(() => {
-  watch([isRecording, javascriptNode], ([newRecording, newJavascriptNode]) => {
-    if (newRecording && newJavascriptNode) {
+  watch([isRecording, isPlaying, javascriptNode], ([newRecording, newPlaying, newJavascriptNode]) => {
+    if ((newRecording || newPlaying) && newJavascriptNode) {
       startDrawing();
     }
   });

@@ -41,9 +41,9 @@ let mp3Url = null;
 const saveRecord = async () => {
   // if (myRecordButton.value) {
     // const audioBlob = myRecordButton.value.getAudioBlob(); // MyRecordButton의 getAudioBlob 메서드 호출
-    if (!audioBlob) return;
+    if (!audioBlob.value) return;
 
-    mp3Blob = await convertWavToMp3(audioBlob);
+    mp3Blob = await convertWavToMp3(audioBlob.value);
     mp3Url = URL.createObjectURL(mp3Blob);
 
     const downloadLink = document.createElement('a');
