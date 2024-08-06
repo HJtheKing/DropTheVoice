@@ -33,44 +33,44 @@ public class VoiceServiceImpl implements VoiceService{
         return voiceRepository.findAllByOrderByHeartCountDesc(pageable);
     }
 
-        @Override
-        public List<Voice> findByMemberWithHeart(Long memberId, Pageable pageable) {
-            return voiceRepository.findByMemberWithHeart(memberId, pageable);
-        }
+    @Override
+    public List<Voice> findByMemberWithHeart(Long memberId, Pageable pageable) {
+        return voiceRepository.findByMemberWithHeart(memberId, pageable);
+    }
 
-
-        @Override
-        public List<Voice> findHeartedByMember(Long memberId) {
-            Member member = memberRepository.findById(memberId)
-                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-            List<Heart> hearts = heartRepository.findByMember(member);
-            return hearts.stream().map(Heart::getVoice).collect(Collectors.toList());
-        }
 
     @Override
-    public List<Voice> findByMemberWithSpread(Long memberId, Pageable pageable) {
-        return null;
+    public List<Voice> findHeartedByMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        List<Heart> hearts = heartRepository.findByMember(member);
+        return hearts.stream().map(Heart::getVoice).collect(Collectors.toList());
     }
 
     @Override
-        public List<Voice> findByTitleContaining(String userNam, Pageable pageable) {
-            return voiceRepository.findByTitleContaining(userNam, pageable);
-        }
+    public List<Voice> findByMemberWithSpread(Long memberId, Pageable pageable) {
+        return voiceRepository.findByMemberWithSpread(memberId, pageable);
+    }
 
-        @Override
-        public List<Voice> findAllByTitle(String title, Pageable pageable) {
-            return voiceRepository.findAllByTitle(title, pageable);
-        }
+    @Override
+    public List<Voice> findByTitleContaining(String userNam, Pageable pageable) {
+        return voiceRepository.findByTitleContaining(userNam, pageable);
+    }
 
-        @Override
-        public Voice findById(Long id) {
+    @Override
+    public List<Voice> findAllByTitle(String title, Pageable pageable) {
+        return voiceRepository.findAllByTitle(title, pageable);
+    }
+
+    @Override
+    public Voice findById(Long id) {
             return voiceRepository.findById(id).get();
-        }
+    }
 
-        public Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort) {
-            PageRequest pageRequest = PageRequest.of(page, size, getSort(sort));
-            return voiceRepository.findVoicesWithKeyword(keyword, pageRequest).map(VoiceResponseDTO::fromEntity);
-        }
+    public Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort) {
+        PageRequest pageRequest = PageRequest.of(page, size, getSort(sort));
+        return voiceRepository.findVoicesWithKeyword(keyword, pageRequest).map(VoiceResponseDTO::fromEntity);
+    }
 
     @Override
     public List<Voice> findAllByMember_MemberId(Long memberId, Pageable pageable) {
@@ -78,14 +78,14 @@ public class VoiceServiceImpl implements VoiceService{
     }
 
     private Sort getSort(String sort) {
-            switch (sort) {
-                case "listenCount":
-                    return Sort.by(Sort.Direction.DESC, "listenCount");
-                case "heartCount":
-                    return Sort.by(Sort.Direction.DESC, "heartCount");
-                case "latest":
-                default:
-                    return Sort.by(Sort.Direction.DESC, "dateTime");
+        switch (sort) {
+            case "listenCount":
+                return Sort.by(Sort.Direction.DESC, "listenCount");
+            case "heartCount":
+                return Sort.by(Sort.Direction.DESC, "heartCount");
+            case "latest":
+            default:
+                return Sort.by(Sort.Direction.DESC, "dateTime");
             }
         }
 }
