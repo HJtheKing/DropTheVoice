@@ -40,7 +40,7 @@ dependencies {
 
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
-    implementation 'net.bramp.ffmpeg:ffmpeg:0.8.0 '
+    implementation 'net.bramp.ffmpeg:ffmpeg:0.8.0'
     implementation 'commons-io:commons-io:2.8.0'
 
     compileOnly 'org.projectlombok:lombok'

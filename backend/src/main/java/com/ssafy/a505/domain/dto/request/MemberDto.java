@@ -5,6 +5,8 @@ import lombok.*;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MemberDto {
 
     private Long memberId; // 유저 아이디

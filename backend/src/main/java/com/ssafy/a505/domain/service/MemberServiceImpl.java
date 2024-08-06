@@ -26,10 +26,10 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
-    public boolean login(MemberDto memberDto) {
+    public long login(MemberDto memberDto) {
         MemberDto target = findMemberByName(memberDto.getMemberName());
-        if(target != null && target.getMemberPassword() == memberDto.getMemberPassword()) return true;
-        return false;
+        if(target != null && target.getMemberPassword().equals(memberDto.getMemberPassword())) return target.getMemberId();
+        return -1;
     }
 
     // membername 중복 불가

@@ -61,11 +61,11 @@ public class MemberController {
         Map<String, Object> result = new HashMap<>();
 
         System.out.println("로그인 시도");
-        
-        if(memberService.login(memberDto)) {
+        long memberID = memberService.login(memberDto);
+        if(memberID != -1) {
             // 토큰 만들어서 넘김
             result.put("message", SUCCESS);
-            result.put("access-token", jwtUtil.createToken(memberDto.getMemberName()));
+            result.put("access-token", jwtUtil.createToken(memberDto.getMemberName(), memberID));
             // id 같이 보내면 덜 번거로움
             status = HttpStatus.ACCEPTED;
         }else {

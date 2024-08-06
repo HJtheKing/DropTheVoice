@@ -8,7 +8,7 @@ public interface MemberService {
     public MemberDto findMemberByName(String name);
 
     //로그인 하기
-    public boolean login(MemberDto memberDto);
+    public long login(MemberDto memberDto);
 
     //사용자 등록하기
     public boolean signup(Member member);
