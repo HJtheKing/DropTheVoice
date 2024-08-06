@@ -47,6 +47,7 @@
       </v-col>
     </v-row>
   </v-container>
+  </v-app>
   <v-app class="black-background">
     <v-container fluid>
       <v-row justify="center">

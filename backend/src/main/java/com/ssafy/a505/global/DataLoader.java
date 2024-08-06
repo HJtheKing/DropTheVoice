@@ -112,65 +112,69 @@ public class DataLoader {
             voiceRepository.save(voice2);
 
             Long count = 0L;
-            for(int i=0;i<40;i++){
+            for (int i = 0; i < 40; i++) {
                 Voice voice = new Voice();
                 voice.setMember(member1);
                 voice.setHeartCount(count++);
-                voice.setListenCount(Math.round(Math.random()*100));
-            voiceRepository.save(voice3);
-            voiceRepository.save(voice4);
-
-            for(int i=0;i<30;i++){
-                Voice voice = new Voice();
-                voice.setMember(member1);
-                voice.setHeartCount(3L);
-                voice.setListenCount(Math.round(Math.random()*100000));
-                voice.setLatitude(50);
-                voice.setLongitude(50);
-                voice.setTitle("두부를 왜 좋아함" + i);
-                voice.setVoiceType(VoiceType.NormalVoice);
-                voice.setDateTime(LocalDateTime.now());
-                voice.setSavePath("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
-                voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
-                voiceRepository.save(voice);
+                voice.setListenCount(Math.round(Math.random() * 100));
+                voiceRepository.save(voice3);
+                voiceRepository.save(voice4);
             }
 
-            for(int i = 1; i <= 43; i++){
-                Voice voice = new Voice();
-                voice.setMember(member1);
-                voice.setHeartCount(Math.round(Math.random()* 1));
-                voice.setTitle("spread" + i);
-                voiceRepository.save(voice);
-            }
-            for(int i = 1; i <= 43; i++){
-                Voice voice = new Voice();
-                voice.setMember(member1);
-                voice.setHeartCount(Math.round(Math.random()* 10));
-                voice.setListenCount(Math.round(Math.random()*1000));
-                voice.setTitle("like" + i);
-                voiceRepository.save(voice);
-            }
+                for (int i = 0; i < 30; i++) {
+                    Voice voice = new Voice();
+                    voice.setMember(member1);
+                    voice.setHeartCount(3L);
+                    voice.setListenCount(Math.round(Math.random() * 100000));
+                    voice.setLatitude(50);
+                    voice.setLongitude(50);
+                    voice.setTitle("두부를 왜 좋아함" + i);
+                    voice.setVoiceType(VoiceType.NormalVoice);
+                    voice.setDateTime(LocalDateTime.now());
+                    voice.setSavePath("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
+                    voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
+                    voiceRepository.save(voice);
+                }
 
-            Heart heart1 = new Heart();
-            heart1.setMember(member1);
-            heart1.setVoice(voice1);
-            heartRepository.save(heart1);
+                for (int i = 1; i <= 43; i++) {
+                    Voice voice = new Voice();
+                    voice.setMember(member1);
+                    voice.setHeartCount(Math.round(Math.random() * 1));
+                    voice.setTitle("spread" + i);
+                    voiceRepository.save(voice);
+                }
+                for (int i = 1; i <= 43; i++) {
+                    Voice voice = new Voice();
+                    voice.setMember(member1);
+                    voice.setHeartCount(Math.round(Math.random() * 10));
+                    voice.setListenCount(Math.round(Math.random() * 1000));
+                    voice.setTitle("like" + i);
+                    voiceRepository.save(voice);
+                }
 
-            Heart heart2 = new Heart();
-            heart2.setMember(member1);
-            heart2.setVoice(voice2);
-            heartRepository.save(heart2);
+                Heart heart1 = new Heart();
+                heart1.setMember(member1);
+                heart1.setVoice(voice1);
+                heartRepository.save(heart1);
 
-            Spread spread1 = new Spread();
-            spread1.setMember(member1);
-            spread1.setVoice(voice3);
-            spreadRepository.save(spread1);
+                Heart heart2 = new Heart();
+                heart2.setMember(member1);
+                heart2.setVoice(voice2);
+                heartRepository.save(heart2);
 
-            Spread spread2 = new Spread();
-            spread2.setMember(member1);
-            spread2.setVoice(voice4);
-            spreadRepository.save(spread2);
+                Spread spread1 = new Spread();
+                spread1.setMember(member1);
+                spread1.setVoice(voice3);
+                spreadRepository.save(spread1);
+
+                Spread spread2 = new Spread();
+                spread2.setMember(member1);
+                spread2.setVoice(voice4);
+                spreadRepository.save(spread2);
+
+
 
         };
     }
 }
+
