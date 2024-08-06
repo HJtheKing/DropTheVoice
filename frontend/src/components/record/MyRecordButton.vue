@@ -240,8 +240,6 @@ function showError(error) {
   isRecording.value = false;
 };
 
-
-
 const spreadStore = useSpreadStore() 
 function sendVoiceInfoToServer(lat, lon) {
   const formData = new FormData();
@@ -251,7 +249,7 @@ function sendVoiceInfoToServer(lat, lon) {
   formData.append('voiceUrl', mp3Url.value);
   formData.append('voiceFile', mp3Blob);  // 'audio.wav'는 파일 이름
 
-  axios.post('http://localhost:8080/api-record/record', formData)
+  axios.post('http://localhost:8080/api-upload/upload', formData)
   .then(response => {
     console.log('Location sent to server:', response.data);
   })
