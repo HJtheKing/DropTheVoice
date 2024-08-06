@@ -110,6 +110,13 @@ public class DataLoader {
 
             voiceRepository.save(voice1);
             voiceRepository.save(voice2);
+
+            Long count = 0L;
+            for(int i=0;i<40;i++){
+                Voice voice = new Voice();
+                voice.setMember(member1);
+                voice.setHeartCount(count++);
+                voice.setListenCount(Math.round(Math.random()*100));
             voiceRepository.save(voice3);
             voiceRepository.save(voice4);
 
@@ -120,11 +127,27 @@ public class DataLoader {
                 voice.setListenCount(Math.round(Math.random()*100000));
                 voice.setLatitude(50);
                 voice.setLongitude(50);
-                voice.setTitle("나는 두부를 좋아함");
+                voice.setTitle("두부를 왜 좋아함" + i);
                 voice.setVoiceType(VoiceType.NormalVoice);
                 voice.setDateTime(LocalDateTime.now());
                 voice.setSavePath("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
                 voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
+                voiceRepository.save(voice);
+            }
+
+            for(int i = 1; i <= 43; i++){
+                Voice voice = new Voice();
+                voice.setMember(member1);
+                voice.setHeartCount(Math.round(Math.random()* 1));
+                voice.setTitle("spread" + i);
+                voiceRepository.save(voice);
+            }
+            for(int i = 1; i <= 43; i++){
+                Voice voice = new Voice();
+                voice.setMember(member1);
+                voice.setHeartCount(Math.round(Math.random()* 10));
+                voice.setListenCount(Math.round(Math.random()*1000));
+                voice.setTitle("like" + i);
                 voiceRepository.save(voice);
             }
 

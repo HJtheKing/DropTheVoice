@@ -1,11 +1,15 @@
 
 package com.ssafy.a505.domain.controller;
 
+import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.global.util.JwtUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -14,19 +18,23 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @RestController
 @RequestMapping("/api-user")
 @Tag(name = "UserController", description = "유저 CRUD")
+@RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, allowCredentials = "true")
 public class UserController {
 
     private static final String SUCCESS = "success";
     private static final String FAIL = "fail";
+    private final MemberService memberService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -115,5 +123,20 @@ public class UserController {
                 .body(result);
     }
 
+    @PostMapping("/check-duplicate")
+    public ResponseEntity<?> checkDuplicate(@RequestBody Map<String, String> request) {
+        String userName = request.get("userName");
+        boolean isDuplicate = memberService.isUserNameDuplicate(userName);
+        return ResponseEntity.ok(Collections.singletonMap("exists", isDuplicate));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody MemberRequestDTO memberRequestDTO) {
+        if (memberService.isUserNameDuplicate(memberRequestDTO.getUserName())) {
+            return ResponseEntity.badRequest().body("유저이름 이미 있음");
+        }
+        MemberResponseDTO savedMember = memberService.registerMember(memberRequestDTO);
+        return ResponseEntity.ok(savedMember);
+    }
 }
 

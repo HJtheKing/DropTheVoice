@@ -1,20 +1,19 @@
 package com.ssafy.a505.domain.service;
 
-import com.ssafy.a505.domain.entity.Heart;
-import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.dto.response.VoiceResponseDTO;
 import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.repository.HeartRepository;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
-import com.ssafy.a505.global.execption.CustomException;
-import com.ssafy.a505.global.execption.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,6 +23,10 @@ public class VoiceServiceImpl implements VoiceService {
     private final MemberRepository memberRepository;
 
     @Override
+    public List<Voice> getVoiceOrderByHeartCountDesc(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return voiceRepository.findAllByOrderByHeartCountDesc(pageable);
+
     public List<Voice> findByMemberWithSpread(Long memberId, Pageable pageable) {
         return voiceRepository.findByMemberWithSpread(memberId, pageable);
     }
@@ -59,12 +62,30 @@ public class VoiceServiceImpl implements VoiceService {
     }
 
     @Override
-    public List<Voice> findALlByTitle(String title, Pageable pageable) {
-        return voiceRepository.findALlByTitle(title, pageable);
+    public List<Voice> findAllByTitle(String title, Pageable pageable) {
+        return voiceRepository.findAllByTitle(title, pageable);
     }
 
     @Override
     public Voice findById(Long id) {
         return voiceRepository.findById(id).get();
     }
+
+    public Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort) {
+        PageRequest pageRequest = PageRequest.of(page, size, getSort(sort));
+        return voiceRepository.findVoicesWithKeyword(keyword, pageRequest).map(VoiceResponseDTO::fromEntity);
+    }
+
+    private Sort getSort(String sort) {
+        switch (sort) {
+            case "listenCount":
+                return Sort.by(Sort.Direction.DESC, "listenCount");
+            case "heartCount":
+                return Sort.by(Sort.Direction.DESC, "heartCount");
+            case "latest":
+            default:
+                return Sort.by(Sort.Direction.DESC, "dateTime");
+        }
+    }
+
 }

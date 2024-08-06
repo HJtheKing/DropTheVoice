@@ -47,7 +47,8 @@ public class Voice {
 
     double latitude;
     double longitude;
-    LocalDateTime dateTime;
+    @Builder.Default
+    LocalDateTime dateTime = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     private VoiceType voiceType;

@@ -1,4 +1,4 @@
-package com.ssafy.a505.domain.service;
+package com.ssafy.a505.global.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
@@ -71,14 +71,13 @@ public class S3FileServiceImpl implements S3FileService {
     // - S3 실제 업로드
     private String uploadFileToS3(MultipartFile file, VoiceType category) {
         String originalFilename = file.getOriginalFilename(); // 원본 파일명
-        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")); // 확장자명
         String s3FileName = getFileFolder(category)+UUID.randomUUID().toString().substring(0, 10) + originalFilename; // 변경된 파일 명
 
         try (InputStream is = file.getInputStream();
              ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {
 
             ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType("voice/" + extension);
+            metadata.setContentType(file.getContentType());
             metadata.setContentLength(byteArrayInputStream.available());
 
             // S3에 파일 올리기

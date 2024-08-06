@@ -1,5 +1,5 @@
 <template>
-  <v-app class="black-background">
+  <v-app class="bg-black">
     <v-main>
       <v-container class="custom-container">
         <v-row justify="center" class="py-4">
@@ -59,10 +59,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.black-background {
-  background-color: #000;
-  color: #fff;
 }
 .load-btn {
   margin-top: 20px;

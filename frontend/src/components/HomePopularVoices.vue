@@ -24,7 +24,7 @@ async function fetchBestVoices(page = 1) {
   isFetching.value = true;
 
   try {
-    const res = await axios.get(`http://localhost:8080/api-voice/best-voice/${page}/${pageSize.value}`);
+    const res = await axios.get(`http://localhost:8080/api-voice/best-heart-voice/${page}/${pageSize.value}`);
     if (res.data.length < pageSize.value) {
       hasMoreVoices.value = false;
     }
@@ -64,19 +64,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <v-row>
-      <v-col>
+  <v-container class="py-4">
+    <v-row align="center" justify="space-between">
+      <v-col cols="12" md="6">
         <h2>오늘의 인기 음성</h2>
       </v-col>
-      <v-col class="text-right">
+      <!-- <v-col cols="12" md="6" class="text-right">
         <v-btn class="more-button" text>더보기</v-btn>
-      </v-col>
+      </v-col> -->
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in voices" :key="index">
-          <v-row no-gutters @click="getDetail(item.id)">
+        <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in voices" :key="index" @click="getDetail(item.id)">
+          <v-row no-gutters>
             <v-col cols="4">
               <v-img :src="item.imageUrl" height="100px" contain></v-img>
             </v-col>
@@ -106,7 +106,7 @@ onMounted(() => {
     <v-row justify="center" v-if="!hasMoreVoices && !isFetching">
       <p>더 이상 불러올 데이터가 없습니다.</p>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
@@ -115,28 +115,117 @@ onMounted(() => {
   color: #000;
   font-weight: bold;
 }
+
 .list-items {
   background-color: #000;
+  color: #fff;
+  transition: transform 0.3s ease;
 }
+
+.list-items:hover {
+  transform: scale(1.02);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .author-name {
   color: #fff;
   font-weight: bold;
 }
+
 .avatar-img {
   object-fit: cover;
   width: 100%;
   height: 100%;
 }
+
 h2 {
   color: #fff;
   font-weight: bold;
+  margin: 0;
 }
+
 h3 {
   color: #fff;
   margin: 0;
 }
+
 p {
   color: #ccc;
-  margin: 0;
+  margin: 0; 
+}
+
+/* 반응형 스타일 */
+@media (max-width: 600px) {
+  .list-items {
+    margin-bottom: 16px;
+  }
+
+  .content h3 {
+    font-size: 18px;
+  }
+
+  .content p {
+    font-size: 14px;
+  }
+
+  .content .author-name {
+    font-size: 14px;
+  }
+
+  .content .avatar-img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 960px) {
+  .list-items {
+    margin-bottom: 20px;
+  }
+
+  .content h3 {
+    font-size: 20px;
+  }
+
+  .content p {
+    font-size: 16px;
+  }
+
+  .content .author-name {
+    font-size: 16px;
+  }
+
+  .content .avatar-img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (min-width: 961px) {
+  .list-items {
+    margin-bottom: 24px;
+  }
+
+  .content h3 {
+    font-size: 22px;
+  }
+
+  .content p {
+    font-size: 18px;
+  }
+
+  .content .author-name {
+    font-size: 18px;
+  }
+
+  .content .avatar-img {
+    width: 32px;
+    height: 32px;
+  }
 }
 </style>

@@ -1,4 +1,5 @@
 <template>
+  <v-app class="bg-black">
   <v-container fluid class="home-container">
     <v-row justify="center">
       <v-col cols="12" class="text-center">
@@ -15,6 +16,7 @@
         <MyRecordButton />
     </v-row>
   </v-container>
+  </v-app>
 </template>
 
 <script setup>
@@ -24,6 +26,7 @@ import MyRecordButton from '@/components/record/MyRecordButton.vue'
 </script>
 
 <style scoped>
+
 .home-container {
   color: rgb(255, 255, 255);
   padding: 20px;
