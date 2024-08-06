@@ -18,9 +18,9 @@ public class JwtUtil {
     private SecretKey secretKey = Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8));
 
     // 다양한 데이터를 Map으로 받아서 처리를 할 수도 있지만, 심플하게 ID만 받아서 토큰을 만들어보자
-    public String createToken(long id) {
+    public String createToken(String name) {
         Date exp = new Date(System.currentTimeMillis() + 1000*60*60); // 1시간, 1초 = 1000
-        return Jwts.builder().header().add("typ", "JWT").and().claim("id", id)
+        return Jwts.builder().header().add("typ", "JWT").and().claim("name", name)
                 .expiration(exp).signWith(secretKey).compact();
     }
 

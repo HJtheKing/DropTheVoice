@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ssafy.a505.domain.dto.request.MemberDto;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.global.util.JwtUtil;
@@ -54,20 +55,21 @@ public class MemberController {
     // 로그인 요청 검증
     @Operation(summary = "로그인 요청 검증")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Member member) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody MemberDto memberDto) {
 
         HttpStatus status = null;
         Map<String, Object> result = new HashMap<>();
 
         System.out.println("로그인 시도");
         
-        if(memberService.login(member)) {
+        if(memberService.login(memberDto)) {
             // 토큰 만들어서 넘김
             result.put("message", SUCCESS);
-            result.put("access-token", jwtUtil.createToken(member.getMemberId()));
+            result.put("access-token", jwtUtil.createToken(memberDto.getMemberName()));
             // id 같이 보내면 덜 번거로움
             status = HttpStatus.ACCEPTED;
         }else {
+            System.out.println("로그인 실패");
             result.put("message", FAIL);
             status = HttpStatus.NO_CONTENT;
         }

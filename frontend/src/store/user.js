@@ -22,15 +22,13 @@ export const useUserStore = defineStore("user", () => {
         sessionStorage.setItem("access-token", token);
 
         const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        let userId = decodedToken["id"];
         let userName = decodedToken["name"];
 
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         isLogin.value = true;
-        loginUserId.value = userId;
         loginUsername.value = userName;
-        getUser(userId);
+        getUser(userName);
 
         router.push("/");
       })
