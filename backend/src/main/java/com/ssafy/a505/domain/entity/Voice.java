@@ -1,6 +1,7 @@
 package com.ssafy.a505.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -51,12 +52,13 @@ public class Voice {
     @Enumerated(EnumType.STRING)
     private VoiceType voiceType;
 
-    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = false)
+    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
     @Builder.Default
     private List<ProcessedVoice> processedVoices = new ArrayList<>();
 
-    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = false)
+    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
     @OrderBy("heartAt ASC")
+    @JsonBackReference
     private Set<Heart> hearts = new LinkedHashSet<>();
 
     public void addProcessedVoice(ProcessedVoice voice) {

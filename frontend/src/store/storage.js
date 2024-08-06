@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import { useUserStore } from '@/store/user';
 
 export const useStorageStore = defineStore('storage', {
   state: () => ({
@@ -29,11 +30,17 @@ export const useStorageStore = defineStore('storage', {
       this.isFetching = false;
     },
     async fetchAllVoices(page = 1) {
+      const useStore = useUserStore();
       if (!this.hasMoreAllVoices) return;
 
       this.isFetching = true;
       try {
-        const response = await axios.get(`http://localhost:8080/api-storage/all/${page}/${this.pageSize}`);
+        const response = await axios.get(`http://localhost:8080/api-storage/spread/${page}/${this.pageSize}`, {
+          params: {
+            memberId: 1, // 테스트용. jwt 인증 구현 되면 밑에꺼 쓰면 됨
+            // memberId: useStore.loginUserId,
+          }
+        });
         if (response.data.length < this.pageSize) {
           this.hasMoreAllVoices = false; // 더 이상 가져올 데이터가 없음을 표시
         }
@@ -49,11 +56,17 @@ export const useStorageStore = defineStore('storage', {
       }
     },
     async fetchLikedVoices(page = 1) {
+      const useStore = useUserStore();
       if (!this.hasMoreLikedVoices) return;
 
       this.isFetching = true;
       try {
-        const response = await axios.get(`http://localhost:8080/api-storage/like/${page}/${this.pageSize}`);
+        const response = await axios.get(`http://localhost:8080/api-storage/heart/${page}/${this.pageSize}`, {
+          params: {
+            memberId: 1, // 테스트용. jwt 인증 구현 되면 밑에꺼 쓰면 됨
+            // memberId: useStore.loginUserId,
+          } 
+        });
         if (response.data.length < this.pageSize) {
           this.hasMoreLikedVoices = false; // 더 이상 가져올 데이터가 없음을 표시
         }
