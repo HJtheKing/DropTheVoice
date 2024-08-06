@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import { MediaRecorder, register } from 'extendable-media-recorder';
@@ -56,7 +56,6 @@ defineExpose({
 
 const recordStore = useRecordStore();
 const { isRecording, audioUrl, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
-// const { isRecording, audioUrl, audioBlob, activeBars, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore);
 
 watch([analyser, dataArray, bufferLength, stream, javascriptNode], (newValues) => {
   if (!analyser.value) analyser.value = null;

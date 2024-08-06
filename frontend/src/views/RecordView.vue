@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import CurrentTime from '@/components/record/CurrentTime.vue';
 import MyTimer from '@/components/record/MyTimer.vue';
 import MyRecordButton from '@/components/record/MyRecordButton.vue';
@@ -32,32 +32,29 @@ const locationMessage = ref('');
 const spreadStore = useSpreadStore();
 const recordStore = useRecordStore();
 
-const { audioBlob, dataArray, isRecording, activeBars, javascriptNode } = storeToRefs(recordStore);
+const { audioBlob } = storeToRefs(recordStore);
 
 
 let mp3Blob = null;
 let mp3Url = null;
 
 const saveRecord = async () => {
-  // if (myRecordButton.value) {
-    // const audioBlob = myRecordButton.value.getAudioBlob(); // MyRecordButton의 getAudioBlob 메서드 호출
-    if (!audioBlob.value) return;
+  if (!audioBlob.value) return;
 
-    mp3Blob = await convertWavToMp3(audioBlob.value);
-    mp3Url = URL.createObjectURL(mp3Blob);
+  mp3Blob = await convertWavToMp3(audioBlob.value);
+  mp3Url = URL.createObjectURL(mp3Blob);
 
-    const downloadLink = document.createElement('a');
-    downloadLink.href = mp3Url;
-    downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
-    downloadLink.click();
-    console.log("Started downloading");
+  const downloadLink = document.createElement('a');
+  downloadLink.href = mp3Url;
+  downloadLink.download = `dropthevoice_음성녹음_${Date.now()}.mp3`;
+  downloadLink.click();
+  console.log("Started downloading");
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(showPosition, showError);
-    } else {
-      locationMessage.value = 'Geolocation is not supported by this browser.';
-    }
-  // }
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition, showError);
+  } else {
+    locationMessage.value = 'Geolocation is not supported by this browser.';
+  }
 };
 
 const showPosition = (position) => {
@@ -139,13 +136,6 @@ async function convertWavToMp3(wavBlob) {
     reader.readAsArrayBuffer(wavBlob);
   });
 }
-
-// onMounted(() => {
-//   if (!audioContext.value) {
-//     const context = new AudioContext();
-//     setAudioContext(context);
-//   }
-// });
 </script>
 
 <style scoped>

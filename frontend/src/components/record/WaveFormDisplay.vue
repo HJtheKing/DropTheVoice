@@ -19,19 +19,6 @@ const startDrawing = () => {
 
   if (!analyser.value) return;
 
-  // const draw = () => {
-  //   if (isRecording.value || isPlaying.value) {
-  //     dataArray.value = new Uint8Array(analyser.value.frequencyBinCount);
-  //     analyser.value.getByteFrequencyData(dataArray.value);
-  //     const average = dataArray.value.reduce((a, b) => a + b, 0) / dataArray.value.length;
-  //     activeBars.value = Math.floor(average / 4);
-
-  //     requestAnimationFrame(draw);
-  //   }
-  // }
-
-  // draw();
-
   if (javascriptNode.value) {
     javascriptNode.value.onaudioprocess = () => {
       if (isRecording.value || isPlaying.value) {
@@ -70,7 +57,7 @@ onMounted(() => {
 .bar {
   width: 8px;
   height: 20px;
-  background-color: #5d5c5c; /* Gray color for all bars */
+  background-color: #5d5c5c;
 }
 
 .bar.active {

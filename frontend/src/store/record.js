@@ -12,7 +12,6 @@ export const useRecordStore = defineStore('record', () => {
   const stream = ref(null); // MediaStream 객체 저장
   const javascriptNode = ref(null);
   const isPlaying = ref(false);
-  let audioContext = null;
 
   return {
     isRecording,
@@ -24,7 +23,6 @@ export const useRecordStore = defineStore('record', () => {
     bufferLength,
     stream,
     javascriptNode,
-    isPlaying,
-    audioContext
+    isPlaying
   };
 });

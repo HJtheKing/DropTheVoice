@@ -52,24 +52,22 @@ const longPressTimeout = ref(null);
 const longPressThreshold = 300; // 밀리초
 const mouseDownTime = ref(0);
 
-watch(() => audioUrl, (newSrc) => {
+watch(audioUrl, async (newSrc) => {
   if (newSrc && audio.value) {
     audio.value.src = newSrc;
-    audio.value.load();
-    let audioContext = new AudioContext();
+    await audio.value.load();
 
-    // const source = audioContext.value.createMediaElementSource(audio.value);
-    // analyser.value = audioContext.value.createAnalyser();
-    // source.connect(analyser.value);
-    // analyser.value.connect(audioContext.value.destination);
+    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
     const source = audioContext.createMediaElementSource(audio.value);
     analyser.value = audioContext.createAnalyser();
     javascriptNode.value = audioContext.createScriptProcessor(2048, 1, 1);
 
     source.connect(analyser.value);
     analyser.value.connect(javascriptNode.value);
-    javascriptNode.value.connect(audioContext.value.destination);
-  
+    javascriptNode.value.connect(audioContext.destination);
+
+    console.log('Audio setup complete', { source, analyser: analyser.value, javascriptNode: javascriptNode.value });
   }
 });
 
@@ -102,7 +100,7 @@ const formatTime = (seconds) => {
 };
 
 const resetPlayer = () => {
-  setPlayingState(false);
+  isPlaying.value = false;
   currentTime.value = 0;
 };
 
@@ -125,7 +123,7 @@ const handleError = (event) => {
 const goToStart = () => {
   audio.value.currentTime = 0;
   audio.value.pause();
-  setPlayingState(false);
+  isPlaying.value = false;
 };
 
 const goToEnd = () => {
@@ -159,9 +157,9 @@ const handleMouseUp = (action) => {
   resetPlaybackRate();
 };
 
-const setPlaybackRate = (rate) => {
-  audio.value.playbackRate = rate;
-};
+// const setPlaybackRate = (rate) => {
+//   audio.value.playbackRate = rate;
+// };
 
 const resetPlaybackRate = () => {
   audio.value.playbackRate = 1;
@@ -207,8 +205,6 @@ const stopRewind = () => {
   clearInterval(rewindInterval.value);
 };
 </script>
-
-
 
 
 <style scoped>
