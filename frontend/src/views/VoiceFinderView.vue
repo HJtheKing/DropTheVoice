@@ -24,11 +24,15 @@
 
           <section v-for="(voice, index) in randomVoiceMarkers" :key="voice.id">
             <naver-marker :latitude="voice.latitude" :longitude="voice.longitude"
-                          @onLoad="onLoadMarker($event, index)" @click="selectMarker(voice, index)">
+                          @onLoad="onLoadMarker($event, index)" 
+                          @click="selectMarker(voice, index)">
+                          <!-- <div class="marker">
+                            <img :src="MY_VOICE_IMAGE">
+                          </div> -->
             </naver-marker>
 
             <naver-info-window :marker="voiceMarkerMetas[index]" :open="isOpenMarker[index]">
-              <div class="infowindow-style">정보 ==> {{ voice }}</div>
+              <div class="infowindow-style">제목만 나오게 합니다 {{ voice.title }}</div>
             </naver-info-window>
           </section>
         </naver-map>
@@ -91,8 +95,10 @@
     </v-main>
   </v-app>
 </template>
+
 <script setup>
 import MY_POSITION_IMAGE from '@/assets/map/my-marker.png';
+import MY_VOICE_IMAGE from '@/assets/map/voice-marker.jpg'
 import THUMBNAIL_IMAGE from '@/assets/images/thumb2.jpg';
 import { computed, ref, watch } from "vue";
 import { NaverCircle, NaverInfoWindow, NaverMap, NaverMarker } from "vue3-naver-maps";
@@ -111,21 +117,18 @@ const randomVoiceMarkers = computed(() => {
 const flag = ref(true);
 let aroundVoices = ref(null);
 
-let randomVoice = ref([]);
-randomVoice.value.push({ id: 1, title: '가', latitude: 37.522875557050604, longitude: 126.73707428498797 });
-randomVoice.value.push({ id: 2, title: '나', latitude: 37.5216328910883, longitude: 126.73739538716526 });
-randomVoice.value.push({ id: 3, title: '다', latitude: 37.52031663531412, longitude: 126.7370380163574 });
-randomVoice.value.push({ id: 4, title: '라', latitude: 37.52070632570098, longitude: 126.7421496981059 });
-
 let randomVoice2 = ref([]);
 randomVoice2.value.push({ id: 5, title: '마', latitude: 37.50186257688321, longitude: 127.03732898332551 });
 randomVoice2.value.push({ id: 6, title: '바', latitude: 37.50116063547292, longitude: 127.03455789540513 });
 randomVoice2.value.push({ id: 7, title: '사', latitude: 37.50036670550219, longitude: 127.03796154358065 });
 randomVoice2.value.push({ id: 8, title: '아', latitude: 37.499682460030634, longitude: 127.03631009579408 });
+randomVoice2.value.push({ id: 1, title: '가', latitude: 37.522875557050604, longitude: 126.73707428498797 });
+randomVoice2.value.push({ id: 2, title: '나', latitude: 37.5216328910883, longitude: 126.73739538716526 });
+randomVoice2.value.push({ id: 3, title: '다', latitude: 37.52031663531412, longitude: 126.7370380163574 });
+randomVoice2.value.push({ id: 4, title: '라', latitude: 37.52070632570098, longitude: 126.7421496981059 });
 
 const getNearByVoice = async (lat, lng) => {
   try {
-    // const response = await axios.get(`http://localhost:8080?lat=${lat}&lgt=${lng}`);
     setTimeout(() => {
       if (!flag.value) {
         aroundVoices.value = randomVoice.value;
@@ -147,7 +150,7 @@ watch(nowPosition, (newPosition) => {
     circle.value.setRadius(limitedRadius.value);
   }
   if (map.value) {
-    map.value.setCenter(new naver.maps.LatLng(newPosition.latitude, newPosition.longitude));
+    map.value.panTo(new naver.maps.LatLng(newPosition.latitude, newPosition.longitude), { duration: 500 });
   }
 
   nowPosition.value = newPosition;
@@ -160,13 +163,38 @@ watch(limitedRadius, (newRadius) => {
   }
 });
 
+watch(selectedRadius, (newRadius) => {
+  const radiusOption = radiusCandidates.find(option => option.distance === newRadius);
+  if (radiusOption && map.value) {
+    map.value.setZoom(radiusOption.zoom, { duration: 500 });
+    limitedRadius.value = getRadiusFromZoom(radiusOption.zoom);
+  }
+});
+
+const getRadiusFromZoom = (zoom) => {
+  switch (zoom) {
+    case 14:
+      return 1000;
+    case 13:
+      return 2000;
+    case 12:
+      return 3000;
+    case 11:
+      return 5000;
+    case 10:
+      return 10000;
+    default:
+      return 1000;
+  }
+};
+
 const mapOptions = {
   latitude: 37.51347,
   longitude: 127.041722,
   zoom: 14,
-  minZoom: 14,
+  minZoom: 9,
   zoomControl: false,
-  zoomControlOptions: { position: "TOP_RIGHT" },
+  // zoomControlOptions: { position: "TOP_RIGHT" },
 };
 
 const initLayers = [
@@ -237,22 +265,28 @@ const loadInfinite = ({ done }) => {
 const radiusCandidates = [
   {
     distance: '1km (default)',
-    value: 1000
+    zoom: 14
+  },
+  {
+    distance: '2km',
+    zoom: 13
+  },
+  {
+    distance: '3km',
+    zoom: 12
   },
   {
     distance: '5km',
-    value: 5000
+    zoom: 11
   },
   {
     distance: '10km',
-    value: 10000
+    zoom: 10
   },
 ];
 
-const updateRadius = (selectedItem) => {
-  limitedRadius.value = selectedItem.value;
-};
 </script>
+
 <style scoped>
 .custom-container {
   max-width: 800px;
@@ -283,7 +317,6 @@ h3 {
   padding: 5px;
   border-radius: 10px;
 }
-
 
 p {
   color: #ccc;

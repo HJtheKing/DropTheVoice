@@ -1,5 +1,5 @@
 <template>
-    <v-btn class="action-button" @click="triggerFileInput" color="primary" rounded large>
+    <v-btn class="action-button" @click="triggerFileInput" color="grey-darken-3" rounded large>
     <div class="button-content">
       <img src="@/assets/upload-icon.png" alt="업로드 아이콘" class="icon" />
       <span>목록에서 가져오기</span>

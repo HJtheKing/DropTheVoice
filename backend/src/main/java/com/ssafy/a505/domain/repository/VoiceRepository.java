@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface VoiceRepository extends JpaRepository<Voice, Long> {
@@ -14,7 +16,9 @@ public interface VoiceRepository extends JpaRepository<Voice, Long> {
 
     List<Voice> findAllByTitle(String title, Pageable pageable);
 
-    List<Voice> findAllByOrderByHeartCountDesc(Pageable pageable);
+    //    List<Voice> findAllByOrderByHeartCountDesc(Pageable pageable);
+    @Query("SELECT v FROM Voice v WHERE v.dateTime >= :dateTime ORDER BY v.heartCount DESC")
+    List<Voice> findAllByOrderByHeartCountDesc(LocalDateTime dateTime, Pageable pageable);
 
     @Query("SELECT v FROM Voice v WHERE v.title LIKE %:keyword%")
     Page<Voice> findVoicesWithKeyword(@Param("keyword") String keyword, Pageable pageable);

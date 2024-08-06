@@ -6,10 +6,9 @@ import os
 import librosa
 import soundfile as sf
 from io import BytesIO
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 app = Flask(__name__)
-
 
 @app.route('/process-audio', methods=['POST'])
 def process_audio():
@@ -39,9 +38,12 @@ def process_audio():
         save_folder = voice['saveFolder']
         save_path = voice['savePath']
 
-        # savePath에서 S3 키 추출
+        # savePath에서 S3 키 추출 및 디코딩
         parsed_url = urlparse(save_path)
-        s3_key = parsed_url.path.lstrip('/')
+        s3_key = unquote(parsed_url.path.lstrip('/'))
+
+        # 로그 출력: 다운로드할 S3 키
+        app.logger.info(f"Downloading from S3 with key: {s3_key}")
 
         # S3에서 파일 다운로드
         response = s3_client.get_object(Bucket=aws_bucket, Key=s3_key)
@@ -58,8 +60,18 @@ def process_audio():
 
         # 변조된 파일을 S3에 업로드
         output_filename = f"{os.path.splitext(os.path.basename(s3_key))[0]}_shifted{pitch_shift}.mp3"
-        processed_s3_key = f"processed-voice/{output_filename}"
-        s3_client.upload_fileobj(output_buffer, 'voice-dev-test-bucket', processed_s3_key)
+        processed_s3_key = f"processed-voice/{output_filename}"  # 파일명을 URL 인코딩하지 않음
+
+        # 로그 출력: 업로드할 S3 키
+        app.logger.info(f"Uploading to S3 with key: {processed_s3_key}")
+
+        # 콘텐츠 유형 설정
+        s3_client.upload_fileobj(
+            output_buffer,
+            aws_bucket,
+            processed_s3_key,
+            ExtraArgs={'ContentType': 'audio/mpeg'}
+        )
 
         # 변조된 파일 경로 반환
         processed_path = f"https://{aws_bucket}.s3.{aws_region}.amazonaws.com/{processed_s3_key}"
@@ -69,7 +81,6 @@ def process_audio():
     except Exception as e:
         app.logger.error("Error processing audio: %s", str(e))
         return jsonify({"error": str(e)}), 500
-
 
 # 0.0.0.0 으로 모든 IP에 대한 연결을 허용해놓고 포트는 5000으로 설정
 if __name__ == '__main__':
