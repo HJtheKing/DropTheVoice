@@ -7,15 +7,17 @@ import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.domain.service.VoiceUploadService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
-@RequestMapping("/api-spread")
+@RequestMapping("/api-upload")
 @RequiredArgsConstructor
-public class SpreadController {
+public class UploadController {
 
     private final VoiceUploadService voiceUploadService;
     private final MemberService memberService;
@@ -23,12 +25,13 @@ public class SpreadController {
     /**
      * Flask로 데이터 전송
      */
-    @PostMapping(value = "/spread")
+    @PostMapping(value = "/upload")
     public ResponseEntity<?> uploadVoice(@RequestPart(value = "audioFile", required = false) MultipartFile audioFile,
-                                         @RequestPart(value = "title") String title,
+                                         @RequestPart(value = "title") String title, @RequestParam(value = "latitude", required = false) Double latitude, @RequestParam(value = "longitude", required = false) Double longitude, @RequestParam(value = "voiceType") String voiceType,
                                          @RequestParam("pitchShift") float pitchShift) throws JsonProcessingException {
         VoiceCreateRequestDTO voiceCreateRequestDTO = new VoiceCreateRequestDTO(title, audioFile);
         Voice voice = voiceUploadService.uploadAndSendVoice(voiceCreateRequestDTO, pitchShift);
+        log.info("latitude: {}, longitude: {}, voiceType: {}", latitude, longitude, voiceType);
         return new ResponseEntity<>(voice, HttpStatus.CREATED);
     }
 
