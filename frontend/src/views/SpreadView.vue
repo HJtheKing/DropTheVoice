@@ -14,7 +14,7 @@
       </div>
 
       <MapComponent v-if="activeTab === 'pokemon'"/>
-      <div class="bottom-button-container" v-if="activeTab === 'pokemon'">
+      <div class="bottom-button-container">
 
         <v-container class="bg-black">
           <v-row no-gutters class="align-content-start">
@@ -58,11 +58,6 @@
           <video controls :src="videoUrl" width="600" class="mt-4"></video>
         </div>
       </div>
-
-      <div class="button-container" v-if="activeTab === 'virus'">
-        <RecordButton/>
-        <UploadButton/>
-      </div>
     </v-container>
     </v-main>
   </v-app>
@@ -71,8 +66,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useSpreadStore } from '@/store/spread.js'
-import RecordButton from '@/components/spread/RecordButton.vue'
-import UploadButton from '@/components/spread/UploadButton.vue'
 import { storeToRefs } from 'pinia'
 import MapComponent from "@/components/spread/MapComponent.vue";
 import { useRouter } from 'vue-router';
