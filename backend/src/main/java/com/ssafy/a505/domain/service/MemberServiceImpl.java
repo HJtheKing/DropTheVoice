@@ -9,13 +9,49 @@ import com.ssafy.a505.global.execption.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service
+@Transactional
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+
+    @Override
+
+    public MemberRequestDTO findMemberByName(String name){
+        Member member = memberRepository.findByMemberName(name)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_NAME));
+        return MemberRequestDTO.getMember(member);
+    }
+
+    @Override
+    public long login(MemberRequestDTO memberRequestDTO) {
+        MemberRequestDTO target = findMemberByName(memberRequestDTO.getMemberName());
+        if(target != null && target.getMemberPassword().equals(memberRequestDTO.getMemberPassword())) return target.getMemberId();
+        return -1;
+    }
+
+    // membername 중복 불가
+    @Override
+    public boolean signup(Member member) {
+        if(member.getMemberName().equals("1234") && member.getMemberPassword().equals("1234")){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeUser(String memberId) {
+        return false;
+    }
+
+    @Override
+    public boolean setUserImg(String memberId, String newImageName) {
+        return false;
+    }
 
     @Override
     public int findRemainChangeCount(Long memberId) {
@@ -26,32 +62,22 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean isUserNameDuplicate(String userName) {
-        return memberRepository.findByUserName(userName).isPresent();
+        return memberRepository.findByMemberName(userName).isPresent();
     }
 
     @Override
     public MemberResponseDTO registerMember(MemberRequestDTO memberRequestDto) {
         Member member = Member.builder()
-                .userEmail(memberRequestDto.getUserEmail())
-                .userName(memberRequestDto.getUserName())
-                .userPassword(memberRequestDto.getUserPassword())
+                .memberEmail(memberRequestDto.getMemberEmail())
+                .memberName(memberRequestDto.getMemberName())
+                .memberPassword(memberRequestDto.getMemberPassword())
                 .profileImgUrl(memberRequestDto.getProfileImgUrl())
                 .build();
 
         Member savedMember = memberRepository.save(member);
 
-        MemberResponseDTO memberResponseDto = new MemberResponseDTO();
-        memberResponseDto.setMemberId(savedMember.getMemberId());
-        memberResponseDto.setUserEmail(savedMember.getUserEmail());
-        memberResponseDto.setUserName(savedMember.getUserName());
-        memberResponseDto.setProfileImgUrl(savedMember.getProfileImgUrl());
-        memberResponseDto.setRemainChangeCount(savedMember.getRemainChangeCount());
-        memberResponseDto.setTotalSpreadCount(savedMember.getTotalSpreadCount());
-        memberResponseDto.setTotalUploadCount(savedMember.getTotalUploadCount());
-        memberResponseDto.setVoices(savedMember.getVoices());
-        memberResponseDto.setHearts(savedMember.getHearts());
-
-        return memberResponseDto;
+        return MemberResponseDTO.getMember(savedMember);
     }
+}
 
-    }
+

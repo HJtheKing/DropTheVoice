@@ -5,15 +5,12 @@ import com.ssafy.a505.domain.repository.HeartRepository;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.SpreadRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 
 @Configuration
 @RequiredArgsConstructor
@@ -28,9 +25,9 @@ public class DataLoader {
             // 멤버 데이터 생성 및 저장
             Member member1 = Member.builder()
                     .memberId(1L)
-                    .userEmail("user1@example.com")
-                    .userName("김병관")
-                    .userPassword("password1")
+                    .memberEmail("user1@example.com")
+                    .memberName("김병관")
+                    .memberPassword("password1")
                     .profileImgUrl("")
                     .remainChangeCount(5)
                     .totalSpreadCount(10)
@@ -38,9 +35,9 @@ public class DataLoader {
                     .build();
             Member member2 = Member.builder()
                     .memberId(2L)
-                    .userEmail("user2@example.com")
-                    .userName("User2")
-                    .userPassword("password2")
+                    .memberEmail("user2@example.com")
+                    .memberName("User2")
+                    .memberPassword("password2")
                     .profileImgUrl("")
                     .remainChangeCount(3)
                     .totalSpreadCount(8)
