@@ -26,5 +26,7 @@ public interface VoiceService {
 
     List<Voice> findByMemberWithHeart(Long memberId, Pageable pageable);
 
+    List<Voice> findHeartedByMember(Long memberId);
+
     List<Voice> findByMemberWithSpread(Long memberId, Pageable pageable);
 }
