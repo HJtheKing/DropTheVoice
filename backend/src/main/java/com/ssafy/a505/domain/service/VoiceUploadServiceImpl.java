@@ -60,7 +60,7 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
     public Voice uploadAndSendVoice(VoiceCreateRequestDTO voiceCreateRequestDTO, float pitchShift) throws JsonProcessingException {
         Voice voice = convertToNewEntity(voiceCreateRequestDTO);
         if (voiceCreateRequestDTO.getAudioFile() != null && !voiceCreateRequestDTO.getAudioFile().isEmpty()) {
-            voice = uploadAudioFileToS3(voice, voiceCreateRequestDTO.getAudioFile(), VoiceType.NormalVoice);
+            voice = uploadAudioFileToS3(voice, voiceCreateRequestDTO.getAudioFile(),voiceCreateRequestDTO.getTitle() ,VoiceType.NormalVoice);
         }
 
         // TODO: 아직 테스트용
@@ -120,8 +120,8 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         return processedVoiceResponseDTO.getProcessedPath();
     }
 
-    private Voice uploadAudioFileToS3(Voice voice, MultipartFile multipartFile, VoiceType category) {
-        String saveFile = s3FileService.uploadFile(multipartFile, category);
+    private Voice uploadAudioFileToS3(Voice voice, MultipartFile multipartFile, String title, VoiceType category) {
+        String saveFile = s3FileService.uploadFile(multipartFile, category, title);
         voice.setSaveFolder(s3FileService.getFileFolder(category));
         voice.setSavePath(saveFile);
         voice.setOriginalName(multipartFile.getOriginalFilename());

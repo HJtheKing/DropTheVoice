@@ -41,6 +41,7 @@ public class Voice {
 
     private String originalName;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String savePath;
 
     private String saveFolder;
