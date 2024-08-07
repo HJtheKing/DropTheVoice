@@ -9,18 +9,12 @@ before_script:
   - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_ID} --password-stdin
 
   #- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  #    - echo ${APPLICATION_PROD} > ~/S11P12A505/backend/src/main/resources/application-prod.properties
 
 build:
   stage: build
   script:
-    - git clone https://gitlab-ci-token:${GITCLONE_TOKEN}@lab.ssafy.com/s11-webmobile1-sub2/S11P12A505.git
-    - git pull origin master
-    - echo ${APPLICATION_PROD} > ~/S11P12A505/backend/src/main/resources/application-prod.properties
-    - cd ~/S11P12A505/frontend
-    - docker build -t gbds234/front:latest --push ~/S11P12A505/frontend #$DOCKER_IMAGE .
-    - docker build -t gbds234/back:latest --push ~/S11P12A505/backend #$DOCKER_IMAGE .
-    - cd ~/S11P12A505/dockercompose
-    - docker compose -f docker-compose-prod.yml pull
-    - docker compose -f docker-compose-prod.yml up -d
+    - echo "${APPLICATION_PROD}" > ~/S11P12A505/backend/src/main/resources/application-prod.properties
+
   only:
     - master
