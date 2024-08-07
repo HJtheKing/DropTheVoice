@@ -1,5 +1,6 @@
 package com.ssafy.a505.RedisTest;
 
+import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
 import com.ssafy.a505.domain.service.RedisService;
 import com.ssafy.a505.domain.entity.Coordinate;
 import org.assertj.core.api.Assertions;
@@ -43,7 +44,27 @@ public class RedisGeoSpatialServiceTest {
         redisService.addLocationV2("test8", TestLatitude + 0.00057, TestLongitude + 0.00057);
         redisService.addLocationV2("test9", TestLatitude + 0.00058, TestLongitude + 0.00058);
     }
+    @Test
+    public void addTestV3(){
+        redisService.addLocationV3(1L, TestLatitude + 0.0005, TestLongitude + 0.0005);
+        redisService.addLocationV3(2L, TestLatitude + 0.00051, TestLongitude + 0.00051);
+        redisService.addLocationV3(3L, TestLatitude + 0.00052, TestLongitude + 0.00052);
+        redisService.addLocationV3(4L, TestLatitude + 0.00053, TestLongitude + 0.00053);
+        redisService.addLocationV3(5L, TestLatitude + 0.00054, TestLongitude + 0.00054);
+        redisService.addLocationV3(6L, TestLatitude + 0.00055, TestLongitude + 0.00055);
+        redisService.addLocationV3(7L, TestLatitude + 0.00056, TestLongitude + 0.00056);
+        redisService.addLocationV3(8L, TestLatitude + 0.00057, TestLongitude + 0.00057);
+        redisService.addLocationV3(9L, TestLatitude + 0.00058, TestLongitude + 0.00058);
+    }
 
+    @Test
+    public void markMsgReceivedTestV2(){
+        Long voiceId = 1L;
+        List<RedisResponseDTO> dtos = redisService.getMembersByRadiusV3(TestLatitude, TestLongitude, 0.5d, voiceId, 3);
+        for (RedisResponseDTO dto : dtos) {
+            redisService.markReceivedV2(voiceId, dto.getMemberId());
+        }
+    }
     @Test
     public void markMsgReceivedTest(){
         String msgId = "1";
@@ -56,6 +77,12 @@ public class RedisGeoSpatialServiceTest {
     @Test
     public void getLocationsTest(){
         Point point = redisService.getLocations("byeongGwan").get(0);
+        System.out.println(point.getX() + " " + point.getY());
+    }
+
+    @Test
+    public void getLocationsTestV2(){
+        Point point = redisService.getLocationsV2(1L).get(0);
         System.out.println(point.getX() + " " + point.getY());
     }
 
@@ -74,11 +101,25 @@ public class RedisGeoSpatialServiceTest {
             System.out.println("name : " + m.getName() + " coord : " + m.getX() + " " + m.getY());
         }
     }
+    @Test
+    public void getWithRadiusTestV3(){
+        List<RedisResponseDTO> result = redisService.getMembersByRadiusV3(TestLatitude, TestLongitude, 1d, 1L, 3);
+
+        for (RedisResponseDTO m : result) {
+            System.out.println("memberId : " + m.getMemberId() + " coord : " + m.getX() + " " + m.getY());
+        }
+    }
 
     @Test
     public void msgReceivedTest(){
         Assertions.assertThat(redisService.isReceived("1", "test2")).isTrue();
         Assertions.assertThat(redisService.isReceived("1", "test99999")).isFalse();
         Assertions.assertThat(redisService.isReceived("2", "test2")).isFalse();
+    }
+    @Test
+    public void msgReceivedTestV2(){
+        Assertions.assertThat(redisService.isReceivedV2(1L, 7L)).isTrue();
+        Assertions.assertThat(redisService.isReceivedV2(1L, 6L)).isTrue();
+        Assertions.assertThat(redisService.isReceivedV2(2L, 1L)).isFalse();
     }
 }
