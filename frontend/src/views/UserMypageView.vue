@@ -12,16 +12,16 @@
         <img src="@/assets/images/user.png" alt="Profile Image" class="profile-image" />
       </v-avatar>
       <div class="profile-info">
-        <h2>{{ member.userNickname }}</h2>
-        <p>{{ member.email }}</p>
+        <h2>{{ member.memberName }}</h2>
+        <p>{{ member.memberEmail }}</p>
       </div>
       <v-avatar size="50">
         <img src="@/assets/images/goldtier.png" alt="Badge" class="badge-image" />
       </v-avatar>
     </v-card-title>
     <v-card-subtitle class="profile-stats">
-      <p>음성 업로드 수 : {{ member.uploadCount }}</p>
-      <p>음성 확산 수 : {{ member.spreadCount }}</p>
+      <p>음성 업로드 수 : {{ member.totalUploadCount }}</p>
+      <p>음성 확산 수 : {{ member.totalSpreadCount }}</p>
     </v-card-subtitle>
     <v-divider></v-divider>
     <v-card-text class="profile-links">
@@ -38,10 +38,13 @@
       <v-list>
         <v-subheader class="subheader">회원정보 변경</v-subheader>
         <v-divider class="thick-divider"></v-divider>
+        <v-list-item @click="logout">
+          <v-list-item-title>로그아웃</v-list-item-title>
+        </v-list-item>
         <v-list-item @click="navigateTo('password-change')">
           <v-list-item-title>비밀번호 변경</v-list-item-title>
         </v-list-item>
-        <v-list-item @click="navigateTo('account-deletion')">
+        <v-list-item @click="confirmUnsign">
           <v-list-item-title>회원 탈퇴</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -51,28 +54,31 @@
   </v-app>
 </template>
 
-<script>
-import axios from 'axios';
-export default {
-  
-  data() {
-    return {
-      member: {
-        profileImage: '',
-        userNickname: '김싸피',
-        email: 'a505@example.com',
-        uploadCount: 0,
-        spreadCount: 0,
-      },
-    };
-  },
-  methods: {
-    navigateTo(routeName) {
-      this.$router.push({ name: routeName });
-    },
-  },
+<script setup>
+import { computed } from "vue";
+import { useUserStore } from "@/store/user";
+
+const userStore = useUserStore();
+const member = computed(() => userStore.user);
+const loginUserId = computed(() => userStore.loginUserId);
+
+const logout = () => {
+  userStore.logout();
 };
+
+const confirmUnsign = () => {
+  if (confirm("정말로 회원탈퇴를 진행하시겠습니까?")) {
+    unsign();
+  }
+};
+
+const unsign = function () {
+  userStore.deleteUser(loginUserId.value);
+};
+
+
 </script>
+
 
 <style scoped>
 .title {

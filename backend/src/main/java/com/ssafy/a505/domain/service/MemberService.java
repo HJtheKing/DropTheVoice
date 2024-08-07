@@ -8,19 +8,20 @@ public interface MemberService {
 
     public MemberRequestDTO findMemberByName(String name);
 
+    //회원 정보 조회
+    MemberResponseDTO getMemberByMemberId(long id);
+
     //로그인 하기
-    public long login(MemberRequestDTO memberRequestDTO);
+    long login(MemberRequestDTO memberRequestDTO);
 
     //사용자 등록하기
-    public boolean signup(Member member);
+    MemberResponseDTO registerMember(MemberRequestDTO memberRequestDTO);
 
     //회원 탈퇴
-    public boolean removeUser(String memberId);
+    boolean removeUser(long memberId);
 
     // 유저 이미지 변경
-    public boolean setUserImg(String memberId, String newImageName);
-
-    MemberResponseDTO registerMember(MemberRequestDTO memberRequestDTO);
+    boolean setUserImg(String memberId, String newImageName);
 
     int findRemainChangeCount(Long memberId);
 
