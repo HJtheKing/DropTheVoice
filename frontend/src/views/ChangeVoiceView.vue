@@ -1,26 +1,58 @@
 <script setup>
-import OriginalSpreadButton from '@/components/change/OriginalSpreadButton.vue'
-import VoiceChangeButton from '@/components/change/VoiceChangeButton.vue'
-import {ref} from 'vue';
-
-const remain = ref(3);
+import MyChangeButton from '@/components/change/MyChangeButton.vue';
 </script>
 
 <template>
-    <div
-        style="display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: black; height: 100%;">
-        <h1 style="color: white; background-color: red;">실시간 녹음하기</h1>>
-        <div
-            style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background-color: blue; height: 100%;">
-            <div style="padding-bottom: 30px; width: 90%; display: flex; flex-direction: row; justify-content: center;">
-                <OriginalSpreadButton></OriginalSpreadButton>
-            </div>
-            <div style="padding-top: 30px; width: 90%; display: flex; flex-direction: row; justify-content: center;">
-                <VoiceChangeButton :remain="remain"></VoiceChangeButton>
-            </div>
-        </div>
-    </div>
+  <v-app class="black-background">
+    <v-main>
+      <v-container class="custom-container">
+        <v-row justify="center" class="py-4">
+          <v-col cols="12" class="text-center">
+          <h1 class="title">Drop The Voice</h1>
+          </v-col>
+        </v-row>
+        <MyChangeButton />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
+<style>
+.custom-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
 
-<style scoped></style>
+.black-background {
+  background-color: #000;
+  color: #fff;
+}
+
+.title {
+  color: #fff;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+
+@media (min-width: 601px) and (max-width: 960px) {
+  .title {
+    font-size: 22px;
+  }
+  .custom-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (min-width: 961px) {
+  .title {
+    font-size: 24px;
+  }
+  .custom-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}
+</style>

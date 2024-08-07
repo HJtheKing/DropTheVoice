@@ -15,7 +15,7 @@
         <audio-player ref="audioPlayer" />
         <v-row justify="center">
           <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기 테스트</v-btn>
-          <v-btn class="load-btn" @click="navigateTo('home')">업로드</v-btn>
+          <v-btn class="load-btn" @click="navigateTo('change')">업로드</v-btn>
         </v-row>
       </v-container>
     </v-main>
