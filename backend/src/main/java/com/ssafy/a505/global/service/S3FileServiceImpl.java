@@ -18,6 +18,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +43,7 @@ public class S3FileServiceImpl implements S3FileService {
 
     // - 파일 업로드 접근 메서드
     @Override
-    public String uploadFile(MultipartFile file, VoiceType category) {
+    public String uploadFile(MultipartFile file, VoiceType category, String title) {
         //파일 비었는지 체크
         if (file.isEmpty() || Objects.isNull(file.getOriginalFilename())) {
             throw new AmazonS3Exception("파일이 비어있습니다");
@@ -50,7 +52,7 @@ public class S3FileServiceImpl implements S3FileService {
         this.validateExtension(file.getOriginalFilename());
 
         //성공로직
-        return this.uploadFileToS3(file, category);
+        return this.uploadFileToS3(file, category, title);
     }
 
     // - 파일 확장자 유효성 검사
@@ -69,29 +71,30 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     // - S3 실제 업로드
-    private String uploadFileToS3(MultipartFile file, VoiceType category) {
-        String originalFilename = file.getOriginalFilename(); // 원본 파일명
-        String s3FileName = getFileFolder(category)+UUID.randomUUID().toString().substring(0, 10) + originalFilename; // 변경된 파일 명
+    private String uploadFileToS3(MultipartFile file, VoiceType category, String title) {
+            String s3FileName = getFileFolder(category) + UUID.randomUUID().toString().substring(0, 10) + title;
 
-        try (InputStream is = file.getInputStream();
-             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {
+            try (InputStream is = file.getInputStream();
+                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(byteArrayInputStream.available());
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(file.getContentType());
+                metadata.setContentLength(byteArrayInputStream.available());
 
-            // S3에 파일 올리기
-            PutObjectRequest putObjectRequest =
-                    new PutObjectRequest(bucketName, s3FileName, byteArrayInputStream, metadata)
-                            .withCannedAcl(CannedAccessControlList.PublicRead);
+                // S3에 파일 올리기
+                PutObjectRequest putObjectRequest =
+                        new PutObjectRequest(bucketName, s3FileName, byteArrayInputStream, metadata)
+                                .withCannedAcl(CannedAccessControlList.PublicRead);
 
-            amazonS3.putObject(putObjectRequest);
-            return amazonS3.getUrl(bucketName, s3FileName).toString();
+                amazonS3.putObject(putObjectRequest);
 
-        } catch (Exception e) {
-            log.error("putObject 도중 에러: " + e.getMessage(), e);
-            throw new AmazonS3Exception("에러");
-        }
+                // 업로드된 파일 URL 반환
+                return amazonS3.getUrl(bucketName, s3FileName).toString();
+
+            } catch (Exception e) {
+                log.error("S3 putObject 도중 에러: " + e.getMessage(), e);
+                throw new AmazonS3Exception("S3 업로드 도중 에러 발생");
+            }
     }
 
     // - 폴더 경로 지정 메서드

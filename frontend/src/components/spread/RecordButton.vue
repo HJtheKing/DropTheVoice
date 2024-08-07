@@ -1,5 +1,5 @@
 <template>
-  <v-btn class="action-button" @click="handleClick" color="primary" rounded large>
+  <v-btn class="action-button" @click="handleClick" color="grey-darken-3" rounded large>
     <div class="button-content">
       <img src="@/assets/microphone-icon.png" alt="녹음 아이콘" class="icon" />
       <span>실시간 녹음하기</span>

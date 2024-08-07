@@ -1,16 +1,6 @@
 <template>
   <v-container fluid>
-    <!-- 오디오 관련 -->
     <v-row justify="center" class="my-4">
-      <v-col cols="12" class="d-flex justify-center align-center">
-        <v-card class="d-flex justify-center align-center pa-2">
-          <div class="visualizer">
-            <div class="bars">
-              <div v-for="n in 15" :key="n" class="bar" :class="{ active: n <= activeBars }"></div>
-            </div>
-          </div>
-        </v-card>
-      </v-col>
     </v-row>
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">
@@ -26,60 +16,48 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-row justify="center" class="my-4">
-        <audio-player ref="audioPlayer"></audio-player>
-    </v-row>
-    <v-row justify="center">
-        <!-- <v-btn v-if="audioUrl && !isRecording" @click="saveRecord" color="blue" class="save-button">
-          저장
-        </v-btn> -->
-    </v-row>
   </v-container>
 </template>
 
-
 <script setup>
-import { ref,} from 'vue';
-import { useSpreadStore } from '@/store/spread';
+import { ref, watch } from 'vue';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
-import AudioPlayer from "@/components/AudioPlayer.vue";
 
 // 녹음 데이터를 반환하는 메서드
 function getAudioBlob() {
-  return audioBlob.value;
+  return recordStore.audioBlob.value;
 }
 
-// expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
+// 메서드를 외부에서 사용할 수 있도록 설정
 defineExpose({
   getAudioBlob
 });
 
 const recordStore = useRecordStore();
-const { isRecording, audioUrl } = storeToRefs(recordStore); // 반응형 상태 참조
+const { isRecording, audioUrl, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
 
-// 녹음된 오디오 청크를 저장하는 배열
+// 초기화
+watch([analyser, dataArray, bufferLength, stream, javascriptNode], (newValues) => {
+  if (!analyser.value) analyser.value = null;
+  if (!dataArray.value) dataArray.value = new Uint8Array(0);
+  if (!bufferLength.value) bufferLength.value = 0;
+  if (!stream.value) stream.value = null;
+  if (!javascriptNode.value) javascriptNode.value = null;
+});
+
+// Web Audio API 관련 변수
+let audioContext = null; // AudioContext 객체를 저장할 변수
+
 const audioChunks = [];
 let mediaRecorder = null; // MediaRecorder 객체를 저장할 변수
-const audioBlob = ref(null); // 녹음된 오디오 데이터를 저장할 Blob
 
 const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
 
-// Web Audio API 관련 변수
-const activeBars = ref(0);
-let audioContext = null; // AudioContext 객체를 저장할 변수
-let analyser = null; // 오디오 분석기 (AnalyserNode) 객체를 저장할 변수
-let dataArray = null; // 오디오 데이터 배열을 저장할 변수
-let bufferLength = null; // 분석할 데이터의 크기를 저장할 변수
-let stream = null; // MediaStream 객체를 저장할 변수 (오디오 입력 스트림)
-
-let javascriptNode = null;
-
 // 인코더 등록 상태 추적
 let isEncoderRegistered = false;
-
 
 // 녹음 시작 및 중지 토글 메서드
 const toggleRecording = () => {
@@ -95,13 +73,13 @@ const startRecording = async () => {
   try {
     console.log("Started Recording")
     // 기존 스트림과 오디오 컨텍스트 종료
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      stream = null;
+    if (stream.value) {
+      stream.value.getTracks().forEach(track => track.stop());
+      stream.value = null;
     }
     if (audioContext) {
       audioContext.close();
-      audioContext = null;
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     // 오디오 플레이어 초기화
@@ -116,27 +94,27 @@ const startRecording = async () => {
     }
 
     // 오디오 입력 스트림 가져오기
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
 
     // Web Audio API 설정
     audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(stream);
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048;
-    bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
+    const source = audioContext.createMediaStreamSource(stream.value);
+    analyser.value = audioContext.createAnalyser();
+    analyser.value.fftSize = 2048;
+    bufferLength.value = analyser.value.frequencyBinCount;
+    dataArray.value = new Uint8Array(bufferLength.value);
 
-    javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+    javascriptNode.value = audioContext.createScriptProcessor(2048, 1, 1);
 
-    analyser.smoothingTimeConstant = 0.3;
-    analyser.fftSize = 2048;
+    analyser.value.smoothingTimeConstant = 0.3;
+    analyser.value.fftSize = 2048;
 
-    source.connect(analyser);
-    analyser.connect(javascriptNode);
-    javascriptNode.connect(audioContext.destination);
+    source.connect(analyser.value);
+    analyser.value.connect(javascriptNode.value);
+    javascriptNode.value.connect(audioContext.destination);
 
     // MediaRecorder 설정 및 시작
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
+    mediaRecorder = new MediaRecorder(stream.value, { mimeType: 'audio/wav' });
     mediaRecorder.ondataavailable = event => {
       audioChunks.push(event.data);
     };
@@ -159,13 +137,11 @@ const startRecording = async () => {
       }
 
       // 스트림의 모든 트랙을 종료
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
+      if (stream.value) {
+        stream.value.getTracks().forEach(track => track.stop());
+        stream.value = null;
       }
     };
-
-    startDrawing(); // 파형 그리기 함수 먼저 호출
 
     mediaRecorder.start(); // 녹음 시작
     isRecording.value = true;
@@ -183,23 +159,6 @@ const stopRecording = () => {
   }
   isRecording.value = false;
 }
-
-
-// 오디오 파형을 그리는 메서드
-const startDrawing = () => {
-  console.log("Started drawing")
-
-  if (!analyser) return;
-
-  javascriptNode.onaudioprocess = () => {
-    if (isRecording.value) {
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      activeBars.value = Math.floor(average / 4);
-    }
-  };
-};
 </script>
 
 
@@ -222,10 +181,8 @@ const startDrawing = () => {
   height: 100%;
   position: relative;
   margin-top: 1cm;
-  margin-bottom: 20px; /* 녹음 버튼과 오디오 플레이어 사이의 간격 */
+  margin-bottom: 20px;
 }
-
-
 
 .record-button {
   width: 60px;
@@ -274,8 +231,6 @@ const startDrawing = () => {
   background-color: darkred;
 }
 
-
-
 .audio-container {
   width: 100%;
   display: flex;
@@ -283,7 +238,6 @@ const startDrawing = () => {
   background-color: #000;
   margin-bottom: 20px; /* 오디오 플레이어와 저장 버튼 사이의 간격 */
 }
-
 
 .save-button-container {
   width: 100%;
@@ -307,27 +261,24 @@ const startDrawing = () => {
   background-color: #2980b9;
 }
 
-  .visualizer {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-  }
-  
-  .bars {
-    display: flex;
-    gap: 4px;
-  }
-  
-  .bar {
-    width: 8px;
-    height: 20px;
-    background-color: #444; /* Gray color for all bars */
-  }
-  
-  .bar.active {
-    background-color: #0f0;
-  }
+.visualizer {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
 
+.bars {
+  display: flex;
+  gap: 4px;
+}
 
+.bar {
+  width: 8px;
+  height: 20px;
+  background-color: #5d5c5c;
+}
 
+.bar.active {
+  background-color: #8B92DF;
+}
 </style>

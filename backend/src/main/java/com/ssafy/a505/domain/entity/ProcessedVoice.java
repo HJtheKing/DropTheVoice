@@ -14,6 +14,7 @@ public class ProcessedVoice {
     @Column(name = "processed_voice_id")
     private Long processedVoiceId;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String processedPath;
 
     @ManyToOne(fetch = FetchType.LAZY)

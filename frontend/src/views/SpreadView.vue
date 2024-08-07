@@ -14,7 +14,7 @@
       </div>
 
       <MapComponent v-if="activeTab === 'pokemon'"/>
-      <div class="bottom-button-container" v-if="activeTab === 'pokemon'">
+      <div class="bottom-button-container">
 
         <v-container class="bg-black">
           <v-row no-gutters class="align-content-start">
@@ -58,11 +58,6 @@
           <video controls :src="videoUrl" width="600" class="mt-4"></video>
         </div>
       </div>
-
-      <div class="button-container" v-if="activeTab === 'virus'">
-        <RecordButton/>
-        <UploadButton/>
-      </div>
     </v-container>
     </v-main>
   </v-app>
@@ -71,8 +66,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useSpreadStore } from '@/store/spread.js'
-import RecordButton from '@/components/spread/RecordButton.vue'
-import UploadButton from '@/components/spread/UploadButton.vue'
 import { storeToRefs } from 'pinia'
 import MapComponent from "@/components/spread/MapComponent.vue";
 import { useRouter } from 'vue-router';
@@ -99,11 +92,62 @@ const handleFileChange = (event) => {
   selectedFile.value = event.target.files[0];
 }
 
+
+
+const locationMessage = ref('');
+const latitude = ref(50.0000);
+const longitude = ref(50.0000);
+
+function showPosition(position) {
+  latitude.value = position.coords.latitude;
+  longitude.value = position.coords.longitude;
+  locationMessage.value = `Latitude: ${latitude.value} | Longitude: ${longitude.value}`;
+  console.log(locationMessage.value);
+}
+
+function showError(error) {
+  switch(error.code) {
+    case error.PERMISSION_DENIED:
+      locationMessage.value = 'User denied the request for Geolocation.';
+      break;
+    case error.POSITION_UNAVAILABLE:
+      locationMessage.value = 'Location information is unavailable.';
+      break;
+    case error.TIMEOUT:
+      locationMessage.value = 'The request to get user location timed out.';
+      break;
+    case error.UNKNOWN_ERROR:
+      locationMessage.value = 'An unknown error occurred.';
+      break;
+  }
+};
+
+function getLocation() {
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    } else {
+      reject(new Error('Geolocation is not supported by this browser.'));
+    }
+  });
+}
+
 const uploadFile = async () => {
+  try {
+    // 위치 정보 가져오기
+    const position = await getLocation();
+    showPosition(position);
+  } catch (error) {
+    showError(error);
+  }
+
   if (selectedFile.value && title.value && selectedPitch.value !== null) {
     const formData = new FormData();
     formData.append('audioFile', selectedFile.value);
     formData.append('title', title.value);
+    formData.append('voiceType', spreadStore.activeTab);
+    formData.append('latitude', latitude.value);
+    formData.append('longitude', longitude.value);
 
     let pitchShift = 0;
     if (selectedPitch.value === '높게') {
@@ -115,8 +159,9 @@ const uploadFile = async () => {
 
     uploadStatus.value = '업로드 중...';
 
-    try {
-      const response = await axios.post('http://localhost:8080/api-spread/spread', formData, {
+    try { 
+      console.log(latitude.value)
+      const response = await axios.post('http://localhost:8080/api-upload/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

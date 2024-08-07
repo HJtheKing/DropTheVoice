@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,8 @@ public class VoiceServiceImpl implements VoiceService{
     @Override
     public List<Voice> getVoiceOrderByHeartCountDesc(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return voiceRepository.findAllByOrderByHeartCountDesc(pageable);
+        LocalDateTime ago = LocalDateTime.now().minusDays(2);
+        return voiceRepository.findAllByOrderByHeartCountDesc(ago ,pageable);
     }
 
     @Override

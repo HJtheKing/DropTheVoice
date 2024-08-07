@@ -16,7 +16,7 @@ import java.util.*;
 
 @RestController
 //@RequiredArgsConstructor
-@RequestMapping("/")
+@RequestMapping("/ws")
 @CrossOrigin(origins = "localhost:3000/*", allowCredentials = "true")
 @Slf4j
 public class StompController {
@@ -41,6 +41,7 @@ public class StompController {
     public void message(Coordinate coordinate, Message<Coordinate> message) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
         String sessionId = headerAccessor.getSessionId();
+        System.out.println(coordinate.getX() + "" + coordinate.getY());
 
         log.info(sessionId+"is sessionId");
         log.info("Session Logged In Member Info: "+ coordinate.toString());

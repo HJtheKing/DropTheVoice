@@ -18,10 +18,10 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: flase
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: flase
   data:
     redis:
       host: ${REDIS_HOST}

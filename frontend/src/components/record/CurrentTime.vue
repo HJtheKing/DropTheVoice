@@ -14,7 +14,7 @@ const updateTime = () => {
 }
 
 onMounted(() => {
-  const intervalId = setInterval(updateTime, 60000)  // 매 분마다 업데이트
+  const intervalId = setInterval(updateTime, 1000)  // 매 초마다 업데이트
   onUnmounted(() => {
     clearInterval(intervalId)
   })
@@ -29,5 +29,4 @@ onMounted(() => {
   border-radius: 5px;
   text-align: center;
 }
-
 </style>
