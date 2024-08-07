@@ -14,7 +14,7 @@ before_script:
 build:
   stage: build
   script:
-    - echo ${APPLICATION_PROD} > ~/S11P12A505/backend/src/main/resources/application-prod.yml
+    - cat ${APPLICATION_PROD} > ~/S11P12A505/backend/src/main/resources/application-prod.yml
 
   only:
     - feat/github-cicd
