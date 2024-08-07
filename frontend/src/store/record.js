@@ -9,7 +9,7 @@ export const useRecordStore = defineStore('record', () => {
   const analyser = ref(null); // 오디오 분석기
   const dataArray = ref(null); // 오디오 데이터 배열
   const bufferLength = ref(0); // 분석할 데이터 크기
-  const stream = ref(null); // MediaStream 객체 저장
+  const stream = ref(null); // MediaStream 객체
   const javascriptNode = ref(null);
   const isPlaying = ref(false);
 

@@ -1,7 +1,6 @@
 <template>
   <v-container fluid>
     <v-row justify="center" class="my-4">
-        <wave-form-display />
     </v-row>
     <v-row justify="center" class="my-4">
       <v-col cols="12" class="d-flex justify-center align-center">
@@ -17,12 +16,6 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-row justify="center" class="my-4">
-        <audio-player ref="audioPlayer"></audio-player>
-    </v-row>
-    <v-row justify="center">
-        <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기</v-btn>
-    </v-row>
   </v-container>
 </template>
 
@@ -32,24 +25,13 @@ import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import { MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
-import AudioPlayer from "@/components/AudioPlayer.vue";
-import WaveFormDisplay from './WaveFormDisplay.vue';
-
-// 테스트용 import, load
-import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
-function playSampleAudio() {
-  if (audioPlayer.value) {
-    audioPlayer.value.loadAudio(audioFile);
-  }
-}
 
 // 녹음 데이터를 반환하는 메서드
 function getAudioBlob() {
   return recordStore.audioBlob.value;
 }
 
-
-// expose 메서드를 사용하여 외부에서 사용할 수 있도록 설정
+// 메서드를 외부에서 사용할 수 있도록 설정
 defineExpose({
   getAudioBlob
 });
@@ -57,6 +39,7 @@ defineExpose({
 const recordStore = useRecordStore();
 const { isRecording, audioUrl, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
 
+// 초기화
 watch([analyser, dataArray, bufferLength, stream, javascriptNode], (newValues) => {
   if (!analyser.value) analyser.value = null;
   if (!dataArray.value) dataArray.value = new Uint8Array(0);
@@ -198,10 +181,8 @@ const stopRecording = () => {
   height: 100%;
   position: relative;
   margin-top: 1cm;
-  margin-bottom: 20px; /* 녹음 버튼과 오디오 플레이어 사이의 간격 */
+  margin-bottom: 20px;
 }
-
-
 
 .record-button {
   width: 60px;
@@ -250,8 +231,6 @@ const stopRecording = () => {
   background-color: darkred;
 }
 
-
-
 .audio-container {
   width: 100%;
   display: flex;
@@ -259,7 +238,6 @@ const stopRecording = () => {
   background-color: #000;
   margin-bottom: 20px; /* 오디오 플레이어와 저장 버튼 사이의 간격 */
 }
-
 
 .save-button-container {
   width: 100%;
@@ -297,13 +275,10 @@ const stopRecording = () => {
 .bar {
   width: 8px;
   height: 20px;
-  background-color: #5d5c5c; /* Gray color for all bars */
+  background-color: #5d5c5c;
 }
 
 .bar.active {
   background-color: #8B92DF;
 }
-
-
-
 </style>

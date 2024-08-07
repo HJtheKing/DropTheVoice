@@ -10,7 +10,12 @@
           <CurrentTime />
         </v-row>
         <MyTimer />
+        <wave-form-display />
         <MyRecordButton ref="myRecordButton" />
+        <audio-player ref="audioPlayer" />
+        <v-row justify="center">
+          <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기 테스트</v-btn>
+        </v-row>
       </v-container>
     </v-main>
   </v-app>
@@ -21,19 +26,30 @@ import { ref } from 'vue';
 import CurrentTime from '@/components/record/CurrentTime.vue';
 import MyTimer from '@/components/record/MyTimer.vue';
 import MyRecordButton from '@/components/record/MyRecordButton.vue';
+import WaveFormDisplay from '@/components/record/WaveFormDisplay.vue';
+import AudioPlayer from '@/components/AudioPlayer.vue';
 import { useSpreadStore } from '@/store/spread';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import * as lamejs from '@breezystack/lamejs';
 import axios from 'axios';
 
+////////////////////////////// 테스트용 ////////////////////////////////////
+import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
+function playSampleAudio() {
+  if (audioPlayer.value) {
+    audioPlayer.value.loadAudio(audioFile);
+  }
+}
+///////////////////////////////////////////////////////////////////////////
+
+const audioPlayer = ref(null);
 const myRecordButton = ref(null);
 const locationMessage = ref('');
 const spreadStore = useSpreadStore();
 const recordStore = useRecordStore();
 
 const { audioBlob } = storeToRefs(recordStore);
-
 
 let mp3Blob = null;
 let mp3Url = null;
@@ -159,5 +175,16 @@ async function convertWavToMp3(wavBlob) {
   color: #fff;
   font-weight: bold;
   font-size: 24px;
+}
+
+.load-btn {
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: #f3b549;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
