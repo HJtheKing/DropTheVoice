@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ssafy.a505.domain.dto.request.VoiceCreateRequestDTO;
 import com.ssafy.a505.domain.entity.ProcessedVoice;
 import com.ssafy.a505.domain.entity.Voice;
+import com.ssafy.a505.domain.repository.VoiceRepository;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.domain.service.VoiceUploadService;
 import lombok.RequiredArgsConstructor;
@@ -21,17 +22,22 @@ public class UploadController {
 
     private final VoiceUploadService voiceUploadService;
     private final MemberService memberService;
+    private final VoiceRepository voiceRepository;
 
     /**
      * Flask로 데이터 전송
      */
     @PostMapping(value = "/upload")
     public ResponseEntity<?> uploadVoice(@RequestPart(value = "audioFile", required = false) MultipartFile audioFile,
+                                         @RequestParam(value = "memberId") Long memberId,
                                          @RequestPart(value = "title") String title, @RequestParam(value = "latitude", required = false) Double latitude, @RequestParam(value = "longitude", required = false) Double longitude, @RequestParam(value = "voiceType") String voiceType,
                                          @RequestParam("pitchShift") float pitchShift) throws JsonProcessingException {
-        VoiceCreateRequestDTO voiceCreateRequestDTO = new VoiceCreateRequestDTO(title, audioFile);
+        VoiceCreateRequestDTO voiceCreateRequestDTO = new VoiceCreateRequestDTO(memberId, title, audioFile);
         Voice voice = voiceUploadService.uploadAndSendVoice(voiceCreateRequestDTO, pitchShift);
         log.info("latitude: {}, longitude: {}, voiceType: {}", latitude, longitude, voiceType);
+        voice.setLatitude(latitude);
+        voice.setLongitude(longitude);
+        voiceRepository.save(voice);
         return new ResponseEntity<>(voice, HttpStatus.CREATED);
     }
 

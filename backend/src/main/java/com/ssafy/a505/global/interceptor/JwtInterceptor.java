@@ -1,4 +1,4 @@
-package com.ssafy.a505.domain.interceptor;
+package com.ssafy.a505.global.interceptor;
 
 import com.ssafy.a505.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;

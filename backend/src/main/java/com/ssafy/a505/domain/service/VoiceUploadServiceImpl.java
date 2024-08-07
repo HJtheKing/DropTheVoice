@@ -10,6 +10,8 @@ import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.entity.VoiceType;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
+import com.ssafy.a505.global.execption.CustomException;
+import com.ssafy.a505.global.execption.ErrorCode;
 import com.ssafy.a505.global.service.S3FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,17 +62,13 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
     public Voice uploadAndSendVoice(VoiceCreateRequestDTO voiceCreateRequestDTO, float pitchShift) throws JsonProcessingException {
         Voice voice = convertToNewEntity(voiceCreateRequestDTO);
         if (voiceCreateRequestDTO.getAudioFile() != null && !voiceCreateRequestDTO.getAudioFile().isEmpty()) {
-            voice = uploadAudioFileToS3(voice, voiceCreateRequestDTO.getAudioFile(),voiceCreateRequestDTO.getTitle() ,VoiceType.NormalVoice);
+            voice = uploadAudioFileToS3(voice, voiceCreateRequestDTO.getAudioFile() ,VoiceType.NormalVoice);
         }
 
-        // TODO: 아직 테스트용
-        Optional<Member> member = memberRepository.findById(voiceCreateRequestDTO.getMemberId());
+        Member member = memberRepository.findById(voiceCreateRequestDTO.getMemberId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
-        if (!member.isPresent()) {
-            throw new IllegalArgumentException("Invalid");
-        }
-
-        voice.setMember(member.get());
+        voice.setMember(member);
 
         voiceRepository.save(voice);
 
@@ -87,7 +85,7 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         voice.addProcessedVoice(processedVoice);
 
         voiceRepository.save(voice); // 변경된 Voice 저장
-
+        member.setTotalUploadCount(member.getTotalUploadCount() + 1);
         return voice;
     }
 
@@ -120,8 +118,8 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         return processedVoiceResponseDTO.getProcessedPath();
     }
 
-    private Voice uploadAudioFileToS3(Voice voice, MultipartFile multipartFile, String title, VoiceType category) {
-        String saveFile = s3FileService.uploadFile(multipartFile, category, title);
+    private Voice uploadAudioFileToS3(Voice voice, MultipartFile multipartFile,  VoiceType category) {
+        String saveFile = s3FileService.uploadFile(multipartFile, category);
         voice.setSaveFolder(s3FileService.getFileFolder(category));
         voice.setSavePath(saveFile);
         voice.setOriginalName(multipartFile.getOriginalFilename());

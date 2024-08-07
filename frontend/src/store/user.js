@@ -33,7 +33,7 @@ export const useUserStore = defineStore("user", () => {
 
         getUser(userId);
 
-        router.push("/");
+        router.push("/home");
       })
       .catch(() => {
         alert("유효하지 않은 아이디 혹은 비번입니다");

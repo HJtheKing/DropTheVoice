@@ -83,7 +83,6 @@ public class MemberController {
         HttpStatus status = null;
         Map<String, Object> result = new HashMap<>();
 
-        System.out.println("로그인 시도");
         long memberID = memberService.login(memberRequestDTO);
         if(memberID != -1) {
             // 토큰 만들어서 넘김
