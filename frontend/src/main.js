@@ -28,7 +28,6 @@ app.use(router)
 app.use(createNaverMap, {clientId: `${import.meta.env.VITE_NAVER_MAP_CLIENT_ID}`, language: 'kr'})
 app.config.devtools = false
 app.use(store)
-app.use(axios)
 
 // 개발 모드에서만 Vue Devtools 활성화
 app.config.devtools = false
