@@ -10,6 +10,7 @@ export const useUserStore = defineStore("user", () => {
   const loginUserId = ref(null);
   const loginUserName = ref(null);
   const user = ref(null);
+  const changeCnt = ref(null);
 
   const userLogin = function (id, password) {
     axios
@@ -24,12 +25,14 @@ export const useUserStore = defineStore("user", () => {
         const decodedToken = JSON.parse(atob(token.split(".")[1]));
         let userName = decodedToken["name"];
         let userId = decodedToken["id"];
+        let changeCount = decodedToken["changeCnt"];
 
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         isLogin.value = true;
         loginUserName.value = userName;
         loginUserId.value = userId;
+        changeCnt.value = changeCount;
 
         getUser(userId);
 
@@ -47,6 +50,7 @@ export const useUserStore = defineStore("user", () => {
     isLogin.value = false; // 로그인 상태 업데이트
     loginUserId.value = null;
     user.value = null;
+    changeCnt.value = null;
     delete axios.defaults.headers.common["Authorization"];
     router.push("/login"); // 홈페이지로 이동
   };
@@ -109,6 +113,7 @@ export const useUserStore = defineStore("user", () => {
     isLogin,
     loginUserId,
     user,
+    changeCnt,
     userLogin,
     logout,
     createUser,

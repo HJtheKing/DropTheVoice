@@ -8,7 +8,7 @@ import MyChangeButton from '@/components/change/MyChangeButton.vue';
       <v-container class="custom-container">
         <v-row justify="center" class="py-4">
           <v-col cols="12" class="text-center">
-          <h1 class="title">Drop The Voice</h1>
+          <h1 class="title">뿌리기</h1>
           </v-col>
         </v-row>
         <MyChangeButton />

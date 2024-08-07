@@ -24,6 +24,12 @@ public class JwtUtil {
                 .expiration(exp).signWith(secretKey).compact();
     }
 
+    public String createTokenV2(String name, long id, int changeCnt) {
+        Date exp = new Date(System.currentTimeMillis() + 1000*60*60); // 1시간, 1초 = 1000
+        return Jwts.builder().header().add("typ", "JWT").and().claim("name", name).claim("id", id).claim("changeCnt", changeCnt)
+                .expiration(exp).signWith(secretKey).compact();
+    }
+
     // 실제로 확인하려고 하는 용도가 아니라 유효기간이 지나면 알아서 에러 발생
     public Jws<Claims> validate(String token){
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
