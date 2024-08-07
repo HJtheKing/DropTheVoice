@@ -7,7 +7,7 @@ public interface S3FileService {
 
     String getFileUrl(String fileName);
 
-    String uploadFile(MultipartFile file, VoiceType category, String title);
+    String uploadFile(MultipartFile file, VoiceType category);
 
     void deleteFile(String fileAddress);
 

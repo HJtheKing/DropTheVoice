@@ -64,14 +64,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useSpreadStore } from '@/store/spread.js'
 import { storeToRefs } from 'pinia'
 import MapComponent from "@/components/spread/MapComponent.vue";
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/store/user';
 import axios from 'axios';
 
 const router = useRouter();
+const userStore = useUserStore();
 
 const spreadStore = useSpreadStore()
 const { activeTab } = storeToRefs(spreadStore)
@@ -93,10 +95,10 @@ const handleFileChange = (event) => {
 }
 
 
-
+const memberId = computed(() => userStore.loginUserId);
 const locationMessage = ref('');
-const latitude = ref(50.0000);
-const longitude = ref(50.0000);
+const latitude = ref(0);
+const longitude = ref(0);
 
 function showPosition(position) {
   latitude.value = position.coords.latitude;
@@ -144,6 +146,7 @@ const uploadFile = async () => {
   if (selectedFile.value && title.value && selectedPitch.value !== null) {
     const formData = new FormData();
     formData.append('audioFile', selectedFile.value);
+    formData.append('memberId', memberId.value);
     formData.append('title', title.value);
     formData.append('voiceType', spreadStore.activeTab);
     formData.append('latitude', latitude.value);

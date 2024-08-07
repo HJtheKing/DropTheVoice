@@ -5,8 +5,10 @@ import HomePopularVoices from '@/components/HomePopularVoices.vue';
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useUserStore } from '@/store/user';
 
 const store = useStore();
+const userStore = useUserStore();
 
 const latitude = ref(0);
 const longitude = ref(0);
@@ -24,7 +26,7 @@ function sendMessage() {
                 latitude.value = position.coords.latitude;
                 longitude.value = position.coords.longitude;
                 console.log(latitude.value);
-                store.dispatch('sendMessage',{name:"김병관",x:latitude.value,y:longitude.value});
+                store.dispatch('sendMessage',{number:userStore.loginUserId,x:latitude.value,y:longitude.value});
             },
             (error) => {
                 alert("위치 정보를 가져오는데 실패했습니다: " + error.message);

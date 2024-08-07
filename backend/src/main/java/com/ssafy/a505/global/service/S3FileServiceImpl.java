@@ -43,7 +43,7 @@ public class S3FileServiceImpl implements S3FileService {
 
     // - 파일 업로드 접근 메서드
     @Override
-    public String uploadFile(MultipartFile file, VoiceType category, String title) {
+    public String uploadFile(MultipartFile file, VoiceType category) {
         //파일 비었는지 체크
         if (file.isEmpty() || Objects.isNull(file.getOriginalFilename())) {
             throw new AmazonS3Exception("파일이 비어있습니다");
@@ -52,7 +52,7 @@ public class S3FileServiceImpl implements S3FileService {
         this.validateExtension(file.getOriginalFilename());
 
         //성공로직
-        return this.uploadFileToS3(file, category, title);
+        return this.uploadFileToS3(file, category);
     }
 
     // - 파일 확장자 유효성 검사
@@ -71,8 +71,8 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     // - S3 실제 업로드
-    private String uploadFileToS3(MultipartFile file, VoiceType category, String title) {
-            String s3FileName = getFileFolder(category) + UUID.randomUUID().toString().substring(0, 10) + title;
+    private String uploadFileToS3(MultipartFile file, VoiceType category) {
+            String s3FileName = getFileFolder(category) + UUID.randomUUID().toString().substring(0, 10) + file.getOriginalFilename();
 
             try (InputStream is = file.getInputStream();
                  ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {

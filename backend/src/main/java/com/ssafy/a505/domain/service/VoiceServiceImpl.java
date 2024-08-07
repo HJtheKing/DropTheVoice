@@ -66,7 +66,11 @@ public class VoiceServiceImpl implements VoiceService{
 
     @Override
     public Voice findById(Long id) {
-            return voiceRepository.findById(id).get();
+        Voice voice = voiceRepository.findById(id).get();
+        Member member = memberRepository.findById(voice.getMember().getMemberId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        member.setTotalSpreadCount(member.getTotalSpreadCount() + 1);
+        return voice;
     }
 
     public Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort) {
