@@ -14,7 +14,7 @@ before_script:
 build:
   stage: build
   script:
-    - cat ${APPLICATION_PROD}
+    - echo "${APPLICATION_PROD}" > > src/main/resources/application.yml
 
   only:
     - feat/github-cicd
