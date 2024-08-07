@@ -89,15 +89,20 @@ export const useUserStore = defineStore("user", () => {
   const tryAutoLogin = () => {
     const token = sessionStorage.getItem("access-token");
     if (!token) {
+      router.push({ name: "login" });
       return;
     }
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
     const userId = decodedToken["id"];
+    const userName = decodedToken["name"];
+
+    getUser(userId);
 
     isLogin.value = true;
     loginUserId.value = userId;
+    loginUserName.value = userName;
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    getUser(userId);
+    
   };
 
   // Call tryAutoLogin when the store is initialized

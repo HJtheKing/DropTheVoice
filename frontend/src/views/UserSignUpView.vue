@@ -157,10 +157,10 @@ const submitForm = async () => {
     } catch (error) {
       alert('가입 중 오류가 발생했습니다.');
     }
-  } else if (!duplicateCheck.value) {
-    alert('아이디 중복을 확인해주세요.');
-  } else {
+  } else if (!isFormValid.value) {
     alert('입력된 정보를 확인해주세요.');
+  } else {
+    alert('아이디 중복을 확인해주세요.');
   }
 };
 
