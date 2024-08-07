@@ -1,117 +1,127 @@
 <template>
+  <v-app class="bg-black">
     <v-container fluid>
-    <v-row justify="center">
-      <v-col cols="12" class="text-center">
-        <h1>보관함</h1>
-      </v-col>
-    </v-row>
+      <v-row justify="center">
+        <v-col cols="12" class="text-center">
+          <h1>보관함</h1>
+        </v-col>
+      </v-row>
+    
+      <v-row justify="center">
+        <v-col cols="12" sm="8" md="6">
+          <v-row justify="center">
+            <v-tabs v-model="activeTab" centered background-color="primary" class="mb-4" @click="store.changeTab(activeTab)">
+              <v-tab value="all">줍한 음성 목록</v-tab>
+              <v-tab value="liked">좋아요 음성 목록</v-tab>
+            </v-tabs>
+          </v-row>
+        </v-col>
+      </v-row>
+    
+      <v-row justify="center">
+        <v-col cols="12" sm="8" md="6">
+          <v-row>
+            <v-col cols="12">
+              <v-card class="mb-4 list-items" elevation="2" v-for="voice in filteredVoices" :key="voice.id">
+                <v-row no-gutters @click="getDetail(voice.id)">
+                  <v-col cols="4">
+                    <v-img :src="voice.imageUrl" height="100px" contain></v-img>
+                  </v-col>
+                  <v-col cols="8">
+                    <v-card-title>
+                      <div class="content">
+                        <h3>{{ voice.title }}</h3>
+                        <p>{{ voice.listenCount }} Listeners</p>
+                        <v-avatar size="36">
+                          <img :src="voice.imageUrl" class="avatar-img" />
+                        </v-avatar>
+                        <span class="author-name">{{ voice.userName }}</span>
+                      </div>
+                    </v-card-title>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </v-col>
+          </v-row>
 
-    <v-row justify="center">
-      <v-col cols="12" sm="8" md="6" >
-        <v-row justify="center">
-        <v-tabs v-model="activeTab" centered background-color="primary" class="mb-4">
-          <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">{{ tab.label }}</v-tab>
-        </v-tabs>
-        </v-row>
-      </v-col>
-    </v-row>
-
-    <v-row justify="center">
-      <v-col cols="12" sm="8" md="6">
-        <v-row>
-          <v-col v-for="voice in filteredVoices" :key="voice.id" cols="12" class="mb-2">
-            <v-card>
-              <v-row>
-                <v-col cols="auto">
-                  <v-img :src="voice.image" alt="voice image" class="voice-image"></v-img>
-                </v-col>
-                <v-col>
-                  <v-card-title>{{ voice.title }}</v-card-title>
-                </v-col>
-              </v-row>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
-  </v-container>
+          <!-- 로딩 애니메이션 -->
+          <v-row justify="center" v-if="store.isFetching">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          </v-row>
+        
+          <!-- 더 이상 데이터가 없을 때 표시할 메시지 -->
+          <template v-if="!store.hasMoreVoices && !store.isFetching">
+            <v-alert type="info">모두 다 발견되었어요 🌈</v-alert>
+          </template>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useStorageStore } from '@/store/storage';
 
+const store = useStorageStore();
+
 const activeTab = ref('all');
-const voiceStore = useStorageStore();
 
-const allVoices = computed(() => voiceStore.allVoices);
-const likedVoices = computed(() => voiceStore.likedVoices);
-
+const allVoices = computed(() => store.allVoices);
+const likedVoices = computed(() => store.likedVoices);
 
 const filteredVoices = computed(() => {
   return activeTab.value === 'all' ? allVoices.value : likedVoices.value;
 });
 
-const tabs = [
-  { value: 'all', label: '줍한 음성 목록' },
-  { value: 'liked', label: '좋아요 음성 목록' },
-];
+const handleScroll = () => {
+  const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 10;
+  if (bottomOfWindow && !store.isFetching && store.hasMoreVoices) {
+    store.loadMoreVoices();
+  }
+};
 
-onMounted(async () => {
-  await voiceStore.fetchAllVoices();
-  await voiceStore.fetchLikedVoices();
+onMounted(() => {
+  // store.fetchAllVoices(); // 초기에는 'all' 탭의 첫 페이지 데이터를 불러옴
+  window.addEventListener('scroll', handleScroll);
+
+  // 데이터 초기화 및 다시 로드
+  if (store.activeTab === 'all') {
+    store.reloadAllVoices();
+  } else if (store.activeTab === 'liked') {
+    store.reloadLikedVoices();
+  }
 });
 </script>
 
-<style>
-body {
-  background-color: #000;
-  color: #fff;
-}
-
-.tabs {
-  display: flex;
-  justify-content: center; /* 가운데 정렬 */
-  margin: 20px 0;
-}
-
-
-button {
-  background-color: #444;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  cursor: pointer;
-  margin: 0 2px; /* 버튼 간격을 좁힙니다. */
-}
-
-button.active {
-  background-color: #ff0;
+<style scoped>
+.more-button {
+  background-color: #f3b549;
   color: #000;
+  font-weight: bold;
 }
-
-.voice-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.list-items {
+  background-color: #000;
 }
-
-.voice-item {
-  display: flex;
-  align-items: center;
-  background-color: #aaa;
-  width: 80%;
-  margin: 10px 0;
-  padding: 10px;
+.author-name {
+  color: #fff;
+  font-weight: bold;
 }
-
-.voice-image {
-  width: 50px;
-  height: 50px;
-  margin-right: 20px;
+.avatar-img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
 }
-
-.voice-title {
-  flex: 1;
+h2 {
+  color: #fff;
+  font-weight: bold;
+}
+h3 {
+  color: #fff;
+  margin: 0;
+}
+p {
+  color: #ccc;
+  margin: 0;
 }
 </style>

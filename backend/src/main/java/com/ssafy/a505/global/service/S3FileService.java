@@ -1,4 +1,4 @@
-package com.ssafy.a505.domain.service;
+package com.ssafy.a505.global.service;
 
 import com.ssafy.a505.domain.entity.VoiceType;
 import org.springframework.web.multipart.MultipartFile;
@@ -7,7 +7,7 @@ public interface S3FileService {
 
     String getFileUrl(String fileName);
 
-    String uploadFile(MultipartFile file, VoiceType category);
+    String uploadFile(MultipartFile file, VoiceType category, String title);
 
     void deleteFile(String fileAddress);
 

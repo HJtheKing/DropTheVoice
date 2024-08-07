@@ -22,9 +22,9 @@
         <v-icon>mdi-bell</v-icon>
         <span>알림함</span>
       </v-btn>
-      <v-btn value="더보기">
+      <v-btn value="마이페이지" @click="navigateTo('mypage')">
         <v-icon>mdi-view-grid</v-icon>
-        <span>더보기</span>
+        <span>마이페이지</span>
       </v-btn>
     </v-bottom-navigation>
   </template>
@@ -38,7 +38,13 @@
     },
     methods: {
       navigateTo(routeName) {
+        if (this.$route.name === routeName) {
+        // 이미 해당 경로에 있는 경우 스크롤을 맨 위로 이동
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
         this.$router.push({ name: routeName });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       },
     },
   };
@@ -49,5 +55,34 @@
     background-color: #252836;
     color: #808191;
   }
+
+
+/* 반응형 스타일 */
+@media (max-width: 600px) {
+  .v-btn .v-icon {
+    font-size: 20px;
+  }
+  .v-btn span {
+    font-size: 10px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 960px) {
+  .v-btn .v-icon {
+    font-size: 22px;
+  }
+  .v-btn span {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 961px) {
+  .v-btn .v-icon {
+    font-size: 24px;
+  }
+  .v-btn span {
+    font-size: 12px;
+  }
+}
   </style>
   

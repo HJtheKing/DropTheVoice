@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import java.util.*;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,9 +19,9 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonManagedReference
     private Long memberId; // 유저 아이디
-    String userEmail; // 유저 이메일
-    String userName; // 유저 닉네임
-    String userPassword; // 유저 패스워드
+    String memberEmail; // 유저 이메일
+    String memberName; // 유저 닉네임
+    String memberPassword; // 유저 패스워드
     String profileImgUrl; // 프로필 이미지 URL
     int remainChangeCount; // 남은 음성 변조 수
     int totalSpreadCount; // 총 음성 확산 수
@@ -29,11 +30,11 @@ public class Member {
     @Embedded
     private Coordinate coordinate;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = false)
     @Builder.Default
     private List<Voice> voices = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = false)
     @OrderBy("heartAt ASC")
     private Set<Heart> hearts = new LinkedHashSet<>();
 

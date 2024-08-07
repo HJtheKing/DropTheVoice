@@ -41,6 +41,7 @@ const router = createRouter({
             path: "/audioplayer",
             name: "audioplayer",
             component: () => import('@/views/AudioPlayView.vue')
+        
         },
         {
             path: "/mypage",
@@ -63,10 +64,15 @@ const router = createRouter({
             component: () => import('@/views/StorageView.vue')
         },
         {
-            path: "/test",
-            name: "test",
-            component: () => import('@/views/MyVtest.vue')
+            path: "/mypage/customer-center",
+            name: "customer-center",
+            component: ()=> import('@/views/CustomerCenterView.vue')
         },
+        {
+            path: "/mypage/privacy-policy",
+            name: "privacy-policy",
+            component:() =>import('@/views/PrivacyPolicyVuew.vue')
+        }
     ]
 })
 

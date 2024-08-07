@@ -1,8 +1,7 @@
 <template>
-  <v-app class="black-background">
+  <v-app class="bg-black">
     <v-main>
       <v-container class="custom-container">
-        <!-- 제목 추가 -->
         <v-row justify="center" class="py-4">
           <h1 class="title">Drop The Voice</h1>
         </v-row>
@@ -41,14 +40,12 @@
                 </v-col>
                 <v-col cols="8">
                   <v-card-title>
-                    <div>
                       <h3>{{ item.title }}</h3>
                       <p>{{ item.listeners }} Listeners</p>
                       <v-avatar>
                         <img :src="item.avatar" />
                       </v-avatar>
                       <span>{{ item.author }}</span>
-                    </div>
                   </v-card-title>
                 </v-col>
               </v-row>
@@ -83,36 +80,7 @@
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      activeNav: 'home',
-      popularVoices: [
-        {
-          title: '재미있는 이야기',
-          listeners: '78.4K',
-          author: '김싸피',
-          image: 'path-to-your-image-1',
-          avatar: 'path-to-your-avatar-1',
-        },
-        {
-          title: '무서운 이야기',
-          listeners: '23.5K',
-          author: '김싸피',
-          image: 'path-to-your-image-2',
-          avatar: 'path-to-your-avatar-2',
-        },
-        {
-          title: '스토킹 당하고 있어요',
-          listeners: '20.5K',
-          author: 'Agnes',
-          image: 'path-to-your-image-3',
-          avatar: 'path-to-your-avatar-3',
-        },
-      ],
-    };
-  },
-};
+
 </script>
 
 <style>
@@ -120,10 +88,6 @@ export default {
   max-width: 800px; /* 원하는 너비로 조정 */
   margin: 0 auto;
   padding-bottom: 80px; /* 하단 네비게이션 바 공간 확보 */
-}
-.black-background {
-  background-color: #000;
-  color: #fff;
 }
 .fixed-bottom {
   position: fixed;
