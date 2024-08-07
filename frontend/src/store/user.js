@@ -8,7 +8,7 @@ const REST_USER_API = `http://localhost:8080/api-member`;
 export const useUserStore = defineStore("user", () => {
   const isLogin = ref(false);
   const loginUserId = ref(null);
-  const loginUsername = ref(null);
+  const loginUserName = ref(null);
   const user = ref(null);
 
   const userLogin = function (id, password) {
@@ -28,7 +28,7 @@ export const useUserStore = defineStore("user", () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         isLogin.value = true;
-        loginUsername.value = userName;
+        loginUserName.value = userName;
         loginUserId.value = userId;
 
         getUser(userId);
@@ -48,7 +48,7 @@ export const useUserStore = defineStore("user", () => {
     loginUserId.value = null;
     user.value = null;
     delete axios.defaults.headers.common["Authorization"];
-    router.push("/"); // 홈페이지로 이동
+    router.push("/login"); // 홈페이지로 이동
   };
 
   // 회원가입 메서드

@@ -19,8 +19,13 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
 
-    @Override
+    public MemberResponseDTO getMemberByMemberId(long id){
+        Member member = memberRepository.findByMemberId(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        return MemberResponseDTO.getMember(member);
+    }
 
+    @Override
     public MemberRequestDTO findMemberByName(String name){
         Member member = memberRepository.findByMemberName(name)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_NAME));
@@ -34,18 +39,25 @@ public class MemberServiceImpl implements MemberService {
         return -1;
     }
 
-    // membername 중복 불가
+    // membername 중복 불가(front에서 처리)
     @Override
-    public boolean signup(Member member) {
-        if(member.getMemberName().equals("1234") && member.getMemberPassword().equals("1234")){
-            return true;
-        }
-        return false;
+    public MemberResponseDTO registerMember(MemberRequestDTO memberRequestDto) {
+        Member member = Member.builder()
+                .memberEmail(memberRequestDto.getMemberEmail())
+                .memberName(memberRequestDto.getMemberName())
+                .memberPassword(memberRequestDto.getMemberPassword())
+                .profileImgUrl(memberRequestDto.getProfileImgUrl())
+                .build();
+
+        Member savedMember = memberRepository.save(member);
+
+        return MemberResponseDTO.getMember(savedMember);
     }
 
     @Override
-    public boolean removeUser(String memberId) {
-        return false;
+    public boolean removeUser(long memberId) {
+        memberRepository.deleteById(memberId);
+        return true;
     }
 
     @Override
@@ -65,19 +77,7 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findByMemberName(userName).isPresent();
     }
 
-    @Override
-    public MemberResponseDTO registerMember(MemberRequestDTO memberRequestDto) {
-        Member member = Member.builder()
-                .memberEmail(memberRequestDto.getMemberEmail())
-                .memberName(memberRequestDto.getMemberName())
-                .memberPassword(memberRequestDto.getMemberPassword())
-                .profileImgUrl(memberRequestDto.getProfileImgUrl())
-                .build();
 
-        Member savedMember = memberRepository.save(member);
-
-        return MemberResponseDTO.getMember(savedMember);
-    }
 }
 
 

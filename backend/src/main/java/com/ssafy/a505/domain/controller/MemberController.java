@@ -7,8 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
+import com.ssafy.a505.global.execption.CustomException;
+import com.ssafy.a505.global.execption.ErrorCode;
 import com.ssafy.a505.global.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -16,14 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +46,34 @@ public class MemberController {
     public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
+
+    // 멤버 정보 확인
+    @Operation(summary = "멤버 아이디로 멤버 정보 확인")
+    @GetMapping("{memberId}")
+    public ResponseEntity<MemberResponseDTO> memberDetail(@PathVariable("memberId") long memberId) {
+        MemberResponseDTO memberResponseDTO = memberService.getMemberByMemberId(memberId);
+        if (memberResponseDTO != null) {
+            return new ResponseEntity<>(memberResponseDTO, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    // 이름 중복 여부 확인
+    @Operation(summary = "멤버 아이디로 멤버 정보 확인")
+    @PostMapping("/check-duplicate")
+    public ResponseEntity<String> checkDuplicateName(@RequestBody MemberRequestDTO memberRequestDTO) {
+        String memberName = memberRequestDTO.getMemberName();
+        try {
+            memberService.findMemberByName(memberName);
+            return new ResponseEntity<>(FAIL, HttpStatus.BAD_REQUEST);
+        } catch (CustomException e) {
+            if (e.getErrorCode() == ErrorCode.INVALID_MEMBER_NAME) {
+                return new ResponseEntity<>(SUCCESS, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     // 로그인 요청 검증
     @Operation(summary = "로그인 요청 검증")
@@ -79,15 +103,19 @@ public class MemberController {
     //회원 가입
     @Operation(summary = "회원 가입")
     @PostMapping("/register")
-    public ResponseEntity<?> signup(@RequestBody Member member) {
-        if(memberService.signup(member)) return new ResponseEntity<Member>(member, HttpStatus.CREATED);
-        else return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Boolean> signup(@RequestBody MemberRequestDTO memberRequestDTO) {
+        try{
+            memberService.registerMember(memberRequestDTO);
+            return new ResponseEntity<Boolean>(true, HttpStatus.CREATED);
+        }catch (CustomException e){
+            return new ResponseEntity<Boolean>(false, HttpStatus.BAD_REQUEST);
+        }
     }
 
     // 회원 삭제
     @Operation(summary = "회원 삭제")
     @DeleteMapping("/{userId}")
-    public ResponseEntity<String> delete(@PathVariable("userId") String userId) {
+    public ResponseEntity<String> delete(@PathVariable("userId") long userId) {
         if (memberService.removeUser(userId))
             return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
         return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
