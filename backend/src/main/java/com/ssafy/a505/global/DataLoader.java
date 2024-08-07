@@ -25,9 +25,9 @@ public class DataLoader {
             // 멤버 데이터 생성 및 저장
             Member member1 = Member.builder()
                     .memberId(1L)
-                    .memberEmail("user1@example.com")
-                    .memberName("김병관")
-                    .memberPassword("password1")
+                    .memberEmail("admin@example.com")
+                    .memberName("admin")
+                    .memberPassword("1234")
                     .profileImgUrl("")
                     .remainChangeCount(5)
                     .totalSpreadCount(10)

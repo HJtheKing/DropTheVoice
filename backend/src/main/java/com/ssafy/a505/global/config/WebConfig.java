@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.ssafy.a505.domain.interceptor.JwtInterceptor;
+import com.ssafy.a505.global.interceptor.JwtInterceptor;
 
 //Web 관련 설정
 @Configuration
