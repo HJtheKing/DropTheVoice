@@ -17,4 +17,4 @@ build:
     - echo "${APPLICATION_PROD}" > ~/S11P12A505/backend/src/main/resources/application-prod.properties
 
   only:
-    - feat/github-cicd
+    - master
