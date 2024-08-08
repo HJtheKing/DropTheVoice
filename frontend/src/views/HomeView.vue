@@ -4,10 +4,14 @@ import HomePopularVoices from '@/components/HomePopularVoices.vue';
 
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
+import {createStore} from '@/store/index.js'
 import { useStore } from 'vuex';
 import { useUserStore } from '@/store/user';
 
-const store = useStore();
+// const store = useStore();
+const store= createStore();
+console.log(store);
+
 const userStore = useUserStore();
 
 const latitude = ref(0);

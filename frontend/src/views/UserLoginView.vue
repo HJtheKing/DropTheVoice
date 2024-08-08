@@ -1,4 +1,5 @@
 <template>
+  <WebRtcSendButton/>
   <v-app class="bg-black">
     <v-container class="login-container" max-width="600px">
       <v-form @submit.prevent="login">
@@ -69,6 +70,7 @@
 <script setup>
 import { ref } from "vue";
 import { useUserStore } from "@/store/user";
+import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";
 
 const store = useUserStore();
 const id = ref("");

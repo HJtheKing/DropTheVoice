@@ -4,12 +4,27 @@ import Webstomp from 'webstomp-client';
 
 var latitude = 0.0;
 var longitude = 0.0;
+let pcListMap = new Map();
+let mySessionId;
+let otherSessionIdList = [];
+let sendChannelMap = new Map();
+let dataMap = new Map();
+const peerConfiguration = {
+    iceServers: [
+        {
+            urls: "turn:i11a505.p.ssafy.io",  // TURN 서버의 URL
+            username: "usr",   // TURN 서버의 사용자 이름
+            credential: "pass"  // TURN 서버의 비밀번호
+        }
+    ]
+};
 
 export default createStore({
     state: {
         stompClient: null,
         isConnected: false,
-        messages: []
+        messages: [],
+        sessionId: null,
     },
     mutations: {
         SET_STOMP_CLIENT(state, client) {
@@ -24,32 +39,78 @@ export default createStore({
     },
     actions: {
         connectWebSocket({ commit }) {
-            const uri = 'i11a505.p.ssafy.io';
+            console.log("SJDFLSDLJF");
+            //const uri = 'i11a505.p.ssafy.io';
+            const uri = import.meta.env.VITE_BASE_URL;
             //const uri = 'localhost';
-            const socket = new SockJS('https://'+uri+'/back/stomp/handshake');
-            const stompClient = Webstomp.over(socket);
-
-            stompClient.connect({}, () => {
+            const socket = new SockJS('https://' + uri + '/back/stomp/handshake');
+            this.state.stompClient = Webstomp.over(socket);
+            
+            this.state.stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
-                var url = stompClient.ws._transport.url;
+                var url = this.state.stompClient.ws._transport.url;
                 var urls = url.split('/');
-                var sessionId = urls[6];
-                console.log(sessionId);
+                var mySessionId = urls[6];
+                
+                console.log(mySessionId);
 
-                stompClient.subscribe('/topic/messages/'+sessionId, function(message){
+                this.state.stompClient.subscribe('/topic/messages/' + mySessionId, function (message) {
                     console.log("-----------");
                     console.log(message);
                     const body = JSON.parse(message.body);
                     commit('ADD_MESSAGE', body);
                 });
-                this.dispatch('startSendingMessages','hi');
+                this.state.stompClient.subscribe(`/topic/peer/iceCandidate/${mySessionId}`, candidate => {
+                    const key = JSON.parse(candidate.body).key
+                    const message = JSON.parse(candidate.body).body;
+
+                    // 해당 key에 해당되는 peer 에 받은 정보를 addIceCandidate 해준다.
+                    pcListMap.get(key).addIceCandidate(new RTCIceCandidate({ candidate: message.candidate, sdpMLineIndex: message.sdpMLineIndex, sdpMid: message.sdpMid }));
+
+                });
+
+                //answer peer 교환을 위한 subscribe
+                this.state.stompClient.subscribe(`/topic/peer/answer/${mySessionId}`, answer => {
+                    const key = JSON.parse(answer.body).key;
+                    const message = JSON.parse(answer.body).body;
+
+                    // 해당 key에 해당되는 Peer 에 받은 정보를 setRemoteDescription 해준다.
+                    pcListMap.get(key).setRemoteDescription(new RTCSessionDescription(message));
+
+                });
+
+                //offer peer 교환을 위한 subscribe
+                this.state.stompClient.subscribe(`/topic/peer/offer/${mySessionId}`, offer => {
+                    const key = JSON.parse(offer.body).mySessionId;
+                    const message = JSON.parse(offer.body).body;
+
+                    // 해당 key에 새로운 peerConnection 를 생성해준후 pcListMap 에 저장해준다.
+                    pcListMap.set(key, createPeerConnection(key));
+                    // 생성한 peer 에 offer정보를 setRemoteDescription 해준다.
+
+                    pcListMap.get(key).setRemoteDescription(new RTCSessionDescription({ type: message.type, sdp: message.sdp }));
+                    //sendAnswer 함수를 호출해준다.
+                    sendAnswer(pcListMap.get(key), key);
+
+                });
+
+                //다른사람들의 key 리스트를 받게됨.
+                this.state.stompClient.subscribe(`/topic/others/${mySessionId}`, message => {
+                    const sessions = JSON.parse(message.body);
+                    sessions.forEach(otherSessionId => {
+                        if (!(mySessionId === otherSessionId)) {
+                            otherSessionIdList.push(otherSessionId);
+                        }
+                    });
+                });
+                this.dispatch('startSendingMessages', 'hi');
 
             }, (error) => {
                 console.error('WebSocket error:', error);
             });
 
-            commit('SET_STOMP_CLIENT', stompClient);
+            commit('SET_STOMP_CLIENT', this.state.stompClient);
         },
         disconnectWebSocket({ state, commit }) {
             if (state.stompClient) {
@@ -111,4 +172,113 @@ function getGeo() {
             reject(new Error("위치 정보를 가져오는데 실패했습니다: "));
         }
     })
+}
+
+const setLocalAndSendMessage = (pc, sessionDescription) => {
+    pc.setLocalDescription(sessionDescription);
+}
+
+const sendAnswer = (pc, otherSessionId) => {
+    pc.createAnswer().then(answer => {
+        setLocalAndSendMessage(pc, answer);
+        this.state.stompClient.send(`/ws/peer/answer/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+            key: mySessionId,
+            body: answer
+        }));
+        console.log('Send answer');
+    });
+};
+
+const onIceCandidate = (event, otherSessionId) => {
+    if (event.candidate) {
+        console.log('ICE candidate');
+        this.state.stompClient.send(`/ws/peer/iceCandidate/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+            key: mySessionId,
+            body: event.candidate
+        }));
+    }
+};
+
+let onTrack = (event, otherSessionId) => {
+
+    if (document.getElementById(`${otherSessionId}`) === null) {
+        const video = document.createElement('video');
+
+        video.autoplay = true;
+        video.controls = true;
+        video.id = otherSessionId;
+        video.srcObject = event.streams[0];
+
+        document.getElementById('remoteStreamDiv').appendChild(video);
+    }
+};
+
+const createPeerConnection = (otherSessionID) => {
+    const pc = new RTCPeerConnection(peerConfiguration);
+    var conn2;
+    try {
+        pc.addEventListener('icecandidate', (event) => {
+            onIceCandidate(event, otherSessionID);
+        });
+        pc.addEventListener('track', (event) => {
+            onTrack(event, otherSessionID);
+        });
+        pc.addEventListener('datachannel', (event) => {
+            console.log('connected to data channel');
+            conn2 = event.channel;
+            conn2.sessionId = otherSessionID;
+            event.channel.onmessage = function (evt) {
+                accumulateStringData(conn2.sessionId, evt.data);
+            };
+        })
+
+        let channel = pc.createDataChannel('temp channel');
+        sendChannelMap.set(otherSessionID, channel);
+
+        channel.onmessage = function (msg) {
+            console.log("sended message is " + msg);
+        };
+        console.log('PeerConnection created');
+    } catch (error) {
+        console.error('PeerConnection failed: ', error);
+    }
+    return pc;
+}
+
+function accumulateStringData(otherSessionId, data) {
+    if (data === "end") {
+        let finalData = dataMap.get(otherSessionId);
+        handleReceiveMessage(finalData);
+    } else {
+        if (dataMap.get(otherSessionId) == null) {
+            let temp = [];
+            temp.push(data);
+            dataMap.set(otherSessionId, temp);
+        } else {
+            dataMap.get(otherSessionId).push(data);
+        }
+    }
+}
+
+function handleReceiveMessage(data) {
+    let receiveFileInfo = document.querySelector('#receiveFileInfo');
+    let totalLength = 0;
+    blobs = []
+    data.forEach(part => {
+        let binaryString = atob(part);
+        let len = binaryString.length;
+        totalLength += len;
+        let bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        let blob = new Blob([bytes]) ; //, { type: 'audio/mp3' }); // or other appropriate MIME type
+        blobs.push(blob);
+    });
+
+    let largeBlob = new Blob(blobs, { type: 'audio/mp3' });
+
+    let url = URL.createObjectURL(largeBlob);
+    receiveFileInfo.innerHTML += `<p>Received file chunk. <a href="${url}" download="received.mp3">Download</a></p>`;
+    console.log("done!!!!!!!!!!!!!!!!!!!");
 }
