@@ -74,7 +74,7 @@ const sortOptions = [
 
 async function fetchVoiceDetail(voiceId) {
   try {
-    const res = await axios.get(`http://localhost:8080/api-voice/best-voice/${voiceId}`);
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`);
     voiceDetail.value = res.data;
     console.log(res.data);
   } catch (error) {
@@ -87,7 +87,7 @@ async function fetchBestVoices(page = 1) {
   isFetching.value = true;
 
   try {
-    const res = await axios.get(`http://localhost:8080/api-voice/search/${page}/${pageSize.value}`, {
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/search/${page}/${pageSize.value}`, {
       params: {
         keyword: searchQuery.value || '',
         sort: sortOption.value

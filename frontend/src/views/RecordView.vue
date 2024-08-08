@@ -106,7 +106,7 @@ const sendVoiceInfoToServer = (lat, lon) => {
   formData.append('voiceUrl', mp3Url);
   formData.append('voiceFile', mp3Blob);
 
-  axios.post('http://localhost:8080/api-record/record', formData)
+  axios.post('${import.meta.env.VITE_BASE_URL}/api-record/record', formData)
     .then(response => {
       console.log('Location sent to server:', response.data);
     })
