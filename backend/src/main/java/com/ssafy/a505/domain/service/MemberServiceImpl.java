@@ -56,8 +56,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean removeUser(long memberId) {
-        memberRepository.deleteById(memberId);
-        return true;
+        if (memberRepository.existsById(memberId)) {
+            memberRepository.deleteById(memberId);
+            return true;
+        }
+        return false;
     }
 
     @Override

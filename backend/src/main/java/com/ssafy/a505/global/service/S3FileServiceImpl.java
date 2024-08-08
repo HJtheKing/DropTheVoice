@@ -59,7 +59,7 @@ public class S3FileServiceImpl implements S3FileService {
     private void validateExtension(String filename) {
         int lastDotIndex = filename.lastIndexOf(".");
         if (lastDotIndex == -1) {
-            throw new AmazonS3Exception("확장자명에 문제가 있습니다");
+            throw new AmazonS3Exception("파일명 문제가 있습니다.");
         }
 
         String extension = filename.substring(lastDotIndex + 1).toLowerCase();

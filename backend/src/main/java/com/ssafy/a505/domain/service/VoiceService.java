@@ -14,6 +14,8 @@ public interface VoiceService {
 
     List<Voice> getVoiceOrderByHeartCountDesc(int page, int size);
 
+    List<Voice> getAllVoice();
+
     List<Voice> findByTitleContaining(String userNam, Pageable pageable);
 
     List<Voice> findAllByTitle(String title, Pageable pageable);

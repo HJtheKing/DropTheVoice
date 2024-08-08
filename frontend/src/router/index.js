@@ -72,6 +72,11 @@ const router = createRouter({
             path: "/mypage/privacy-policy",
             name: "privacy-policy",
             component:() =>import('@/views/PrivacyPolicyVuew.vue')
+        },
+        {
+            path: "/spread/upload",
+            name: "upload-voice",
+            component:() => import('@/views/UploadVoiceView.vue')
         }
     ]
 })

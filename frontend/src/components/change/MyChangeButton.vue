@@ -35,8 +35,9 @@ const member = computed(() => userStore.user);
 
 const recordStore = useRecordStore();
 
-function tst(){
-  console.log(member.value.remainChangeCount);
+function tst() {
+  if (!recordStore.audioBlob) return;
+  navigateTo('upload-voice');
 }
 
 function navigateTo(routeName) {
@@ -46,91 +47,6 @@ function navigateTo(routeName) {
 onMounted(() =>{
   userStore.tryAutoLogin();
 })
-
-// const memberId = computed(() => userStore.loginUserId);
-// const locationMessage = ref('');
-// const latitude = ref(0);
-// const longitude = ref(0);
-
-// function showPosition(position) {
-//   latitude.value = position.coords.latitude;
-//   longitude.value = position.coords.longitude;
-//   locationMessage.value = `Latitude: ${latitude.value} | Longitude: ${longitude.value}`;
-//   console.log(locationMessage.value);
-// }
-
-// function showError(error) {
-//   switch(error.code) {
-//     case error.PERMISSION_DENIED:
-//       locationMessage.value = 'User denied the request for Geolocation.';
-//       break;
-//     case error.POSITION_UNAVAILABLE:
-//       locationMessage.value = 'Location information is unavailable.';
-//       break;
-//     case error.TIMEOUT:
-//       locationMessage.value = 'The request to get user location timed out.';
-//       break;
-//     case error.UNKNOWN_ERROR:
-//       locationMessage.value = 'An unknown error occurred.';
-//       break;
-//   }
-// };
-
-// function getLocation() {
-//   return new Promise((resolve, reject) => {
-//     if (navigator.geolocation) {
-//       navigator.geolocation.getCurrentPosition(resolve, reject);
-//     } else {
-//       reject(new Error('Geolocation is not supported by this browser.'));
-//     }
-//   });
-// }
-
-// const uploadFile = async () => {
-//   try {
-//     // 위치 정보 가져오기
-//     const position = await getLocation();
-//     showPosition(position);
-//   } catch (error) {
-//     showError(error);
-//   }
-
-//   if (selectedFile.value && title.value && selectedPitch.value !== null) {
-//     const formData = new FormData();
-//     formData.append('audioFile', selectedFile.value);
-//     formData.append('memberId', memberId.value);
-//     formData.append('title', title.value);
-//     formData.append('voiceType', spreadStore.activeTab);
-//     formData.append('latitude', latitude.value);
-//     formData.append('longitude', longitude.value);
-
-//     let pitchShift = 0;
-//     if (selectedPitch.value === '높게') {
-//       pitchShift = 3;
-//     } else if (selectedPitch.value === '낮게') {
-//       pitchShift = -3;
-//     }
-//     formData.append('pitchShift', pitchShift);
-
-//     uploadStatus.value = '업로드 중...';
-
-//     try { 
-//       console.log(latitude.value)
-//       const response = await axios.post('http://localhost:8080/api-upload/upload', formData, {
-//         headers: {
-//           'Content-Type': 'multipart/form-data'
-//         }
-//       });
-//       console.log('File uploaded successfully:', response.data);
-//       videoUrl.value = response.data.videoUrl || response.data.processedPath;
-//       uploadStatus.value = '업로드 성공';
-//     } catch (error) {
-//       uploadStatus.value = '업로드 실패';
-//     }
-//   } else {
-//     uploadStatus.value = '모든 빈칸을 채워주세요.';
-//   }
-// }
 </script>
 
 <style scoped>

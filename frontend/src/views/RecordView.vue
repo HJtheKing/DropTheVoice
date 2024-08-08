@@ -14,8 +14,7 @@
         <MyRecordButton ref="myRecordButton" />
         <audio-player ref="audioPlayer" />
         <v-row justify="center">
-          <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기 테스트</v-btn>
-          <v-btn class="load-btn" @click="navigateTo('change')">업로드</v-btn>
+          <v-btn class="load-btn" @click="navigateTo('upload-voice')">업로드</v-btn>
         </v-row>
       </v-container>
     </v-main>
@@ -35,15 +34,6 @@ import { storeToRefs } from 'pinia';
 import * as lamejs from '@breezystack/lamejs';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-////////////////////////////// 테스트용 ////////////////////////////////////
-import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
-function playSampleAudio() {
-  if (audioPlayer.value) {
-    audioPlayer.value.loadAudio(audioFile);
-  }
-}
-///////////////////////////////////////////////////////////////////////////
-
 const audioPlayer = ref(null);
 const myRecordButton = ref(null);
 const locationMessage = ref('');

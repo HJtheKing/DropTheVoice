@@ -76,7 +76,6 @@ async function fetchVoiceDetail(voiceId) {
   try {
     const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`);
     voiceDetail.value = res.data;
-    console.log(res.data);
   } catch (error) {
     console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
   }

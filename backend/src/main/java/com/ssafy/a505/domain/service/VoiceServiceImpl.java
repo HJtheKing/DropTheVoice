@@ -36,6 +36,11 @@ public class VoiceServiceImpl implements VoiceService{
     }
 
     @Override
+    public List<Voice> getAllVoice() {
+        return voiceRepository.findAll();
+    }
+
+    @Override
     public List<Voice> findByMemberWithHeart(Long memberId, Pageable pageable) {
         return voiceRepository.findByMemberWithHeart(memberId, pageable);
     }

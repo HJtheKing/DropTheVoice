@@ -57,6 +57,7 @@
 <script setup>
 import { computed } from "vue";
 import { useUserStore } from "@/store/user";
+import router from "@/router";
 
 const userStore = useUserStore();
 const member = computed(() => userStore.user);
@@ -67,10 +68,15 @@ const logout = () => {
 };
 
 const confirmUnsign = () => {
-  if (confirm("정말로 회원탈퇴를 진행하시겠습니까?")) {
+  console.log(userStore.loginUserId)
+  if (confirm("회원탈퇴를 하면 연관된 모든 데이터가 삭제됩니다. 진행하겠습니까?")) {
     unsign();
   }
 };
+
+function navigateTo(routeName) {
+  router.push({ name: routeName });
+}
 
 const unsign = function () {
   userStore.deleteUser(loginUserId.value);
