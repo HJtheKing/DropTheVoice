@@ -1,23 +1,16 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const voices = ref([]);
-const voiceDetail = ref();
+const voiceDetail = ref([]);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const isFetching = ref(false);
 const hasMoreVoices = ref(true);
+const router = useRouter();
 
-async function fetchVoiceDetail(voiceId) {
-  try {
-    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`);
-    voiceDetail.value = res.data;
-    console.log(res.data);
-  } catch (error) {
-    console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
-  }
-}
 
 async function fetchBestVoices(page = 1) {
   if (isFetching.value || !hasMoreVoices.value) return;
@@ -36,8 +29,8 @@ async function fetchBestVoices(page = 1) {
   }
 }
 
-function getDetail(id) {
-  fetchVoiceDetail(id);
+function navigateToDetail(id) {
+  router.push({ name: 'audioplayer', params: { id } });
 }
 
 const handleScroll = () => {
@@ -76,7 +69,7 @@ onMounted(() => {
     <v-row>
       <v-col cols="12">
         <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in voices" :key="index"
-                @click="getDetail(item.id)">
+                @click="navigateToDetail(item.id)">
           <v-row no-gutters>
             <v-col cols="4">
               <v-img :src="item.imageUrl" height="100px" contain></v-img>
