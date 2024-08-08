@@ -15,6 +15,7 @@
         <audio-player ref="audioPlayer" />
         <v-row justify="center">
           <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기 테스트</v-btn>
+          <v-btn class="load-btn" @click="navigateTo('change')">업로드</v-btn>
         </v-row>
       </v-container>
     </v-main>
@@ -33,7 +34,7 @@ import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import * as lamejs from '@breezystack/lamejs';
 import axios from 'axios';
-
+import { useRouter } from 'vue-router';
 ////////////////////////////// 테스트용 ////////////////////////////////////
 import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
 function playSampleAudio() {
@@ -50,6 +51,7 @@ const spreadStore = useSpreadStore();
 const recordStore = useRecordStore();
 
 const { audioBlob } = storeToRefs(recordStore);
+const router = useRouter();
 
 let mp3Blob = null;
 let mp3Url = null;
@@ -151,6 +153,11 @@ async function convertWavToMp3(wavBlob) {
     reader.onerror = reject;
     reader.readAsArrayBuffer(wavBlob);
   });
+}
+
+function navigateTo(routeName) {
+  if (!audioBlob.value) return;
+  router.push({ name: routeName });
 }
 </script>
 
