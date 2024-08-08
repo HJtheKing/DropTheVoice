@@ -150,7 +150,7 @@ async function navigateTo(routeName) {
   const mp3Blob = await convertWavToMp3(audioBlob.value);
   const base64Data = await blobToBase64(mp3Blob);
 
-  localStorage.setItem('recordData', JSON.stringify(base64Data));
+  localStorage.setItem('recordData', base64Data);
   router.push({ name: routeName });
 }
 function blobToBase64(blob) {

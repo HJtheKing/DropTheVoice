@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+
 @Slf4j
 @RestController
 @RequestMapping("/api-upload")
@@ -34,7 +37,7 @@ public class UploadController {
                                          @RequestParam("pitchShift") float pitchShift) throws JsonProcessingException {
         VoiceCreateRequestDTO voiceCreateRequestDTO = new VoiceCreateRequestDTO(memberId, title, audioFile);
         Voice voice = voiceUploadService.uploadAndSendVoice(voiceCreateRequestDTO, pitchShift);
-        log.info("latitude: {}, longitude: {}, voiceType: {}", latitude, longitude, voiceType);
+        log.info("latitude: {}, longitude: {}, voiceType: {}, memberId: {}", latitude, longitude, voiceType, memberId);
         voice.setLatitude(latitude);
         voice.setLongitude(longitude);
         voiceRepository.save(voice);
