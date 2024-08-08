@@ -2,7 +2,7 @@
   <v-container class="py-8">
     <v-row justify="center" align="center" class="fill-height">
       <v-col cols="6" xs="12" class="d-flex justify-center">
-        <v-card class="main-button" elevation="2" @click="navigateTo('spread')">
+        <v-card class="main-button" elevation="2" @click="recordStore.uploadFile()">
           <v-card-text class="text-center align-center">
             <v-icon class="main-button-icon">mdi-send</v-icon>
             <div class="main-button-text">원본 업로드</div>
@@ -11,10 +11,10 @@
       </v-col>
       <v-col cols="6" xs="12" class="d-flex justify-center">
         <v-card class="main-button" elevation="2" @click="tst()">
-          <v-card-text class="text-center align-center">
+          <v-card-text v-if="member" class="text-center align-center">
             <v-icon class="main-button-icon">mdi-headphones</v-icon>
             <div class="main-button-text">음성변조</div>
-            <div class="small-text">남은횟수 : {{ changeCnt }}</div>
+            <div class="small-text">남은횟수 : {{ member.remainChangeCount }}</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -24,20 +24,28 @@
 
 <script setup>
 import { useUserStore } from '@/store/user';
+import { useRecordStore } from '@/store/record';
+import { computed , onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 const userStore = useUserStore();
-const changeCnt = userStore.changeCnt;
+const member = computed(() => userStore.user);
+
+const recordStore = useRecordStore();
 
 function tst(){
-  console.log(changeCnt);
+  console.log(member.value.remainChangeCount);
 }
 
 function navigateTo(routeName) {
   router.push({ name: routeName });
 }
+
+onMounted(() =>{
+  userStore.tryAutoLogin();
+})
 
 // const memberId = computed(() => userStore.loginUserId);
 // const locationMessage = ref('');

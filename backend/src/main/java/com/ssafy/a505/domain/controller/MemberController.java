@@ -90,7 +90,7 @@ public class MemberController {
         if(memberID != -1) {
             // 토큰 만들어서 넘김
             result.put("message", SUCCESS);
-            result.put("access-token", jwtUtil.createTokenV2(memberRequestDTO.getMemberName(), memberID, findMemberDto.getRemainChangeCount()));
+            result.put("access-token", jwtUtil.createToken(memberRequestDTO.getMemberName(), memberID));
             // id 같이 보내면 덜 번거로움
             status = HttpStatus.ACCEPTED;
         }else {
