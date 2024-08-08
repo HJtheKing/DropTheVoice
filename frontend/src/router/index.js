@@ -54,11 +54,6 @@ const router = createRouter({
             component: () => import('@/views/RecordView.vue')
         },
         {
-            path: "/change",
-            name: "change",
-            component: () => import('@/views/ChangeVoiceView.vue')
-        },
-        {
             path: "/storage",
             name: "storage",
             component: () => import('@/views/StorageView.vue')
