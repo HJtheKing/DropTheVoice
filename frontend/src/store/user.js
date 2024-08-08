@@ -64,6 +64,16 @@ export const useUserStore = defineStore("user", () => {
       });
   };
 
+  // 비밀번호 변경
+  const changePassword = function (oldPassword, newPassword){
+    axios
+      .post(`${REST_USER_API}/changePassword`, {
+        memberName : loginUserName.value,
+        oldPassword : oldPassword,
+        newPassword : newPassword
+      })
+  }
+
   // 유저 정보 가져오기
   const getUser = function (userId) {
     axios.get(`${REST_USER_API}/${userId}`).then((response) => {
@@ -96,12 +106,12 @@ export const useUserStore = defineStore("user", () => {
     const userId = decodedToken["id"];
     const userName = decodedToken["name"];
 
-    getUser(userId);
-
     isLogin.value = true;
     loginUserId.value = userId;
     loginUserName.value = userName;
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+    getUser(userId);
     
   };
 
@@ -120,5 +130,6 @@ export const useUserStore = defineStore("user", () => {
     getUser,
     deleteUser,
     tryAutoLogin,
+    changePassword,
   };
 });

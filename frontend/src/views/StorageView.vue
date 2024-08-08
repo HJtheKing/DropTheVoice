@@ -62,8 +62,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useStorageStore } from '@/store/storage';
+import { useUserStore } from "@/store/user";
 
 const store = useStorageStore();
+const userStore = useUserStore();
 
 const activeTab = ref('all');
 
@@ -82,6 +84,7 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
+  userStore.tryAutoLogin();
   // store.fetchAllVoices(); // 초기에는 'all' 탭의 첫 페이지 데이터를 불러옴
   window.addEventListener('scroll', handleScroll);
 

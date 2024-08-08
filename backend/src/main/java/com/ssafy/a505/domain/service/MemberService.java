@@ -1,6 +1,7 @@
 package com.ssafy.a505.domain.service;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 
@@ -19,6 +20,9 @@ public interface MemberService {
 
     //회원 탈퇴
     boolean removeUser(long memberId);
+
+    //비밀번호 변경
+    boolean changePassword(PasswordRequestDTO passwordRequestDTO);
 
     // 유저 이미지 변경
     boolean setUserImg(String memberId, String newImageName);

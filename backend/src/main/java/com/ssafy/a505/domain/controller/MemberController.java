@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
@@ -36,8 +37,8 @@ public class MemberController {
     // 응답을 편하게 하기 위해 상수로 지정
     private static final String SUCCESS = "success";
     private static final String FAIL = "fail";
-
     private final MemberService memberService;
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -119,6 +120,19 @@ public class MemberController {
             return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
         return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
     }
+
+    // 비밀번호 변경
+    @Operation(summary = "회원 삭제")
+    @PostMapping("/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody PasswordRequestDTO passwordRequestDTO) {
+        System.out.println(passwordRequestDTO.getMemberName()+" "+passwordRequestDTO.getOldPassword()+" "+passwordRequestDTO.getNewPassword());
+        System.out.println("비밀번호 변경 시작");
+        if (memberService.changePassword(passwordRequestDTO)) {
+            return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
+        }
+        return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
+    }
+
 
     @GetMapping("/image/{userImgUrl}")
     public ResponseEntity<?> getImage(@PathVariable String userImgUrl) {

@@ -41,7 +41,7 @@
             <v-list-item @click="logout">
               <v-list-item-title>로그아웃</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="navigate('password-change')">
+            <v-list-item @click="openPasswordChangeModal">
               <v-list-item-title>비밀번호 변경</v-list-item-title>
             </v-list-item>
             <v-list-item @click="confirmUnsign">
@@ -50,20 +50,24 @@
           </v-list>
         </v-card-text>
       </v-container>
+      <ChangePassword ref="changePasswordModal" />
     </v-main>
   </v-app>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { useUserStore } from "@/store/user";
 import { useRouter } from 'vue-router';
+import ChangePassword from '@/views/ChangePasswordView.vue';
 
 const userStore = useUserStore();
 const router = useRouter();
 
 const member = computed(() => userStore.user);
 const loginUserId = computed(() => userStore.loginUserId);
+
+const changePasswordModal = ref(null);
 
 const logout = () => {
   userStore.logout();
@@ -83,8 +87,10 @@ const navigate = (routeName) => {
   router.push({ name: routeName });
 };
 
+const openPasswordChangeModal = () => {
+  changePasswordModal.value.openDialog();
+};
 </script>
-
 
 <style scoped>
 .mypage-container {
