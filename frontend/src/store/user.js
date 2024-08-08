@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import router from "@/router";
 import axios from "axios";
 
-const REST_USER_API = `http://localhost:8080/api-member`;
+const REST_USER_API = `${import.meta.env.VITE_BASE_URL}/api-member`;
 
 export const useUserStore = defineStore("user", () => {
   const isLogin = ref(false);

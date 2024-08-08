@@ -164,7 +164,7 @@ const uploadFile = async () => {
 
     try { 
       console.log(latitude.value)
-      const response = await axios.post('http://localhost:8080/api-upload/upload', formData, {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api-upload/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
