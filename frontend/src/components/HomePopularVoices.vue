@@ -1,30 +1,23 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import {onMounted, ref} from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const voices = ref([]);
-const voiceDetail = ref();
+const voiceDetail = ref([]);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const isFetching = ref(false);
 const hasMoreVoices = ref(true);
+const router = useRouter();
 
-async function fetchVoiceDetail(voiceId) {
-  try {
-    const res = await axios.get(`http://localhost:8080/api-voice/best-voice/${voiceId}`);
-    voiceDetail.value = res.data;
-    console.log(res.data);
-  } catch (error) {
-    console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
-  }
-}
 
 async function fetchBestVoices(page = 1) {
   if (isFetching.value || !hasMoreVoices.value) return;
   isFetching.value = true;
 
   try {
-    const res = await axios.get(`http://localhost:8080/api-voice/best-heart-voice/${page}/${pageSize.value}`);
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-heart-voice/${page}/${pageSize.value}`);
     if (res.data.length < pageSize.value) {
       hasMoreVoices.value = false;
     }
@@ -36,8 +29,8 @@ async function fetchBestVoices(page = 1) {
   }
 }
 
-function getDetail(id) {
-  fetchVoiceDetail(id);
+function navigateToDetail(id) {
+  router.push({ name: 'audioplayer', params: { id } });
 }
 
 const handleScroll = () => {
@@ -75,7 +68,8 @@ onMounted(() => {
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in voices" :key="index" @click="getDetail(item.id)">
+        <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in voices" :key="index"
+                @click="navigateToDetail(item.id)">
           <v-row no-gutters>
             <v-col cols="4">
               <v-img :src="item.imageUrl" height="100px" contain></v-img>
@@ -86,7 +80,7 @@ onMounted(() => {
                   <h3>{{ item.title }}</h3>
                   <p>{{ item.listenCount }} Listeners</p>
                   <v-avatar size="36">
-                    <img :src="item.imageUrl" class="avatar-img" />
+                    <img :src="item.imageUrl" class="avatar-img"/>
                   </v-avatar>
                   <span class="author-name">{{ item.userName }}</span>
                 </div>
@@ -156,7 +150,7 @@ h3 {
 
 p {
   color: #ccc;
-  margin: 0; 
+  margin: 0;
 }
 
 /* 반응형 스타일 */

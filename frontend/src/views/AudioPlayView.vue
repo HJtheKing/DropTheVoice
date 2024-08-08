@@ -3,20 +3,17 @@
     <v-main>
       <v-container class="custom-container">
         <v-row justify="center" class="py-4">
-          <h2>{{ selectedItem.title }}</h2>
+          <h2>{{ voice.title }}</h2>
         </v-row>
-        <v-row>
-          <v-img :src="selectedItem.imgURL" height="300px" contain></v-img>
-        </v-row>
-        <v-row justify="center" class="py-4">
-          <h2>{{ selectedItem.title }}</h2>
+        <v-row justify="center">
+          <v-img :src="voice.imgURL" height="300px" contain></v-img>
         </v-row>
         <v-row justify="center" class="py-4">
-          <h3>사연자: {{ selectedItem.author }}</h3>
+          <h3>사연자: {{ voice.voiceId }}</h3>
         </v-row>
         <v-row>
           <v-container class="audio-play">
-            <audio-player ref="audioPlayer"></audio-player>
+            <audio-player ref="audioPlayer" :src="voice.audioUrl"></audio-player>
             <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기</v-btn>
           </v-container>
         </v-row>
@@ -24,21 +21,34 @@
     </v-main>
   </v-app>
 </template>
-
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 import { useSeletedTrackStore } from '@/store/playList.js';
 import AudioPlayer from '@/components/AudioPlayer.vue';
-import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
+
+const route = useRoute();
+const voice = ref({});
+const audioPlayer = ref(null);
+
+onMounted(async () => {
+  const voiceId = route.params.id;
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/${voiceId}`);
+    voice.value = res.data;
+    console.log(voice.value)
+  } catch (error) {
+    console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
+  }
+});
 
 const store = useSeletedTrackStore();
 const selectedItem = computed(() => store.getSelectedItem);
 
-const audioPlayer = ref(null);
-
 function playSampleAudio() {
   if (audioPlayer.value) {
-    audioPlayer.value.loadAudio(audioFile);
+    audioPlayer.value.loadAudio(voice.value.audioUrl);
   }
 }
 
@@ -48,7 +58,6 @@ onMounted(() => {
   }
 });
 </script>
-
 <style scoped>
 .custom-container {
   max-width: 800px;

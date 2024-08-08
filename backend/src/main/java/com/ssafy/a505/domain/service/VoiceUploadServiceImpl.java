@@ -81,7 +81,7 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         processedVoice.setVoice(voice);
         processedVoice.setProcessedPath(processedPath);
         processedVoice.setVoiceType(VoiceType.Processed);
-
+        member.setRemainChangeCount(member.getRemainChangeCount() - 1);
         voice.addProcessedVoice(processedVoice);
 
         voiceRepository.save(voice); // 변경된 Voice 저장

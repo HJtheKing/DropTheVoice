@@ -61,11 +61,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStorageStore } from '@/store/storage';
 import { useUserStore } from "@/store/user";
 
 const store = useStorageStore();
 const userStore = useUserStore();
+const router = useRouter();
 
 const activeTab = ref('all');
 
@@ -75,6 +77,10 @@ const likedVoices = computed(() => store.likedVoices);
 const filteredVoices = computed(() => {
   return activeTab.value === 'all' ? allVoices.value : likedVoices.value;
 });
+
+const navigateToDetail = (id) => {
+  router.push({ name: 'audioplayer', params: { id } });
+};
 
 const handleScroll = () => {
   const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 10;
@@ -95,6 +101,7 @@ onMounted(() => {
     store.reloadLikedVoices();
   }
 });
+
 </script>
 
 <style scoped>

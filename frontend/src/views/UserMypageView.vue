@@ -92,6 +92,7 @@ const openPasswordChangeModal = () => {
 };
 </script>
 
+
 <style scoped>
 .mypage-container {
   max-width: 600px;

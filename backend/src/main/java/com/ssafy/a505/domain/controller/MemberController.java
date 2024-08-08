@@ -7,13 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
-import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
 import com.ssafy.a505.global.util.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -37,8 +38,8 @@ public class MemberController {
     // 응답을 편하게 하기 위해 상수로 지정
     private static final String SUCCESS = "success";
     private static final String FAIL = "fail";
-    private final MemberService memberService;
 
+    private final MemberService memberService;
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -85,6 +86,7 @@ public class MemberController {
         Map<String, Object> result = new HashMap<>();
 
         long memberID = memberService.login(memberRequestDTO);
+        MemberResponseDTO findMemberDto = memberService.getMemberByMemberId(memberID);
         if(memberID != -1) {
             // 토큰 만들어서 넘김
             result.put("message", SUCCESS);

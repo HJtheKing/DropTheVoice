@@ -58,8 +58,13 @@ public class VoiceController {
 
 
     @GetMapping("/best-voice/{voice_id}")
-    public ResponseEntity<?> getVoiceDetail(@PathVariable("voice_id") Long voiceId){
+    public ResponseEntity<?> getVoiceDetail(@PathVariable("voice_id") Long voiceId) {
         Voice result = voiceService.findById(voiceId);
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/all-voices")
+    public ResponseEntity<?> getAllVoices() {
+        return new ResponseEntity<>(voiceService.getAllVoice(), HttpStatus.OK);
     }
 }

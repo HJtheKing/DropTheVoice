@@ -72,8 +72,11 @@ public class MemberServiceImpl implements MemberService {
     //회원 삭제
     @Override
     public boolean removeUser(long memberId) {
-        memberRepository.deleteById(memberId);
-        return true;
+        if (memberRepository.existsById(memberId)) {
+            memberRepository.deleteById(memberId);
+            return true;
+        }
+        return false;
     }
 
     //비밀번호 변경
