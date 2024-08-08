@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  mysql:  
+  mysql:
     image: mysql:8.0
     container_name: mysql-container
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
     restart: always
     container_name: flask
     ports:
-      - 5001:5000
+      - 5000:5000
 
 volumes:
   esdata1:

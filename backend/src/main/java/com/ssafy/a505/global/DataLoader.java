@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Random;
 
 @Configuration
 @RequiredArgsConstructor
@@ -46,6 +48,43 @@ public class DataLoader {
             memberRepository.save(member1);
             memberRepository.save(member2);
 
+            List<String> titles = List.of(
+                    "오늘 힘든일이 있었어요", "오늘 꿀잼썰", "여러분 이거 아세요?", "오늘 기분 최고!",
+                    "속상한 일이 있었어요", "재밌는 이야기 해드릴게요", "오늘 먹은 맛있는 음식",
+                    "산책 중 만난 강아지", "이상한 경험담", "행복했던 순간", "감동적인 이야기",
+                    "오늘의 운세", "오늘 만난 사람", "기쁜 소식", "슬픈 소식",
+                    "우울할 때 들으면 좋은 노래", "스트레스 해소법", "오늘의 명언", "새로운 취미",
+                    "여행 가고 싶어요", "맛집 추천", "영화 감상 후기", "책 추천", "오늘의 운동",
+                    "재미있는 퀴즈", "유익한 정보", "고민 상담", "오늘의 목표", "작은 성취", "뜻밖의 발견"
+            );
+
+            Long k = 1L;
+            Random random = new Random();
+            for (int i = 0; i < 30; i++) {
+                long heartCount = random.nextInt(300) + 1;
+                long listenCount = random.nextInt(300) + 1;
+                Voice voice = Voice.builder()
+                        .voiceId(k)
+                        .member(member1)
+                        .title(titles.get(i % titles.size()))
+                        .imageUrl("https://picsum.photos/id/" + random.nextInt(300) + "/200/300")
+                        .originalName("original" + i + ".mp3")
+                        .savePath("http://example.com/audio" + i + ".mp3")
+                        .saveFolder("folder" + i)
+                        .latitude(37.5 + random.nextDouble() * 0.1)
+                        .longitude(127.0 + random.nextDouble() * 0.1)
+                        .heartCount(heartCount)
+                        .listenCount(listenCount)
+                        .voiceType(VoiceType.Processed)
+                        .build();
+                ProcessedVoice processedVoice = ProcessedVoice.builder()
+                        .processedPath("http://example.com/processed" + i + ".mp3")
+                        .voice(voice)
+                        .voiceType(VoiceType.Processed)
+                        .build();
+                k++;
+                voiceRepository.save(voice);
+            }
             // 보이스 데이터 생성 및 저장
             Voice voice1 = Voice.builder()
                     .voiceId(1L)
@@ -71,7 +110,7 @@ public class DataLoader {
                     .savePath("/voices/voice2.mp3")
                     .saveFolder("/voices/")
                     .latitude(37.7749)
-                    .longitude(-122.4194)
+                    .longitude(122.4194)
                     .dateTime(LocalDateTime.now())
                     .voiceType(VoiceType.NormalVoice)
                     .build();
@@ -99,7 +138,7 @@ public class DataLoader {
                     .savePath("/voices/voice2.mp3")
                     .saveFolder("/voices/")
                     .latitude(37.7749)
-                    .longitude(-122.4194)
+                    .longitude(122.4194)
                     .dateTime(LocalDateTime.now())
                     .voiceType(VoiceType.NormalVoice)
                     .build();
@@ -123,8 +162,8 @@ public class DataLoader {
                     voice.setMember(member1);
                     voice.setHeartCount(3L);
                     voice.setListenCount(Math.round(Math.random() * 100000));
-                    voice.setLatitude(50);
-                    voice.setLongitude(50);
+                    voice.setLatitude(127.0 + random.nextDouble() * 0.1);
+                    voice.setLongitude(37.5 + random.nextDouble() * 0.1);
                     voice.setTitle("두부를 왜 좋아함" + i);
                     voice.setVoiceType(VoiceType.NormalVoice);
                     voice.setDateTime(LocalDateTime.now());
