@@ -34,7 +34,7 @@ public class UploadController {
                                          @RequestParam("pitchShift") float pitchShift) throws JsonProcessingException {
         VoiceCreateRequestDTO voiceCreateRequestDTO = new VoiceCreateRequestDTO(memberId, title, audioFile);
         Voice voice = voiceUploadService.uploadAndSendVoice(voiceCreateRequestDTO, pitchShift);
-        log.info("latitude: {}, longitude: {}, voiceType: {}", latitude, longitude, voiceType);
+        log.info("latitude: {}, longitude: {}, voiceType: {}, memberId: {}", latitude, longitude, voiceType, memberId);
         voice.setLatitude(latitude);
         voice.setLongitude(longitude);
         voiceRepository.save(voice);

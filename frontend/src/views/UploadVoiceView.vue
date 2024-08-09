@@ -21,7 +21,7 @@
           <v-row justify="center" class="py-4">
             <v-col cols="12" class="text-center">
               <v-btn
-                v-if="!showPitchControls"
+                v-if="!showPitchControls && member"
                 class="v-alert--density-comfortable"
                 size="large"
                 variant="tonal"
@@ -120,13 +120,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useUserStore } from '@/store/user';
 import { useSpreadStore } from '@/store/spread';
-import { useRecordStore } from '@/store/record';
 import axios from 'axios';
-import { storeToRefs } from 'pinia';
 
 const userStore = useUserStore();
 const spreadStore = useSpreadStore();
-const recordStore = useRecordStore();
 const member = computed(() => userStore.user);
 
 const title = ref('');
@@ -138,16 +135,35 @@ const showPitchControls = ref(false);
 const uploadInProgress = ref(false);
 
 const memberId = computed(() => userStore.loginUserId);
-const { audioBlob } = storeToRefs(recordStore);
 
 const latitude = ref(0);
 const longitude = ref(0);
 
-onMounted(() => {
-  if (audioBlob.value) {
-    selectedFile.value = new File([audioBlob.value], 'recorded-audio.mp3', { type: 'audio/mp3' });
+const mp3Blob = ref(null);
+onMounted(async () => {
+  const base64Data = localStorage.getItem('recordData');
+  if (base64Data) {
+  mp3Blob.value = base64ToBlob(base64Data);
+  }
+  if (mp3Blob.value) {
+    selectedFile.value = new File([mp3Blob.value], 'recorded-audio.mp3', { type: 'audio/mp3' });
   }
 });
+
+function base64ToBlob(base64) {
+  const [prefix, base64Data] = base64.split(',');
+
+  const contentType = prefix.match(/:(.*?);/)[1];
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: contentType });
+}
 
 function showPosition(position) {
   latitude.value = position.coords.latitude;

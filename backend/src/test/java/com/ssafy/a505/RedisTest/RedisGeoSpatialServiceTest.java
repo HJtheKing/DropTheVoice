@@ -10,6 +10,8 @@ import org.springframework.data.geo.Point;
 
 import java.util.List;
 
+import static com.ssafy.a505.domain.service.RedisService.*;
+
 @SpringBootTest
 public class RedisGeoSpatialServiceTest {
 
@@ -21,15 +23,15 @@ public class RedisGeoSpatialServiceTest {
 
     @Test
     public void addTestV3(){
-        redisService.addLocation(1L, TestLatitude + 0.0005, TestLongitude + 0.0005);
-        redisService.addLocation(2L, TestLatitude + 0.00051, TestLongitude + 0.00051);
-        redisService.addLocation(3L, TestLatitude + 0.00052, TestLongitude + 0.00052);
-        redisService.addLocation(4L, TestLatitude + 0.00053, TestLongitude + 0.00053);
-        redisService.addLocation(5L, TestLatitude + 0.00054, TestLongitude + 0.00054);
-        redisService.addLocation(6L, TestLatitude + 0.00055, TestLongitude + 0.00055);
-        redisService.addLocation(7L, TestLatitude + 0.00056, TestLongitude + 0.00056);
-        redisService.addLocation(8L, TestLatitude + 0.00057, TestLongitude + 0.00057);
-        redisService.addLocation(9L, TestLatitude + 0.00058, TestLongitude + 0.00058);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 1L, TestLatitude + 0.0005, TestLongitude + 0.0005, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 2L, TestLatitude + 0.00051, TestLongitude + 0.00051, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 3L, TestLatitude + 0.00052, TestLongitude + 0.00052, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 4L, TestLatitude + 0.00053, TestLongitude + 0.00053, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 5L, TestLatitude + 0.00054, TestLongitude + 0.00054, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 6L, TestLatitude + 0.00055, TestLongitude + 0.00055, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 7L, TestLatitude + 0.00056, TestLongitude + 0.00056, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 8L, TestLatitude + 0.00057, TestLongitude + 0.00057, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 9L, TestLatitude + 0.00058, TestLongitude + 0.00058, 1);
     }
 
     @Test
@@ -37,13 +39,13 @@ public class RedisGeoSpatialServiceTest {
         Long voiceId = 1L;
         List<RedisResponseDTO> dtos = redisService.getMembersByRadius(TestLatitude, TestLongitude, 0.5d, voiceId, 3);
         for (RedisResponseDTO dto : dtos) {
-            redisService.markReceived(voiceId, dto.getMemberId());
+            redisService.markReceived(voiceId, dto.getId());
         }
     }
 
     @Test
     public void getLocationsTestV2(){
-        Point point = redisService.getLocations(1L).get(0);
+        Point point = redisService.getLocations(MEMBER_KEY, 1L).get(0);
         System.out.println(point.getX() + " " + point.getY());
     }
 
@@ -52,7 +54,7 @@ public class RedisGeoSpatialServiceTest {
         List<RedisResponseDTO> result = redisService.getMembersByRadius(TestLatitude, TestLongitude, 1d, 1L, 3);
 
         for (RedisResponseDTO m : result) {
-            System.out.println("memberId : " + m.getMemberId() + " coord : " + m.getX() + " " + m.getY());
+            System.out.println("memberId : " + m.getId() + " coord : " + m.getX() + " " + m.getY());
         }
     }
 
