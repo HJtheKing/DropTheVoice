@@ -62,7 +62,7 @@ public class MemberController {
     }
 
     // 이름 중복 여부 확인
-    @Operation(summary = "멤버 아이디로 멤버 정보 확인")
+    @Operation(summary = "이름 중복 여부 확인")
     @PostMapping("/check-duplicate")
     public ResponseEntity<String> checkDuplicateName(@RequestBody MemberRequestDTO memberRequestDTO) {
         String memberName = memberRequestDTO.getMemberName();

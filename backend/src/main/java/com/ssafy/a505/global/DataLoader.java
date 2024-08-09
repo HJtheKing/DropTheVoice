@@ -29,7 +29,7 @@ public class DataLoader {
                     .memberId(1L)
                     .memberEmail("admin@example.com")
                     .memberName("admin")
-                    .memberPassword("1234")
+                    .memberPassword("$2a$10$w.68Nb5lODdeU9D3H7bwpe5Q25uS7sJTFrdXK9KplB6oNtpBq56zq")
                     .profileImgUrl("")
                     .remainChangeCount(5)
                     .totalSpreadCount(10)

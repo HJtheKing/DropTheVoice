@@ -63,12 +63,6 @@ const router = createRouter({
             meta: { requiresAuth: true }
         },
         {
-            path: "/change",
-            name: "change",
-            component: () => import('@/views/ChangeVoiceView.vue'),
-            meta: { requiresAuth: true }
-        },
-        {
             path: "/storage",
             name: "storage",
             component: () => import('@/views/StorageView.vue'),
@@ -94,5 +88,27 @@ const router = createRouter({
         },
     ]
 })
+
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = !!sessionStorage.getItem('access-token');
+
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        // 인증이 필요한 페이지에 접근하려고 할 때
+        if (!isAuthenticated) {
+            next({ name: 'login' });
+        } else {
+            next();
+        }
+    } else if (to.matched.some(record => record.meta.guest)) {
+        // 비인증 사용자만 접근할 수 있는 페이지에 접근하려고 할 때
+        if (isAuthenticated) {
+            next({ name: 'home' });
+        } else {
+            next();
+        }
+    } else {
+        next();
+    }
+});
 
 export default router
