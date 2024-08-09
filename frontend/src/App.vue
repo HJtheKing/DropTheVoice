@@ -24,7 +24,7 @@ const longitude = ref(0);
 onMounted(() => {
   
   if (!store.getters.isConnected) {
-    store.dispatch('connectWebSocket').then(sendMessage());
+    store.dispatch('connectWebSocket');
   }
 });
 

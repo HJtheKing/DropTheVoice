@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
 import SockJS from 'sockjs-client';
-import Webstomp from 'webstomp-client';
+//import Webstomp from 'webstomp-client';
+import { Stomp } from '@stomp/stompjs';
 
 var latitude = 0.0;
 var longitude = 0.0;
@@ -9,7 +10,7 @@ let mySessionId;
 let otherSessionIdList = [];
 let sendChannelMap = new Map();
 let dataMap = new Map();
-var stompClient = null;
+let stompClient = null;
 const peerConfiguration = {
     iceServers: [
         {
@@ -22,7 +23,6 @@ const peerConfiguration = {
 
 export default createStore({
     state: {
-        stompClient: null,
         isConnected: false,
         messages: [],
         sessionId: null,
@@ -46,12 +46,11 @@ export default createStore({
             //const socket = new SockJS('http's'://' + uri + '/stomp/handshake');
 
             const socket = new SockJS('http://' + uri + '/stomp/handshake');
-            this.state.stompClient = Webstomp.over(socket);
-            stompClient = this.state.stompClient;
+            stompClient = Stomp.over(socket);
             stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
-                var url = this.state.stompClient.ws._transport.url;
+                var url = stompClient.ws._transport.url;
                 var urls = url.split('/');
                 mySessionId = urls[6];
 
@@ -66,29 +65,36 @@ export default createStore({
                     commit('ADD_MESSAGE', body);
                 });
                 stompClient.subscribe(`/topic/peer/iceCandidate/${mySessionId}`, candidate => {
+                    console.log("------------ice candidate start----------");
                     const key = JSON.parse(candidate.body).key
                     const message = JSON.parse(candidate.body).body;
 
                     // 해당 key에 해당되는 peer 에 받은 정보를 addIceCandidate 해준다.
                     pcListMap.get(key).addIceCandidate(new RTCIceCandidate({ candidate: message.candidate, sdpMLineIndex: message.sdpMLineIndex, sdpMid: message.sdpMid }));
+                    console.log("------------ice candidate end----------");
 
                 });
 
                 //answer peer 교환을 위한 subscribe
                 stompClient.subscribe(`/topic/peer/answer/${mySessionId}`, answer => {
+                    console.log("------------answer start----------");
+
                     const key = JSON.parse(answer.body).key;
                     const message = JSON.parse(answer.body).body;
 
                     // 해당 key에 해당되는 Peer 에 받은 정보를 setRemoteDescription 해준다.
                     pcListMap.get(key).setRemoteDescription(new RTCSessionDescription(message));
+                    console.log("------------answer end----------");
 
                 });
 
                 //offer peer 교환을 위한 subscribe
                 stompClient.subscribe(`/topic/peer/offer/${mySessionId}`, offer => {
-                    
+                    console.log("------------offer start----------");
+
                     console.log("offer subscribe log");
-                    
+
+
                     const key = JSON.parse(offer.body).mySessionId;
                     const message = JSON.parse(offer.body).body;
 
@@ -100,11 +106,14 @@ export default createStore({
                     //sendAnswer 함수를 호출해준다.
 
                     sendAnswer(pcListMap.get(key), key);
+                    console.log("------------offer end----------");
 
                 });
 
                 //다른사람들의 key 리스트를 받게됨.
                 stompClient.subscribe(`/topic/others/${mySessionId}`, message => {
+                    console.log("------------others start----------");
+
                     console.log("i received");
                     console.log("receive others key!!!!!!!!!!!!!!!");
                     console.log(`/topic/others/${mySessionId}`);
@@ -123,6 +132,7 @@ export default createStore({
                             sendOffer(pcListMap.get(sessionID), sessionID);
                         }
                     });
+                    console.log("------------others end----------");
                 });
                 this.dispatch('startSendingMessages', 'hi');
 
@@ -130,10 +140,7 @@ export default createStore({
                 console.error('WebSocket error:', error);
             });
 
-            commit('SET_STOMP_CLIENT', this.state.stompClient);
-        },
-        sendMessage({ state }, file) {
-            sendFileInner(file);
+            commit('SET_STOMP_CLIENT', stompClient);
         }
         ,
         disconnectWebSocket({ state, commit }) {
@@ -153,8 +160,8 @@ export default createStore({
             console.log("message is !!!!!!!!!!");
             console.log(message);
             const { latitude, longitude } = await getGeo();
-            if (state.stompClient && state.isConnected) {
-                state.stompClient.send('/ws/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));
+            if (stompClient && state.isConnected) {
+                stompClient.send('/ws/position', {}, JSON.stringify({ name: 'sendMessageName', x: latitude, y: longitude }));
             } else {
                 console.log("fail");
             }
@@ -162,7 +169,7 @@ export default createStore({
         startSendingMessages({ dispatch }, message) {
             setInterval(() => {
                 dispatch('sendMessage', message);
-            }, 30000);
+            }, 3000);
         }
     },
     getters: {
@@ -209,7 +216,7 @@ const setLocalAndSendMessage = (pc, sessionDescription) => {
 const sendAnswer = (pc, otherSessionId) => {
     pc.createAnswer().then(answer => {
         setLocalAndSendMessage(pc, answer);
-        this.state.stompClient.send(`/ws/peer/answer/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+        stompClient.send(`/ws/peer/answer/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
             key: mySessionId,
             body: answer
         }));
@@ -220,7 +227,7 @@ const sendAnswer = (pc, otherSessionId) => {
 const onIceCandidate = (event, otherSessionId) => {
     if (event.candidate) {
         console.log('ICE candidate');
-        this.state.stompClient.send(`/ws/peer/iceCandidate/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+        stompClient.send(`/ws/peer/iceCandidate/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
             key: mySessionId,
             body: event.candidate
         }));
@@ -275,7 +282,7 @@ const createPeerConnection = (otherSessionID) => {
 }
 
 function tryPeerConnect() {
-    console.log('b');
+    console.log("-----start of----------try peer Connect");
     console.log(mySessionId + "is best!!!!!!!!!!!");
     console.log(stompClient);
     var url = stompClient.ws._transport.url;
@@ -290,12 +297,28 @@ function tryPeerConnect() {
 let sendOffer = (pc, otherSessionId) => {
     console.log("send offer init");
     pc.createOffer().then(offer => {
-        console.log("offer start!!!!!!!!!!!!");
-        setLocalAndSendMessage(pc, offer);
-        stompClient.send(`/ws/peer/offer/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+        console.log(typeof offer);
+
+        console.log('---------------')
+        let temp2 = JSON.stringify({
             mySessionId: mySessionId,
             body: offer
-        }));
+        });
+        console.log(temp2);
+        console.log(JSON.parse(temp2));
+        setLocalAndSendMessage(pc, offer);
+
+        //const offerStr = JSON.stringify(offer);
+        //const sanitizedOffer = offerStr.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        stompClient.send(
+            `/ws/peer/offer/${mySessionId}/${otherSessionId}`,
+            {},
+            JSON.stringify({
+                mySessionId: mySessionId,
+                body: offer
+            })
+        )
+
         console.log('Send offer');
     });
 };
@@ -319,7 +342,7 @@ function accumulateStringData(otherSessionId, data) {
 function handleReceiveMessage(data) {
     let receiveFileInfo = document.querySelector('#receiveFileInfo');
     let totalLength = 0;
-    blobs = []
+    let blobs = []
     data.forEach(part => {
         let binaryString = atob(part);
         let len = binaryString.length;
@@ -335,11 +358,21 @@ function handleReceiveMessage(data) {
     let largeBlob = new Blob(blobs, { type: 'audio/mp3' });
 
     let url = URL.createObjectURL(largeBlob);
-    receiveFileInfo.innerHTML += `<p>Received file chunk. <a href="${url}" download="received.mp3">Download</a></p>`;
+    //receiveFileInfo.innerHTML += `<p>Received file chunk. <a href="${url}" download="received.mp3">Download</a></p>`;
+    let a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'received.mp3';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    receiveFileInfo.innerHTML += `<p>Received file and triggered download.</p>`;
     console.log("done!!!!!!!!!!!!!!!!!!!");
 }
 
 async function sendFileInner(file) {
+
     if (!file) {
         console.log("file has some error");
         return;
@@ -358,7 +391,7 @@ async function sendFileInner(file) {
             const result = event.target.result;
             const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
             otherSessionIdList.forEach(session => {
-                channel = sendChannelMap.get(session);
+                let channel = sendChannelMap.get(session);
                 if (channel.readyState === 'open') {
                     channel.send(base64String);
                 } else {
@@ -370,7 +403,7 @@ async function sendFileInner(file) {
                 readSlice(offset);
             } else {
                 otherSessionIdList.forEach(session => {
-                    channel = sendChannelMap.get(session);
+                    let channel = sendChannelMap.get(session);
                     if (channel.readyState === 'open') {
                         channel.send("end");
                     } else {

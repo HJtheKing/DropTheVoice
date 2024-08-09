@@ -127,7 +127,6 @@
 
             //다른사람들의 key 리스트를 받게됨.
             stompClient.subscribe(`/topic/others/${mySessionId}`, message => {
-                console.log("receive others key!!!!!!!!!!!!!!!");
                 const sessions = JSON.parse(message.body);
                 sessions.forEach(otherSessionId => {
                     if (!(mySessionId === otherSessionId)) {

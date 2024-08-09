@@ -1,6 +1,7 @@
 package com.ssafy.a505.domain.controller;
 
 import com.ssafy.a505.domain.entity.Coordinate;
+import com.ssafy.a505.global.OfferDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
@@ -29,6 +30,13 @@ public class StompController {
         this.messagingTemplate = simpMessagingTemplate;
     }
 
+    @MessageMapping("/test")
+    @SendTo("/test")
+    public String test(@Payload String testValue) {
+        log.info("[ANSWER] {} ", testValue);
+        return testValue;
+    }
+
     /**
      *
      * @param coordinate
@@ -38,10 +46,11 @@ public class StompController {
      * 사용자 위치정보를 계속해서 업데이트한다
      */
     @MessageMapping(value = "/position")
-    public void message( Coordinate coordinate, Message<Coordinate> message) {
+    public void message(@Payload Coordinate coordinate, Message<Coordinate> message) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
         String sessionId = headerAccessor.getSessionId();
         System.out.println(coordinate.getX() + "" + coordinate.getY());
+        sessionIDs.add(sessionId);
 
         log.info(sessionId+"is sessionId");
         log.info("Session Logged In Member Info: "+ coordinate.toString());
@@ -68,8 +77,6 @@ public class StompController {
         System.out.println(sessionId);
         System.out.println("is sessionId");
 
-        // sessionId를 맵에 추가
-        sessionIDs.add(sessionId);
 
         // 세션 ID를 주제로 다른 클라이언트에 전송
         messagingTemplate.convertAndSend("/topic/others/" + sessionId, sessionIDs);
@@ -79,11 +86,11 @@ public class StompController {
     //WebRTC연결을 특정할 수 있다.
     @MessageMapping("/peer/offer/{mySessionId}/{otherSessionId}")
     @SendTo("/topic/peer/offer/{otherSessionId}")
-    public String PeerHandleOffer(@Payload String offer, @DestinationVariable(value = "mySessionId") String mySessionId,
+    public Object PeerHandleOffer(@Payload String offer, @DestinationVariable(value = "mySessionId") String mySessionId,
                                   @DestinationVariable(value = "otherSessionId") String otherSessionId) {
-        System.out.println("Nnnbnnnbggjfjfjfjf");
         log.info("[OFFER] {} : {}", mySessionId+" : "+otherSessionId, offer);
-
+        System.out.println("FUFUFUFUFFUFUFUF");
+        System.out.println(offer);
         return offer;
     }
 
