@@ -26,6 +26,8 @@ public class VoiceResponseDTO {
     private double longitude;
     private LocalDateTime dateTime;
     private VoiceType voiceType;
+    private boolean isProcessed;
+    private String processedPath;
 
     // 다른 필요한 필드들도 포함 가능
 
@@ -44,6 +46,10 @@ public class VoiceResponseDTO {
                 .longitude(voice.getLongitude())
                 .dateTime(voice.getDateTime())
                 .voiceType(voice.getVoiceType())
+                .isProcessed(voice.isProcessed())
+                .processedPath(voice.isProcessed() && !voice.getProcessedVoicePath().isEmpty() ? voice.getProcessedVoices().get(0).getProcessedPath() : null)
                 .build();
     }
+
+
 }

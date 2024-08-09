@@ -7,7 +7,7 @@ public interface S3FileService {
 
     String getFileUrl(String fileName);
 
-    String uploadFile(MultipartFile file, VoiceType category);
+    String uploadFile(MultipartFile file, boolean isProcessed);
 
     void deleteFile(String fileAddress);
 
@@ -15,6 +15,6 @@ public interface S3FileService {
 
     String getDownloadFileName(String fileName);
 
-    String getFileFolder(VoiceType category);
+    String getFileFolder(boolean isProcessed);
 
 }
