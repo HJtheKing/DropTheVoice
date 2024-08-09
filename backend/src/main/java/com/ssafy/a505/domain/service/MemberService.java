@@ -2,6 +2,7 @@ package com.ssafy.a505.domain.service;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
 import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
+import com.ssafy.a505.domain.dto.response.MailDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 
@@ -24,11 +25,21 @@ public interface MemberService {
     //비밀번호 변경
     boolean changePassword(PasswordRequestDTO passwordRequestDTO);
 
+    String getTempPassword();
+
+    //임시비밀번호 메일 생성 및 비밀번호 변경
+    MailDTO createMailAndChangePassword(MemberRequestDTO memberRequestDTO);
+    
+    // 메일 전송
+    void sendMail(MailDTO mailDTO);
+
     // 유저 이미지 변경
     boolean setUserImg(String memberId, String newImageName);
 
     int findRemainChangeCount(Long memberId);
 
     boolean isUserNameDuplicate(String userName);
+
+    MemberResponseDTO getMemberByMemberEmail(MemberRequestDTO memberRequestDTO);
 
 }

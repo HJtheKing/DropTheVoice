@@ -9,14 +9,15 @@
         </v-row>
         <v-card-title class="profile-header" v-if="member">
           <v-avatar size="50">
-            <img src="@/assets/images/user.png" alt="Profile Image" class="profile-image" />
+            <img :src="userImage" alt="Profile Image" class="profile-image" />
           </v-avatar>
           <div class="profile-info">
             <h2>{{ member.memberName }}</h2>
             <p>{{ member.memberEmail }}</p>
           </div>
           <v-avatar size="50">
-            <img src="@/assets/images/goldtier.png" alt="Badge" class="badge-image" />
+            <!-- badgeImage computed property를 사용하여 배지 이미지를 동적으로 설정 -->
+            <img :src="badgeImage" alt="Badge" class="badge-image" />
           </v-avatar>
         </v-card-title>
         <v-card-subtitle class="profile-stats" v-if="member">
@@ -61,6 +62,15 @@ import { useUserStore } from "@/store/user";
 import { useRouter } from 'vue-router';
 import ChangePassword from '@/views/ChangePasswordView.vue';
 
+// 이미지 파일들을 모듈로 가져오기
+import userImageSrc from '@/assets/images/user.png';
+import unranked from '@/assets/images/unranked.png'
+import bronzeBadgeSrc from '@/assets/images/bronze.png';
+import silverBadgeSrc from '@/assets/images/silver.png';
+import goldBadgeSrc from '@/assets/images/gold.png';
+import platinumBadgeSrc from '@/assets/images/platinum.png';
+import diamondBadgeSrc from '@/assets/images/diamond.png';
+
 const userStore = useUserStore();
 const router = useRouter();
 
@@ -90,7 +100,32 @@ const navigate = (routeName) => {
 const openPasswordChangeModal = () => {
   changePasswordModal.value.openDialog();
 };
+
+// 프로필 이미지 경로 설정
+const userImage = userImageSrc;
+
+// 배지 이미지를 동적으로 결정하는 computed property
+const badgeImage = computed(() => {
+  if (!member.value.totalUploadCount || member.value.totalUploadCount <= 5) {
+    return unranked; // 업로드 수가 0인 경우 기본 배지로 설정
+  }
+
+  const spreadRatio = member.value.totalSpreadCount / member.value.totalUploadCount;
+
+  if (spreadRatio >= 0.8) {
+    return diamondBadgeSrc;
+  } else if (spreadRatio >= 0.6) {
+    return platinumBadgeSrc;
+  } else if (spreadRatio >= 0.4) {
+    return goldBadgeSrc;
+  } else if (spreadRatio >= 0.2) {
+    return silverBadgeSrc;
+  } else {
+    return bronzeBadgeSrc;
+  }
+});
 </script>
+
 
 
 <style scoped>
