@@ -157,6 +157,7 @@ public class MemberController {
     }
 
 
+    
 
     @GetMapping("/image/{userImgUrl}")
     public ResponseEntity<?> getImage(@PathVariable String userImgUrl) {
