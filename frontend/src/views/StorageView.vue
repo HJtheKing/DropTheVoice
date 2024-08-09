@@ -22,8 +22,8 @@
         <v-col cols="12" sm="8" md="6">
           <v-row>
             <v-col cols="12">
-              <v-card class="mb-4 list-items" elevation="2" v-for="voice in filteredVoices" :key="voice.id" @click="navigateToDetail(voice.id)">
-                <v-row no-gutters>
+              <v-card class="mb-4 list-items" elevation="2" v-for="voice in filteredVoices" :key="voice.id">
+                <v-row no-gutters @click="getDetail(voice.id)">
                   <v-col cols="4">
                     <v-img :src="voice.imageUrl" height="100px" contain></v-img>
                   </v-col>
@@ -58,12 +58,15 @@
     </v-container>
   </v-app>
 </template>
+
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStorageStore } from '@/store/storage';
+import { useUserStore } from "@/store/user";
 
 const store = useStorageStore();
+const userStore = useUserStore();
 const router = useRouter();
 
 const activeTab = ref('all');
@@ -87,8 +90,11 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
+  userStore.tryAutoLogin();
+  // store.fetchAllVoices(); // 초기에는 'all' 탭의 첫 페이지 데이터를 불러옴
   window.addEventListener('scroll', handleScroll);
 
+  // 데이터 초기화 및 다시 로드
   if (store.activeTab === 'all') {
     store.reloadAllVoices();
   } else if (store.activeTab === 'liked') {
@@ -97,6 +103,7 @@ onMounted(() => {
 });
 
 </script>
+
 <style scoped>
 .more-button {
   background-color: #f3b549;

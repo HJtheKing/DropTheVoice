@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
@@ -38,7 +39,6 @@ public class MemberController {
     // 응답을 편하게 하기 위해 상수로 지정
     private static final String SUCCESS = "success";
     private static final String FAIL = "fail";
-    private static final Logger log = LoggerFactory.getLogger(MemberController.class);
 
     private final MemberService memberService;
     @Autowired
@@ -62,7 +62,7 @@ public class MemberController {
     }
 
     // 이름 중복 여부 확인
-    @Operation(summary = "멤버 아이디로 멤버 정보 확인")
+    @Operation(summary = "이름 중복 여부 확인")
     @PostMapping("/check-duplicate")
     public ResponseEntity<String> checkDuplicateName(@RequestBody MemberRequestDTO memberRequestDTO) {
         String memberName = memberRequestDTO.getMemberName();
@@ -82,6 +82,7 @@ public class MemberController {
     @Operation(summary = "로그인 요청 검증")
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody MemberRequestDTO memberRequestDTO) {
+
         HttpStatus status = null;
         Map<String, Object> result = new HashMap<>();
 
@@ -122,6 +123,19 @@ public class MemberController {
             return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
         return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
     }
+
+    // 비밀번호 변경
+    @Operation(summary = "회원 삭제")
+    @PostMapping("/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody PasswordRequestDTO passwordRequestDTO) {
+        System.out.println(passwordRequestDTO.getMemberName()+" "+passwordRequestDTO.getOldPassword()+" "+passwordRequestDTO.getNewPassword());
+        System.out.println("비밀번호 변경 시작");
+        if (memberService.changePassword(passwordRequestDTO)) {
+            return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
+        }
+        return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
+    }
+
 
     @GetMapping("/image/{userImgUrl}")
     public ResponseEntity<?> getImage(@PathVariable String userImgUrl) {

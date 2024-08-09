@@ -1,6 +1,7 @@
 package com.ssafy.a505.domain.service;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.repository.MemberRepository;
@@ -8,8 +9,12 @@ import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public MemberResponseDTO getMemberByMemberId(long id){
         Member member = memberRepository.findByMemberId(id)
@@ -35,17 +43,24 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public long login(MemberRequestDTO memberRequestDTO) {
         MemberRequestDTO target = findMemberByName(memberRequestDTO.getMemberName());
-        if(target != null && target.getMemberPassword().equals(memberRequestDTO.getMemberPassword())) return target.getMemberId();
+        if(target != null) {
+            if(passwordEncoder.matches(memberRequestDTO.getMemberPassword(), target.getMemberPassword())){
+                return target.getMemberId();
+            }
+            return -1;
+        }
         return -1;
     }
 
     // membername 중복 불가(front에서 처리)
     @Override
     public MemberResponseDTO registerMember(MemberRequestDTO memberRequestDto) {
+        String encodedPassword = passwordEncoder.encode(memberRequestDto.getMemberPassword());
+
         Member member = Member.builder()
                 .memberEmail(memberRequestDto.getMemberEmail())
                 .memberName(memberRequestDto.getMemberName())
-                .memberPassword(memberRequestDto.getMemberPassword())
+                .memberPassword(encodedPassword)
                 .profileImgUrl(memberRequestDto.getProfileImgUrl())
                 .build();
 
@@ -54,11 +69,29 @@ public class MemberServiceImpl implements MemberService {
         return MemberResponseDTO.getMember(savedMember);
     }
 
+    //회원 삭제
     @Override
     public boolean removeUser(long memberId) {
         if (memberRepository.existsById(memberId)) {
             memberRepository.deleteById(memberId);
             return true;
+        }
+        return false;
+    }
+
+    //비밀번호 변경
+    public boolean changePassword(PasswordRequestDTO passwordRequestDTO) {
+        Optional<Member> findOptional = memberRepository.findByMemberName(passwordRequestDTO.getMemberName());
+        Member target = findOptional.get();
+        if(target != null) {
+            if(passwordEncoder.matches(passwordRequestDTO.getOldPassword(), target.getMemberPassword())){
+                String encodedPassword = passwordEncoder.encode(passwordRequestDTO.getNewPassword());
+                //target.setMemberPassword(encodedPassword);
+                target.setMemberPassword(encodedPassword);
+                memberRepository.save(target);
+                return true;
+            }
+            return false;
         }
         return false;
     }

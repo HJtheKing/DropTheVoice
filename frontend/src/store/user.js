@@ -64,6 +64,16 @@ export const useUserStore = defineStore("user", () => {
       });
   };
 
+  // 비밀번호 변경
+  const changePassword = function (oldPassword, newPassword){
+    axios
+      .post(`${REST_USER_API}/changePassword`, {
+        memberName : loginUserName.value,
+        oldPassword : oldPassword,
+        newPassword : newPassword
+      })
+  }
+
   // 유저 정보 가져오기
   const getUser = function (userId) {
     axios.get(`${REST_USER_API}/${userId}`).then((response) => {
@@ -89,15 +99,20 @@ export const useUserStore = defineStore("user", () => {
   const tryAutoLogin = () => {
     const token = sessionStorage.getItem("access-token");
     if (!token) {
+      router.push({ name: "login" });
       return;
     }
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
     const userId = decodedToken["id"];
+    const userName = decodedToken["name"];
 
     isLogin.value = true;
     loginUserId.value = userId;
+    loginUserName.value = userName;
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
     getUser(userId);
+    
   };
 
   // Call tryAutoLogin when the store is initialized
@@ -115,5 +130,6 @@ export const useUserStore = defineStore("user", () => {
     getUser,
     deleteUser,
     tryAutoLogin,
+    changePassword,
   };
 });
