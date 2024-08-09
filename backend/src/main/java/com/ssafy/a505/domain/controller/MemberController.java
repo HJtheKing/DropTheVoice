@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
