@@ -24,12 +24,9 @@ const longitude = ref(0);
 onMounted(() => {
   
   if (!store.getters.isConnected) {
-    console.log("****************New web");
     store.dispatch('connectWebSocket').then(sendMessage());
   }
 });
-console.log(store);
-console.log("---------");
 
 function sendMessage() {
     if ("geolocation" in navigator) {

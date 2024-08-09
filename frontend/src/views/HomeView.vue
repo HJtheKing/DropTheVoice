@@ -5,46 +5,12 @@ import HomePopularVoices from '@/components/HomePopularVoices.vue';
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
 import {createStore} from '@/store/index.js'
-import { useStore } from 'vuex';
-import { useUserStore } from '@/store/user';
 
 // const store = useStore();
 const store= createStore();
 console.log(store);
 
-const userStore = useUserStore();
 
-const latitude = ref(0);
-const longitude = ref(0);
-
-onMounted(() => {
-  if (!store.getters.isConnected) {
-    store.dispatch('connectWebSocket').then(sendMessage());
-  }
-});
-
-function sendMessage() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                latitude.value = position.coords.latitude;
-                longitude.value = position.coords.longitude;
-                console.log(latitude.value);
-                store.dispatch('sendMessage',{number:userStore.loginUserId,x:latitude.value,y:longitude.value});
-            },
-            (error) => {
-                alert("위치 정보를 가져오는데 실패했습니다: " + error.message);
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            }
-        );
-    } else {
-        alert("이 브라우저에서는 위치 정보 서비스를 지원하지 않습니다.");
-    }
-}
 </script>
 
 <template>

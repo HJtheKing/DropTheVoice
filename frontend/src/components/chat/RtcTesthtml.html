@@ -72,12 +72,13 @@
                     console.error("Error accessing media devices:", error);
                 });
         }
-
     }
 
     // 소켓 연결
     const connectSocket = async () => {
-        const socket = new SockJS('http://ubuntu@i11a505.p.ssafy.io:8080/stomp/handshake/');
+        //const socket = new SockJS('http://ubuntu@i11a505.p.ssafy.io:8080/stomp/handshake/');
+        const socket = new SockJS('http://localhost:8080/stomp/handshake/');
+
         stompClient = Stomp.over(socket);
         stompClient.debug = null;
 
