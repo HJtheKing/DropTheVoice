@@ -1,7 +1,7 @@
 <template>
   <v-container class="audio-player">
     <audio ref="audio" @timeupdate="updateTime" @loadedmetadata="updateDuration" @ended="resetPlayer" @error="handleError">
-      <source :src="audioSrc" type="audio/mp3">
+      <source :src="audioUrl" type="audio/wav">
       Your browser does not support the audio element.
     </audio>
     <v-container class="controls" justify="center">
@@ -35,12 +35,12 @@
 </template>
 
 <script setup>
-import { ref, watch, defineExpose } from 'vue';
+import { ref, watch, onBeforeUnmount, defineExpose } from 'vue';
 import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 
 const recordStore = useRecordStore();
-const { isPlaying, audioUrl, analyser, javascriptNode } = storeToRefs(recordStore);
+const { isPlaying, audioUrl, analyser, javascriptNode, activeBars } = storeToRefs(recordStore);
 
 const audio = ref(null);
 const currentTime = ref(0);
@@ -52,22 +52,91 @@ const longPressTimeout = ref(null);
 const longPressThreshold = 300; // 밀리초
 const mouseDownTime = ref(0);
 
-watch(audioUrl, async (newSrc) => {
-  if (newSrc && audio.value) {
-    audio.value.src = newSrc;
-    await audio.value.load();
+let audioContext = null;
+let sourceNode = null;
 
-    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const initAudioContext = () => {
+  if (!audioContext || audioContext.state === 'closed') {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
 
-    const source = audioContext.createMediaElementSource(audio.value);
-    analyser.value = audioContext.createAnalyser();
-    javascriptNode.value = audioContext.createScriptProcessor(2048, 1, 1);
+  if (!sourceNode) {
+    // sourceNode.disconnect();
+    // sourceNode = null;
+    sourceNode = audioContext.createMediaElementSource(audio.value);
+  }
 
-    source.connect(analyser.value);
-    analyser.value.connect(javascriptNode.value);
-    javascriptNode.value.connect(audioContext.destination);
+  // sourceNode = audioContext.createMediaElementSource(audio.value);
+  analyser.value = audioContext.createAnalyser();
+  javascriptNode.value = audioContext.createScriptProcessor(2048, 1, 1);
 
-    console.log('Audio setup complete', { source, analyser: analyser.value, javascriptNode: javascriptNode.value });
+  sourceNode.connect(analyser.value);
+  analyser.value.connect(javascriptNode.value);
+  javascriptNode.value.connect(audioContext.destination);
+
+  javascriptNode.value.onaudioprocess = () => {
+    if (isPlaying.value) {
+      const dataArray = new Uint8Array(analyser.value.frequencyBinCount);
+      analyser.value.getByteFrequencyData(dataArray);
+      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+      activeBars.value = Math.floor(average / 4); // 원하는 대로 조정
+    }
+  };
+
+  console.log('Audio setup complete', { sourceNode, analyser: analyser.value, javascriptNode: javascriptNode.value });
+};
+
+// watch(audioUrl, async (newSrc) => {
+//   if (newSrc && audio.value) {
+//     audio.value.src = newSrc;
+//     await audio.value.load();
+
+//     if (!audioContext || audioContext.state === 'closed') {
+//       audioContext = new (window.AudioContext || window.webkitAudioContext)();
+//     }
+    
+//     if (sourceNode) {
+//       sourceNode.disconnect();
+//       sourceNode = null;
+//     }
+
+//     sourceNode = audioContext.createMediaElementSource(audio.value);
+//     analyser.value = audioContext.createAnalyser();
+//     javascriptNode.value = audioContext.createScriptProcessor(2048, 1, 1);
+
+//     sourceNode.connect(analyser.value);
+//     analyser.value.connect(javascriptNode.value);
+//     javascriptNode.value.connect(audioContext.destination);
+
+//     console.log('Audio setup complete', { sourceNode, analyser: analyser.value, javascriptNode: javascriptNode.value });
+//   }
+// });
+
+watch(audioUrl, (newUrl) => {
+  // audio.value.loadAudio('');
+  // if (newUrl && audio.value) {
+    audio.value.src = newUrl;
+    audio.value.load();
+    audio.value.onloadedmetadata = () => {
+      duration.value = audio.value.duration;
+    };
+
+    initAudioContext();
+  // }
+});
+
+onBeforeUnmount(() => {
+  if (sourceNode) {
+    sourceNode.disconnect();
+    sourceNode = null;
+  }
+  if (javascriptNode.value) {
+    javascriptNode.value.disconnect();
+    javascriptNode.value = null;
+  }
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
   }
 });
 
@@ -109,7 +178,7 @@ const loadAudio = (audioUrl) => {
   audio.value.load();
   audio.value.onloadedmetadata = () => {
     duration.value = audio.value.duration;
-  };
+  };  
 };
 
 defineExpose({
@@ -157,10 +226,6 @@ const handleMouseUp = (action) => {
   resetPlaybackRate();
 };
 
-// const setPlaybackRate = (rate) => {
-//   audio.value.playbackRate = rate;
-// };
-
 const resetPlaybackRate = () => {
   audio.value.playbackRate = 1;
 };
@@ -205,6 +270,7 @@ const stopRewind = () => {
   clearInterval(rewindInterval.value);
 };
 </script>
+
 
 
 <style scoped>

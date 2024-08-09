@@ -13,6 +13,10 @@ export const useRecordStore = defineStore('record', () => {
   const javascriptNode = ref(null);
   const isPlaying = ref(false);
 
+  function loadAudio(url) {
+    audioUrl.value = url;
+  }
+
   return {
     isRecording,
     audioUrl,
@@ -23,6 +27,7 @@ export const useRecordStore = defineStore('record', () => {
     bufferLength,
     stream,
     javascriptNode,
-    isPlaying
+    isPlaying,
+    loadAudio,
   };
 });
