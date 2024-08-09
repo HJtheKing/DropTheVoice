@@ -25,7 +25,7 @@ function sendMessage() {
             (position) => {
                 latitude.value = position.coords.latitude;
                 longitude.value = position.coords.longitude;
-                console.log(latitude.value);
+                // console.log(latitude.value);
                 store.dispatch('sendMessage',{number:userStore.loginUserId,x:latitude.value,y:longitude.value});
             },
             (error) => {

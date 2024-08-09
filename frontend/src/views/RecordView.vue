@@ -145,9 +145,21 @@ async function convertWavToMp3(wavBlob) {
   });
 }
 
-function navigateTo(routeName) {
+async function navigateTo(routeName) {
   if (!audioBlob.value) return;
+  const mp3Blob = await convertWavToMp3(audioBlob.value);
+  const base64Data = await blobToBase64(mp3Blob);
+
+  localStorage.setItem('recordData', base64Data);
   router.push({ name: routeName });
+}
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob); // Blob을 Base64 데이터 URL로 변환
+  });
 }
 </script>
 

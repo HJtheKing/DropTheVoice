@@ -20,7 +20,7 @@ public interface VoiceService {
 
     List<Voice> findAllByTitle(String title, Pageable pageable);
 
-    Voice findById(Long id);
+    VoiceResponseDTO findById(Long id);
 
     Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort);
 
