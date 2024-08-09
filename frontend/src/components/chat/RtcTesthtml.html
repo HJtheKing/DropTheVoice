@@ -195,7 +195,7 @@
     // 스트림 버튼 클릭시 , 다른 웹 key들 웹소켓을 가져 온뒤에 offer -> answer -> iceCandidate 통신
     // peer 커넥션은 pcListMap 으로 저장
     document.querySelector('#startSteamBtn').addEventListener('click', async () => {
-        await stompClient.send(`/ws/spread/50/50`, {}, {});
+        //await stompClient.send(`/ws/spread/50/50`, {}, {});
 
         setTimeout(() => {
             otherSessionIdList.map((sessionID) => {

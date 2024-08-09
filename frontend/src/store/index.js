@@ -63,6 +63,7 @@ export default createStore({
         async sendMessage({ state }, message) {
             console.log("message is ");
             console.log(message);
+            state.stompClient.send('/ws/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));
             const { latitude, longitude } = await getGeo();
             if (state.stompClient && state.isConnected) {
                 state.stompClient.send('/ws/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));

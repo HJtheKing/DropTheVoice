@@ -117,7 +117,7 @@
   </v-app>
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useUserStore } from '@/store/user';
 import { useSpreadStore } from '@/store/spread';
 import axios from 'axios';
@@ -164,6 +164,10 @@ function base64ToBlob(base64) {
   const byteArray = new Uint8Array(byteNumbers);
   return new Blob([byteArray], { type: contentType });
 }
+
+onBeforeUnmount(() => {
+  localStorage.removeItem('recordData');
+});
 
 function showPosition(position) {
   latitude.value = position.coords.latitude;
@@ -220,7 +224,7 @@ const uploadFile = async (type) => {
     formData.append('audioFile', selectedFile.value);
     formData.append('memberId', memberId.value);
     formData.append('title', title.value);
-    formData.append('voiceType', spreadStore.activeTab);
+    formData.append('voiceType', localStorage.getItem('voiceType'));
     formData.append('latitude', latitude.value);
     formData.append('longitude', longitude.value);
     formData.append('pitchShift', pitch.value);
@@ -238,7 +242,9 @@ const uploadFile = async (type) => {
       uploadStatus.value = '업로드 성공';
     } catch (error) {
       uploadStatus.value = '업로드 실패';
-    }
+    } finally {
+      localStorage.removeItem('recordData');
+}
   } else {
     alert ('제목 혹은 파일은 선택해 주세요.');
   }

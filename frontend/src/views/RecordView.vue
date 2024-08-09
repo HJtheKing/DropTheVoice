@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import CurrentTime from '@/components/record/CurrentTime.vue';
 import MyTimer from '@/components/record/MyTimer.vue';
 import MyRecordButton from '@/components/record/MyRecordButton.vue';
