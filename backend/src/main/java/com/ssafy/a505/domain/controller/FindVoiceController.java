@@ -79,7 +79,7 @@ public class FindVoiceController {
                 .latitude(37.5665)
                 .longitude(126.9780)
                 .dateTime(LocalDateTime.now())
-                .voiceType(VoiceType.Processed)
+                .voiceType(VoiceType.pokemon)
                 .build();
 
         Voice voice2 = Voice.builder()
@@ -94,7 +94,7 @@ public class FindVoiceController {
                 .latitude(37.7749)
                 .longitude(-122.4194)
                 .dateTime(LocalDateTime.now())
-                .voiceType(VoiceType.NormalVoice)
+                .voiceType(VoiceType.pokemon)
                 .build();
 
         result.add(voice1);

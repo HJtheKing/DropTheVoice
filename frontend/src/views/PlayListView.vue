@@ -36,8 +36,8 @@
 
         <v-row>
           <v-col v-for="(item, index) in voices" :key="index" cols="12" sm="6" md="6">
-            <RecordFile :item="item" @click="navigateToDetail(item.id)"></RecordFile>
-          </v-col>
+  <RecordFile :item="item" @click="navigateToDetail(item.voiceId)"></RecordFile>
+</v-col>
         </v-row>
 
         <v-row justify="center" v-if="isFetching">
@@ -88,6 +88,7 @@ async function fetchBestVoices(page = 1) {
       hasMoreVoices.value = false;
     }
     voices.value.push(...res.data.content);
+    console.log(voices.value[0].voiceId)
   } catch (error) {
     console.error('Error fetching best voices:', error);
   } finally {

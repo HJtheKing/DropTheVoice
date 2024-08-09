@@ -44,7 +44,7 @@ const router = createRouter({
             meta: { requiresAuth: true }
         },
         {
-            path: "/audioplayer",
+            path: "/audioplayer/:id",
             name: "audioplayer",
             component: () => import('@/views/AudioPlayView.vue'),
             meta: { requiresAuth: true }
