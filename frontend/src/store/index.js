@@ -260,7 +260,7 @@ const createPeerConnection = (otherSessionID) => {
             };
         })
 
-        var channel = pc.createDataChannel('temp channel');
+        let channel = pc.createDataChannel('temp channel');
         console.log("data channel created");
         sendChannelMap.set(otherSessionID, channel);
 
@@ -284,7 +284,7 @@ function tryPeerConnect() {
     console.log(temp + "is calculated");
     console.log(JSON.stringify(temp));
     stompClient.send(`/ws/spread/50/50`, {}, 'hi');
-    console.log("-----end of b----------try peer Connect");
+    console.log("-----end of----------try peer Connect");
 }
 
 let sendOffer = (pc, otherSessionId) => {

@@ -33,4 +33,4 @@ spring:
       max-file-size: 10MB
 logging:
   level:
-    root: info
+    root: debug
