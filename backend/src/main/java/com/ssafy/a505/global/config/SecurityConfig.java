@@ -39,7 +39,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api-member/login",
                                         "/api-member/register",
-                                        "/api-member/check-duplicate"
+                                        "/api-member/check-duplicate",
+                                        "/login"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 )

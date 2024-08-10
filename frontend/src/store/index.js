@@ -46,6 +46,7 @@ export default createStore({
 
             const socket = new SockJS(uri + '/stomp/handshake');
             stompClient = Stomp.over(socket);
+            stompClient.debug = () => {};
             stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
@@ -53,12 +54,11 @@ export default createStore({
                 var urls = url.split('/');
                 mySessionId = urls[6];
 
-                console.log(mySessionId + "is my sesss!!!!!!!!!!!");
+                console.log(mySessionId + "is my sessionId");
                 console.log(`/topic/others/${mySessionId}`);
 
 
                 stompClient.subscribe('/topic/messages/' + mySessionId, function (message) {
-                    console.log("-----------");
                     console.log(message);
                     const body = JSON.parse(message.body);
                     commit('ADD_MESSAGE', body);
@@ -91,9 +91,6 @@ export default createStore({
                 stompClient.subscribe(`/topic/peer/offer/${mySessionId}`, offer => {
                     console.log("------------offer start----------");
 
-                    console.log("offer subscribe log");
-
-
                     const key = JSON.parse(offer.body).mySessionId;
                     const message = JSON.parse(offer.body).body;
 
@@ -113,20 +110,20 @@ export default createStore({
                 stompClient.subscribe(`/topic/others/${mySessionId}`, message => {
                     console.log("------------others start----------");
 
-                    console.log("i received");
-                    console.log("receive others key!!!!!!!!!!!!!!!");
+                    console.log("receive others key");
                     console.log(`/topic/others/${mySessionId}`);
                     const sessions = JSON.parse(message.body);
                     sessions.forEach(otherSessionId => {
                         console.log("others session id is " + otherSessionId);
                         if (!(mySessionId === otherSessionId)) {
+                            console.log("compare "+mySessionId+" "+otherSessionId);
                             otherSessionIdList.push(otherSessionId);
                         }
                     });
 
                     otherSessionIdList.map((sessionID) => {
                         if (!pcListMap.has(sessionID)) {
-                            console.log("b2 ------ new ssession connection peer");
+                            console.log("new ssession connection peer");
                             pcListMap.set(sessionID, createPeerConnection(sessionID));
                             sendOffer(pcListMap.get(sessionID), sessionID);
                         }
@@ -152,14 +149,14 @@ export default createStore({
             }
         },
         async sendFile({ state }, file) {
-            console.log("inner function called");
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
-            console.log("message is !!!!!!!!!!");
-            console.log(message);
+            console.log("send location of me");
+            //const { latitude, longitude } = await getGeo();
+            const latitude = 50.0;
+            const longitude = 50.0;
             state.stompClient.send('/ws/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));
-            const { latitude, longitude } = await getGeo();
             if (stompClient && state.isConnected) {
                 stompClient.send('/ws/position', {}, JSON.stringify({ name: 'sendMessageName', x: latitude, y: longitude }));
             } else {
@@ -282,34 +279,15 @@ const createPeerConnection = (otherSessionID) => {
 }
 
 function tryPeerConnect() {
-    console.log("-----start of----------try peer Connect");
-    console.log(mySessionId + "is best!!!!!!!!!!!");
-    console.log(stompClient);
-    var url = stompClient.ws._transport.url;
-    var urls = url.split('/');
-    var temp = urls[6];
-    console.log(temp + "is calculated");
-    console.log(JSON.stringify(temp));
+    console.log("start peer Connect");
     stompClient.send(`/ws/spread/50/50`, {}, 'hi');
-    console.log("-----end of----------try peer Connect");
+    console.log("end of try peer Connect");
 }
 
 let sendOffer = (pc, otherSessionId) => {
     console.log("send offer init");
     pc.createOffer().then(offer => {
-        console.log(typeof offer);
-
-        console.log('---------------')
-        let temp2 = JSON.stringify({
-            mySessionId: mySessionId,
-            body: offer
-        });
-        console.log(temp2);
-        console.log(JSON.parse(temp2));
         setLocalAndSendMessage(pc, offer);
-
-        //const offerStr = JSON.stringify(offer);
-        //const sanitizedOffer = offerStr.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
         stompClient.send(
             `/ws/peer/offer/${mySessionId}/${otherSessionId}`,
             {},
@@ -319,7 +297,7 @@ let sendOffer = (pc, otherSessionId) => {
             })
         )
 
-        console.log('Send offer');
+        console.log('Send offer end');
     });
 };
 
@@ -368,7 +346,7 @@ function handleReceiveMessage(data) {
     document.body.removeChild(a);
 
     //receiveFileInfo.innerHTML += `<p>Received file and triggered download.</p>`;
-    console.log("done!!!!!!!!!!!!!!!!!!!");
+    console.log("file transfer complete");
 }
 
 async function sendFileInner(file) {
@@ -379,9 +357,7 @@ async function sendFileInner(file) {
     }
 
     if (file) {
-        console.log('a')
         await tryPeerConnect();
-        console.log('c');
         console.log('send start');
         const chunkSize = 16384;
         let offset = 0;
@@ -391,11 +367,10 @@ async function sendFileInner(file) {
             const result = event.target.result;
             const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
             otherSessionIdList.forEach(session => {
+                console.log("other sesion id is "+session);
                 let channel = sendChannelMap.get(session);
                 if (channel.readyState === 'open') {
                     channel.send(base64String);
-                } else {
-                    console.error('Channel is not open. Current state:', channel.readyState);
                 }
             });
             offset += chunkSize;
@@ -407,7 +382,7 @@ async function sendFileInner(file) {
                     if (channel.readyState === 'open') {
                         channel.send("end");
                     } else {
-                        console.error('Channel is not open. Current state:', channel.readyState);
+                        console.log('Channel is waiting for open. Current state:', channel.readyState);
                     }
                 });
             }
