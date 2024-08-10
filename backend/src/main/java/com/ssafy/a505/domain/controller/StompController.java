@@ -10,9 +10,12 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.*;
@@ -34,29 +37,21 @@ public class StompController {
         this.messagingTemplate = simpMessagingTemplate;
     }
 
-    @MessageMapping("/test")
-    @SendTo("/test")
-    public String test(@Payload String testValue) {
-        log.info("[ANSWER] {} ", testValue);
-        return testValue;
-    }
-
     /**
      *
      * @param coordinate
-     * @param message
      *
      * 매 10초마다 프론트엔드에서 호출되는 메서드.
      * 사용자 위치정보를 계속해서 업데이트한다
      */
     @MessageMapping(value = "/position")
-    public void message(@Payload Coordinate coordinate, Message<Coordinate> message) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
-        String sessionId = headerAccessor.getSessionId();
+    public void message(@Header("simpSessionId") String sessionId, @Payload Coordinate coordinate) {
         System.out.println(coordinate.getX() + "" + coordinate.getY());
-        sessionIDs.add(sessionId);
 
-        log.info(sessionId+"is sessionId");
+        redisService.addSessionId(sessionId,coordinate.getName());
+        sessionIDs.add(coordinate.getName());
+
+        log.info(coordinate.getName()+" is userId");
         log.info("Session Logged In Member Info: "+ coordinate.toString());
 
         //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자.
@@ -65,7 +60,6 @@ public class StompController {
 
     /**
      *
-     * @param sessionId - 내 세션ID
      * @param latitude - 위도
      * @param longitude - 경도
      * @throws NullPointerException
@@ -76,14 +70,14 @@ public class StompController {
      * 현재 미개발 상태라 등록된 세션정보 모두를 반환하고 있다.
      */
     @MessageMapping("/spread/{latitude}/{longitude}")
-    public void spread(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "latitude") double latitude, @DestinationVariable(value = "longitude") double longitude) {
-        log.info("[Key] : {}  [lat,lng] : {} : {}", sessionId, latitude, longitude);
-        System.out.println(sessionId);
+    public void spread(@Payload String mySessionId, @DestinationVariable(value = "latitude") double latitude, @DestinationVariable(value = "longitude") double longitude) {
+        log.info("[Key] : {}  [lat,lng] : {} : {}", mySessionId, latitude, longitude);
+        System.out.println(mySessionId);
         System.out.println("is sessionId");
 
 
         // 세션 ID를 주제로 다른 클라이언트에 전송
-        messagingTemplate.convertAndSend("/topic/others/" + sessionId, sessionIDs);
+        messagingTemplate.convertAndSend("/topic/others/" + mySessionId, sessionIDs);
     }
 
     //클라이언트가 사전에 전달받은 상대 세션ID 리스트를 통해 mySessionId와 otherSessionId를 명시함으로써
@@ -114,11 +108,13 @@ public class StompController {
     }
 
     //웹소켓 세션이 종료되었을때 해당 세션 종료에 대한 후처리 기능이 적용되어야함
+
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
-        sessionIDs.remove(sessionId);
+        String userId = redisService.removeSessionIdAndGetUserId(sessionId);
+        sessionIDs.remove(userId);
 
         log.info("Disconnected: " + sessionId);
         log.info(sessionIDs.toString());
