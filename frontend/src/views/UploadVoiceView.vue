@@ -89,24 +89,33 @@
 
       <v-container v-else class="upload-status-container">
         <div class="center-content">
-            <h1 class="title">{{ uploadStatus }}</h1>
-            <v-progress-circular
-              v-if="uploadStatus === '업로드 중...'"
-              :size="128"
-              :width="12"
-              indeterminate
-              color="dark-blue"
-            ></v-progress-circular>
-            <v-icon
-              v-else-if="uploadStatus === '업로드 성공'"
-              icon="mdi-check-circle"
-              :size="128"
-            ></v-icon>
-            <v-icon
-              v-else-if="uploadStatus === '업로드 실패'"
-              icon="mdi-alert-circle"
-              :size="128"
-            ></v-icon>
+          <h1 class="title">{{ uploadStatus }}</h1>
+          <v-progress-circular
+            v-if="uploadStatus === '업로드 중...'"
+            :size="128"
+            :width="12"
+            indeterminate
+            color="dark-blue"
+          ></v-progress-circular>
+          <v-icon
+            v-else-if="uploadStatus === '업로드 성공'"
+            icon="mdi-check-circle"
+            :size="128"
+          ></v-icon>
+          <v-icon
+            v-else-if="uploadStatus === '업로드 실패'"
+            icon="mdi-alert-circle"
+            :size="128"
+          ></v-icon>
+          <v-btn
+            v-if="uploadStatus === '업로드 성공' || uploadStatus === '업로드 실패'"
+            color="white"
+            text-color="black"
+            class="mt-4 font-weight-bold"
+            @click="$router.push('/')"
+          >
+            홈으로 돌아가기
+          </v-btn>
         </div>
       </v-container>
 
@@ -167,6 +176,7 @@ function base64ToBlob(base64) {
 
 onBeforeUnmount(() => {
   localStorage.removeItem('recordData');
+  localStorage.removeItem('voiceType')
 });
 
 function showPosition(position) {
