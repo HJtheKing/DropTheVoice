@@ -14,7 +14,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    private String key = "SSAFY_NonMajor_JavaTrack_SecretKey" ;
+    private String key = "SSAFY_OFFICIAL_A505_Drop_The_Voice_SecretKey" ;
     private SecretKey secretKey = Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8));
 
     // 다양한 데이터를 Map으로 받아서 처리를 할 수도 있지만, 심플하게 ID만 받아서 토큰을 만들어보자

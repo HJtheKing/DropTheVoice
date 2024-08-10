@@ -29,7 +29,7 @@ public class DataLoader {
                     .memberId(1L)
                     .memberEmail("admin@example.com")
                     .memberName("admin")
-                    .memberPassword("1234")
+                    .memberPassword("$2a$10$w.68Nb5lODdeU9D3H7bwpe5Q25uS7sJTFrdXK9KplB6oNtpBq56zq")
                     .profileImgUrl("")
                     .remainChangeCount(5)
                     .totalSpreadCount(10)
@@ -75,12 +75,11 @@ public class DataLoader {
                         .longitude(127.0 + random.nextDouble() * 0.1)
                         .heartCount(heartCount)
                         .listenCount(listenCount)
-                        .voiceType(VoiceType.Processed)
+                        .voiceType(VoiceType.virus)
                         .build();
                 ProcessedVoice processedVoice = ProcessedVoice.builder()
                         .processedPath("http://example.com/processed" + i + ".mp3")
                         .voice(voice)
-                        .voiceType(VoiceType.Processed)
                         .build();
                 k++;
                 voiceRepository.save(voice);
@@ -98,7 +97,7 @@ public class DataLoader {
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.Processed)
+                    .voiceType(VoiceType.virus)
                     .build();
             Voice voice2 = Voice.builder()
                     .voiceId(2L)
@@ -112,7 +111,7 @@ public class DataLoader {
                     .latitude(37.7749)
                     .longitude(122.4194)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.NormalVoice)
+                    .voiceType(VoiceType.pokemon)
                     .build();
             Voice voice3 = Voice.builder()
                     .voiceId(3L)
@@ -126,7 +125,7 @@ public class DataLoader {
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.Processed)
+                    .voiceType(VoiceType.virus)
                     .build();
             Voice voice4 = Voice.builder()
                     .voiceId(4L)
@@ -140,7 +139,7 @@ public class DataLoader {
                     .latitude(37.7749)
                     .longitude(122.4194)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.NormalVoice)
+                    .voiceType(VoiceType.pokemon)
                     .build();
 
 
@@ -165,7 +164,7 @@ public class DataLoader {
                     voice.setLatitude(127.0 + random.nextDouble() * 0.1);
                     voice.setLongitude(37.5 + random.nextDouble() * 0.1);
                     voice.setTitle("두부를 왜 좋아함" + i);
-                    voice.setVoiceType(VoiceType.NormalVoice);
+                    voice.setVoiceType(VoiceType.virus);
                     voice.setDateTime(LocalDateTime.now());
                     voice.setSavePath("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
                     voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");

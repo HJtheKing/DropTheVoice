@@ -23,6 +23,5 @@ public class ProcessedVoice {
     @JoinColumn(name = "voice_id")
     private Voice voice;
 
-    @Enumerated(EnumType.STRING)
-    private VoiceType voiceType;
+
 }
