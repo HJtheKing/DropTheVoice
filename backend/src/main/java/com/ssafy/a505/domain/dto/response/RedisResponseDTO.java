@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class RedisResponseDTO {
-    private Long memberId;
+    private Long id;
     private Double x;
     private Double y;
 }

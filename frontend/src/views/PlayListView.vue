@@ -36,8 +36,8 @@
 
         <v-row>
           <v-col v-for="(item, index) in voices" :key="index" cols="12" sm="6" md="6">
-            <RecordFile :item="item"></RecordFile>
-          </v-col>
+  <RecordFile :item="item" @click="navigateToDetail(item.voiceId)"></RecordFile>
+</v-col>
         </v-row>
 
         <v-row justify="center" v-if="isFetching">
@@ -56,31 +56,22 @@
 import RecordFile from '@/components/RecordFile.vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const voices = ref([]);
-const voiceDetail = ref();
 const currentPage = ref(1);
 const pageSize = ref(10);
 const searchQuery = ref('');
 const sortOption = ref('latest');
 const isFetching = ref(false);
 const hasMoreVoices = ref(true);
+const router = useRouter();
 
 const sortOptions = [
   { text: '최신순', value: 'latest' },
   { text: '청취수 순', value: 'listenCount' },
   { text: '좋아요 순', value: 'heartCount' }
 ];
-
-async function fetchVoiceDetail(voiceId) {
-  try {
-    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`);
-    voiceDetail.value = res.data;
-    console.log(res.data);
-  } catch (error) {
-    console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
-  }
-}
 
 async function fetchBestVoices(page = 1) {
   if (isFetching.value || !hasMoreVoices.value) return;
@@ -97,6 +88,7 @@ async function fetchBestVoices(page = 1) {
       hasMoreVoices.value = false;
     }
     voices.value.push(...res.data.content);
+    console.log(voices.value[0].voiceId)
   } catch (error) {
     console.error('Error fetching best voices:', error);
   } finally {
@@ -104,8 +96,8 @@ async function fetchBestVoices(page = 1) {
   }
 }
 
-function getDetail(id) {
-  fetchVoiceDetail(id);
+function navigateToDetail(id) {
+  router.push({ name: 'audioplayer', params: { id } });
 }
 
 const handleScroll = () => {
@@ -118,7 +110,6 @@ const handleScroll = () => {
 
 function resetPagination() {
   voices.value = [];
-  console.log(voices.value)
   currentPage.value = 1;
   hasMoreVoices.value = true;
   isFetching.value = false;

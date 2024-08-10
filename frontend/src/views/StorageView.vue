@@ -17,32 +17,35 @@
           </v-row>
         </v-col>
       </v-row>
-    
-      <v-row justify="center">
-        <v-col cols="12" sm="8" md="6">
-          <v-row>
-            <v-col cols="12">
-              <v-card class="mb-4 list-items" elevation="2" v-for="voice in filteredVoices" :key="voice.id">
-                <v-row no-gutters @click="getDetail(voice.id)">
-                  <v-col cols="4">
-                    <v-img :src="voice.imageUrl" height="100px" contain></v-img>
-                  </v-col>
-                  <v-col cols="8">
-                    <v-card-title>
-                      <div class="content">
-                        <h3>{{ voice.title }}</h3>
-                        <p>{{ voice.listenCount }} Listeners</p>
-                        <v-avatar size="36">
-                          <img :src="voice.imageUrl" class="avatar-img" />
-                        </v-avatar>
-                        <span class="author-name">{{ voice.userName }}</span>
-                      </div>
-                    </v-card-title>
-                  </v-col>
-                </v-row>
-              </v-card>
-            </v-col>
-          </v-row>
+          
+      <v-row>
+        <v-col cols="12">
+          <v-card class="mb-4 list-items" elevation="2" v-for="voice in filteredVoices" :key="voice.voiceId" @click="navigateToDetail(voice.voiceId)">
+  <v-row no-gutters class="d-flex align-center">
+    <v-col cols="4">
+      <v-img :src="voice.imageUrl" height="100px" contain class="rounded-left rounded-md"></v-img>
+    </v-col>
+    <v-col cols="8">
+      <v-card-title class="py-3">
+        <div class="content">
+          <h3 class="title mb-2">{{ voice.title }}</h3>
+          <div class="d-flex align-center mb-2">
+            <v-icon color="blue" class="mr-2">mdi-thumb-up</v-icon>
+            <span class="mr-10">{{ voice.heartCount }}</span>
+            <v-icon color="blue" class="mr-2">mdi-headphones</v-icon>
+            <span>{{ voice.listenCount }}</span>
+          </div>
+          <div class="d-flex align-center">
+            <!-- <v-avatar size="36" class="mr-2">
+              <img :src="voice.imageUrl" class="avatar-img"/>
+            </v-avatar>
+            <span class="author-name">{{ voice.userName }}</span> -->
+          </div>
+        </div>
+      </v-card-title>
+    </v-col>
+  </v-row>
+</v-card>
 
           <!-- 로딩 애니메이션 -->
           <v-row justify="center" v-if="store.isFetching">
@@ -61,9 +64,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStorageStore } from '@/store/storage';
+import { useUserStore } from "@/store/user";
 
 const store = useStorageStore();
+const userStore = useUserStore();
+const router = useRouter();
 
 const activeTab = ref('all');
 
@@ -74,6 +81,10 @@ const filteredVoices = computed(() => {
   return activeTab.value === 'all' ? allVoices.value : likedVoices.value;
 });
 
+const navigateToDetail = (id) => {
+  router.push({ name: 'audioplayer', params: { id } });
+};
+
 const handleScroll = () => {
   const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 10;
   if (bottomOfWindow && !store.isFetching && store.hasMoreVoices) {
@@ -82,6 +93,7 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
+  userStore.tryAutoLogin();
   // store.fetchAllVoices(); // 초기에는 'all' 탭의 첫 페이지 데이터를 불러옴
   window.addEventListener('scroll', handleScroll);
 
@@ -92,6 +104,7 @@ onMounted(() => {
     store.reloadLikedVoices();
   }
 });
+
 </script>
 
 <style scoped>
@@ -102,13 +115,18 @@ onMounted(() => {
 }
 .list-items {
   background-color: #000;
+  color: #fff;
+}
+.list-items:hover {
+  transform: scale(1.02);
+  cursor: pointer;
 }
 .author-name {
   color: #fff;
   font-weight: bold;
 }
 .avatar-img {
-  object-fit: cover;
+  object-fit: contain;
   width: 100%;
   height: 100%;
 }

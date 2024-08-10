@@ -3,21 +3,26 @@
     <v-main>
       <v-container class="custom-container">
         <v-row justify="center" class="py-4">
-          <h2>{{ selectedItem.title }}</h2>
+          <h1>음성 듣기</h1>
         </v-row>
-        <v-row>
-          <v-img :src="selectedItem.imgURL" height="300px" contain></v-img>
-        </v-row>
-        <v-row justify="center" class="py-4">
-          <h2>{{ selectedItem.title }}</h2>
+        <v-row justify="center">
+          <v-img :src="voice.imageUrl" height="300px" class="rounded-md" contain></v-img>
         </v-row>
         <v-row justify="center" class="py-4">
-          <h3>사연자: {{ selectedItem.author }}</h3>
+          <h3>{{ voice.title }}</h3>
+              <!-- <v-icon color="blue" class="mr-2">mdi-thumb-up</v-icon>
+              <span class="mr-10">{{ item.heartCount }}</span>
+              <v-icon color="blue" class="mr-2">mdi-headphones</v-icon>
+              <span>{{ item.listenCount }}</span> -->
         </v-row>
+
         <v-row>
           <v-container class="audio-play">
-            <audio-player ref="audioPlayer"></audio-player>
-            <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기</v-btn>
+            <AudioPlayer v-if="voice.savePath" :src="voice.savePath"/>
+            <v-icon
+              v-else icon="mdi-check-circle"
+              :size="large"
+            ></v-icon>
           </v-container>
         </v-row>
       </v-container>
@@ -26,25 +31,22 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue';
-import { useSeletedTrackStore } from '@/store/playList.js';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 import AudioPlayer from '@/components/AudioPlayer.vue';
-import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
 
-const store = useSeletedTrackStore();
-const selectedItem = computed(() => store.getSelectedItem);
+const route = useRoute();
+const voice = ref({});
 
-const audioPlayer = ref(null);
-
-function playSampleAudio() {
-  if (audioPlayer.value) {
-    audioPlayer.value.loadAudio(audioFile);
-  }
-}
-
-onMounted(() => {
-  if (!selectedItem.value.title) {
-    console.log('선택된 아이템이 없습니다.');
+onMounted(async () => {
+  const voiceId = route.params.id;
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`);
+    voice.value = res.data;
+    console.log('Voice data: ', voice.value)
+  } catch (error) {
+    console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
   }
 });
 </script>
@@ -59,18 +61,5 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.load-btn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #f3b549;
-  color: #000;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.load-btn:hover {
-  background-color: #cd9e01;
 }
 </style>

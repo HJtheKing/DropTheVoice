@@ -10,7 +10,6 @@ import {createStore} from '@/store/index.js'
 const store= createStore();
 console.log(store);
 
-
 </script>
 
 <template>

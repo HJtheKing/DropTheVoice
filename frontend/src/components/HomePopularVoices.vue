@@ -1,23 +1,64 @@
+<template>
+  <v-app class="bg-black">
+    <v-container class="py-4">
+      <v-row align="center" justify="space-between">
+        <v-col cols="12" md="6">
+          <h2>오늘의 인기 음성</h2>
+        </v-col>
+      </v-row>
+      
+      <v-row>
+        <v-col cols="12">
+          <v-card class="mb-4 list-items" elevation="2" v-for="(item) in voices" :key="item.voiceId" @click="navigateToDetail(item.voiceId)">
+  <v-row no-gutters class="d-flex align-center">
+    <v-col cols="4">
+      <v-img :src="item.imageUrl" height="100px" contain class="rounded-left rounded-md"></v-img>
+    </v-col>
+    <v-col cols="8">
+      <v-card-title class="py-3">
+        <div class="content">
+          <h3 class="title mb-2">{{ item.title }}</h3>
+          <div class="d-flex align-center mb-2">
+            <v-icon color="blue" class="mr-2">mdi-thumb-up</v-icon>
+            <span class="mr-10">{{ item.heartCount }}</span>
+            <v-icon color="blue" class="mr-2">mdi-headphones</v-icon>
+            <span>{{ item.listenCount }}</span>
+          </div>
+          <div class="d-flex align-center">
+          </div>
+        </div>
+      </v-card-title>
+    </v-col>
+  </v-row>
+</v-card>
+
+        </v-col>
+      </v-row>
+
+      <!-- 로딩 애니메이션 -->
+      <v-row justify="center" v-if="isFetching">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+      </v-row>
+
+      <!-- 더 이상 데이터가 없을 때 표시할 메시지 -->
+      <v-row justify="center" v-if="!hasMoreVoices && !isFetching">
+        <p>더 이상 불러올 데이터가 없습니다.</p>
+      </v-row>
+    </v-container>
+  </v-app>
+</template>
+
 <script setup>
-import {onMounted, ref} from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const voices = ref([]);
-const voiceDetail = ref();
 const currentPage = ref(1);
 const pageSize = ref(10);
 const isFetching = ref(false);
 const hasMoreVoices = ref(true);
-
-async function fetchVoiceDetail(voiceId) {
-  try {
-    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`);
-    voiceDetail.value = res.data;
-    console.log(res.data);
-  } catch (error) {
-    console.error(`Error fetching voice detail for ID ${voiceId}:`, error);
-  }
-}
+const router = useRouter();
 
 async function fetchBestVoices(page = 1) {
   if (isFetching.value || !hasMoreVoices.value) return;
@@ -36,8 +77,8 @@ async function fetchBestVoices(page = 1) {
   }
 }
 
-function getDetail(id) {
-  fetchVoiceDetail(id);
+function navigateToDetail(id) {
+  router.push({ name: 'audioplayer', params: { id } });
 }
 
 const handleScroll = () => {
@@ -60,55 +101,7 @@ onMounted(() => {
   fetchBestVoices(); // 초기 데이터를 가져옴
   window.addEventListener('scroll', handleScroll);
 });
-
 </script>
-
-<template>
-  <v-container class="py-4">
-    <v-row align="center" justify="space-between">
-      <v-col cols="12" md="6">
-        <h2>오늘의 인기 음성</h2>
-      </v-col>
-      <!-- <v-col cols="12" md="6" class="text-right">
-        <v-btn class="more-button" text>더보기</v-btn>
-      </v-col> -->
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in voices" :key="index"
-                @click="getDetail(item.id)">
-          <v-row no-gutters>
-            <v-col cols="4">
-              <v-img :src="item.imageUrl" height="100px" contain></v-img>
-            </v-col>
-            <v-col cols="8">
-              <v-card-title>
-                <div class="content">
-                  <h3>{{ item.title }}</h3>
-                  <p>{{ item.listenCount }} Listeners</p>
-                  <v-avatar size="36">
-                    <img :src="item.imageUrl" class="avatar-img"/>
-                  </v-avatar>
-                  <span class="author-name">{{ item.userName }}</span>
-                </div>
-              </v-card-title>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- 로딩 애니메이션 -->
-    <v-row justify="center" v-if="isFetching">
-      <v-progress-circular indeterminate color="primary"></v-progress-circular>
-    </v-row>
-
-    <!-- 더 이상 데이터가 없을 때 표시할 메시지 -->
-    <v-row justify="center" v-if="!hasMoreVoices && !isFetching">
-      <p>더 이상 불러올 데이터가 없습니다.</p>
-    </v-row>
-  </v-container>
-</template>
 
 <style scoped>
 .more-button {
@@ -139,7 +132,7 @@ onMounted(() => {
 }
 
 .avatar-img {
-  object-fit: cover;
+  object-fit: contain;
   width: 100%;
   height: 100%;
 }

@@ -62,7 +62,7 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
     public Voice uploadAndSendVoice(VoiceCreateRequestDTO voiceCreateRequestDTO, float pitchShift) throws JsonProcessingException {
         Voice voice = convertToNewEntity(voiceCreateRequestDTO);
         if (voiceCreateRequestDTO.getAudioFile() != null && !voiceCreateRequestDTO.getAudioFile().isEmpty()) {
-            voice = uploadAudioFileToS3(voice, voiceCreateRequestDTO.getAudioFile() ,VoiceType.NormalVoice);
+            voice = uploadAudioFileToS3(voice, voiceCreateRequestDTO.getAudioFile());
         }
 
         Member member = memberRepository.findById(voiceCreateRequestDTO.getMemberId())
@@ -80,8 +80,7 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         ProcessedVoice processedVoice = new ProcessedVoice();
         processedVoice.setVoice(voice);
         processedVoice.setProcessedPath(processedPath);
-        processedVoice.setVoiceType(VoiceType.Processed);
-
+        member.setRemainChangeCount(member.getRemainChangeCount() - 1);
         voice.addProcessedVoice(processedVoice);
 
         voiceRepository.save(voice); // 변경된 Voice 저장
@@ -118,12 +117,11 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         return processedVoiceResponseDTO.getProcessedPath();
     }
 
-    private Voice uploadAudioFileToS3(Voice voice, MultipartFile multipartFile,  VoiceType category) {
-        String saveFile = s3FileService.uploadFile(multipartFile, category);
-        voice.setSaveFolder(s3FileService.getFileFolder(category));
+    private Voice uploadAudioFileToS3(Voice voice, MultipartFile multipartFile) {
+        String saveFile = s3FileService.uploadFile(multipartFile, voice.isProcessed());
+        voice.setSaveFolder(s3FileService.getFileFolder(voice.isProcessed()));
         voice.setSavePath(saveFile);
         voice.setOriginalName(multipartFile.getOriginalFilename());
-        voice.setVoiceType(category);
         return voice;
     }
 

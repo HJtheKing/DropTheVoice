@@ -7,12 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
+import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
 import com.ssafy.a505.global.util.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -59,7 +62,7 @@ public class MemberController {
     }
 
     // 이름 중복 여부 확인
-    @Operation(summary = "멤버 아이디로 멤버 정보 확인")
+    @Operation(summary = "이름 중복 여부 확인")
     @PostMapping("/check-duplicate")
     public ResponseEntity<String> checkDuplicateName(@RequestBody MemberRequestDTO memberRequestDTO) {
         String memberName = memberRequestDTO.getMemberName();
@@ -84,6 +87,7 @@ public class MemberController {
         Map<String, Object> result = new HashMap<>();
 
         long memberID = memberService.login(memberRequestDTO);
+        MemberResponseDTO findMemberDto = memberService.getMemberByMemberId(memberID);
         if(memberID != -1) {
             // 토큰 만들어서 넘김
             result.put("message", SUCCESS);
@@ -119,6 +123,19 @@ public class MemberController {
             return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
         return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
     }
+
+    // 비밀번호 변경
+    @Operation(summary = "회원 삭제")
+    @PostMapping("/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody PasswordRequestDTO passwordRequestDTO) {
+        System.out.println(passwordRequestDTO.getMemberName()+" "+passwordRequestDTO.getOldPassword()+" "+passwordRequestDTO.getNewPassword());
+        System.out.println("비밀번호 변경 시작");
+        if (memberService.changePassword(passwordRequestDTO)) {
+            return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
+        }
+        return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
+    }
+
 
     @GetMapping("/image/{userImgUrl}")
     public ResponseEntity<?> getImage(@PathVariable String userImgUrl) {

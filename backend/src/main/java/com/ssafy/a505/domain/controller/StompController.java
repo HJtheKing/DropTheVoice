@@ -2,7 +2,9 @@ package com.ssafy.a505.domain.controller;
 
 import com.ssafy.a505.domain.entity.Coordinate;
 import com.ssafy.a505.global.OfferDto;
+import com.ssafy.a505.domain.service.RedisService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.*;
@@ -22,6 +24,9 @@ import java.util.*;
 @Slf4j
 public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private RedisService redisService;
 
     public Set<String> sessionIDs;
 
@@ -56,7 +61,7 @@ public class StompController {
         log.info("Session Logged In Member Info: "+ coordinate.toString());
 
         //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자.
-        //redisService.update(member,lat,lng);
+        redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
     }
 
     /**
