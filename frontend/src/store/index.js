@@ -45,7 +45,7 @@ export default createStore({
             //const uri = 'localhost';
             //const socket = new SockJS('http's'://' + uri + '/stomp/handshake');
 
-            const socket = new SockJS('http://' + uri + '/stomp/handshake');
+            const socket = new SockJS(uri + '/stomp/handshake');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
@@ -367,7 +367,7 @@ function handleReceiveMessage(data) {
     a.click();
     document.body.removeChild(a);
 
-    receiveFileInfo.innerHTML += `<p>Received file and triggered download.</p>`;
+    //receiveFileInfo.innerHTML += `<p>Received file and triggered download.</p>`;
     console.log("done!!!!!!!!!!!!!!!!!!!");
 }
 
