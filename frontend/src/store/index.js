@@ -1,10 +1,9 @@
 import { createStore } from 'vuex';
 import SockJS from 'sockjs-client';
-//import Webstomp from 'webstomp-client';
 import { Stomp } from '@stomp/stompjs';
 
-var latitude = 0.0;
-var longitude = 0.0;
+let latitude = 0.0;
+let longitude = 0.0;
 let pcListMap = new Map();
 let mySessionId;
 let otherSessionIdList = [];
