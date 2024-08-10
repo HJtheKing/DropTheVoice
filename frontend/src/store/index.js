@@ -59,7 +59,6 @@ export default createStore({
 
 
                 stompClient.subscribe('/topic/messages/' + mySessionId, function (message) {
-                    console.log(message);
                     const body = JSON.parse(message.body);
                     commit('ADD_MESSAGE', body);
                 });
@@ -149,6 +148,7 @@ export default createStore({
             }
         },
         async sendFile({ state }, file) {
+            console.log("send1");
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
@@ -306,6 +306,7 @@ function accumulateStringData(otherSessionId, data) {
     if (data === "end") {
         let finalData = dataMap.get(otherSessionId);
         handleReceiveMessage(finalData);
+        clearConnections();
     } else {
         if (dataMap.get(otherSessionId) == null) {
             let temp = [];
@@ -394,4 +395,11 @@ async function sendFileInner(file) {
         };
         readSlice(0);
     }
+}
+
+function clearConnections(){
+    pcListMap = new Map();
+    otherSessionIdList = [];
+    sendChannelMap = new Map();
+    dataMap = new Map();
 }

@@ -15,9 +15,7 @@ import { useUserStore } from '@/store/user';
 import { ref, onMounted, watch } from 'vue';
 const fileInput = ref(null);
 
-console.log("---a-----");
 const store = useStore();
-const userStore = useUserStore();
 
 const triggerFileInput = () => {
   fileInput.value.click();
@@ -35,6 +33,7 @@ const uploadFile = (event) => {
   } else {
     console.error('파일 선택 오류: 파일이 선택되지 않았습니다.');
   }
+  fileInput.value.value = ""; // 추가된 부분
 };
 
 </script>
