@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebRTC working example</title>
+
+    <!-- 웹소캣 연결에 필요한 라이브러리 선언 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+</head>
+
+<body>
+    <div>
+        <!-- 룸 아이디 번호를 입력하는 input -->
+        <input type="number" id="roomIdInput" />
+        <!-- 룸 아이디를 입력후 클릭하는 button -->
+        <button type="button" id="enterRoomBtn">enter Room</button>
+        <!-- enterRoomBtn 클릭시 나타남, Streams 정보를 담은 Peer 를 웹소켓 ( 시그널링 )   -->
+        <button type="button" id="startSteamBtn" style="display: none;">start Streams</button>
+    </div>
+    <!-- 내 웹캠 화면을 보여주는 video html -->
+    <video id="localStream" autoplay playsinline controls style="display: none;"></video>
+
+    <!-- WebRTC에 연결된 웹캠들이 추가되는 Div  -->
+    <div id="remoteStreamDiv">
+    </div>
+
+    <h2>WebRTC File Transfer</h2>
+    <input type="file" id="fileInput">
+    <button id="sendFileBtn">Send File</button>
+    <div id="receiveFileInfo"></div>
+    <script src="webrtc-file-transfer.js"></script>
+    <!-- webRTC 연결을 위한 js  -->
+</body>
+<script>
+
+    // let remoteStreamElement = document.querySelector('#remoteStream');
+    let localStreamElement = document.querySelector('#localStream');
+    const myKey = Math.random().toString(36).substring(2, 11);
+    let pcListMap = new Map();
+    let mySessionId;
+    let otherSessionIdList = [];
+    let localStream = undefined;
+    let sendChannelMap = new Map();
+    let dataMap = new Map();
+
+    const peerConfiguration = {
+        iceServers: [
+            {
+                urls: "turn:i11a505.p.ssafy.io",  // TURN 서버의 URL
+                username: "usr",   // TURN 서버의 사용자 이름
+                credential: "pass"  // TURN 서버의 비밀번호
+            }
+        ]
+    };
+
+    const startCam = async () => {
+        if (navigator.mediaDevices !== undefined) {
+            await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+                .then(async (stream) => {
+                    console.log('Stream found');
+                    //웹캠, 마이크의 스트림 정보를 글로벌 변수로 저장한다.
+                    localStream = stream;
+                    // Disable the microphone by default
+                    stream.getAudioTracks()[0].enabled = true;
+                    localStreamElement.srcObject = localStream;
+                    // Connect after making sure that local stream is availble
+
+                }).catch(error => {
+                    console.error("Error accessing media devices:", error);
+                });
+        }
+
+    }
+
+    // 소켓 연결
+    const connectSocket = async () => {
+        const socket = new SockJS('http://ubuntu@i11a505.p.ssafy.io:8080/stomp/handshake/');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, function () {
+            console.log('Connected to WebRTC server');
+
+            var url = stompClient.ws._transport.url;
+            var urls = url.split('/');
+            mySessionId = urls[6];
+
+            console.log("send my id");
+
+            //iceCandidate peer 교환을 위한 subscribe
+            stompClient.subscribe(`/topic/peer/iceCandidate/${mySessionId}`, candidate => {
+                const key = JSON.parse(candidate.body).key
+                const message = JSON.parse(candidate.body).body;
+
+                // 해당 key에 해당되는 peer 에 받은 정보를 addIceCandidate 해준다.
+                pcListMap.get(key).addIceCandidate(new RTCIceCandidate({ candidate: message.candidate, sdpMLineIndex: message.sdpMLineIndex, sdpMid: message.sdpMid }));
+
+            });
+
+            //answer peer 교환을 위한 subscribe
+            stompClient.subscribe(`/topic/peer/answer/${mySessionId}`, answer => {
+                const key = JSON.parse(answer.body).key;
+                const message = JSON.parse(answer.body).body;
+
+                // 해당 key에 해당되는 Peer 에 받은 정보를 setRemoteDescription 해준다.
+                pcListMap.get(key).setRemoteDescription(new RTCSessionDescription(message));
+
+            });
+
+            //offer peer 교환을 위한 subscribe
+            stompClient.subscribe(`/topic/peer/offer/${mySessionId}`, offer => {
+                const key = JSON.parse(offer.body).mySessionId;
+                const message = JSON.parse(offer.body).body;
+
+                // 해당 key에 새로운 peerConnection 를 생성해준후 pcListMap 에 저장해준다.
+                pcListMap.set(key, createPeerConnection(key));
+                // 생성한 peer 에 offer정보를 setRemoteDescription 해준다.
+
+                pcListMap.get(key).setRemoteDescription(new RTCSessionDescription({ type: message.type, sdp: message.sdp }));
+                //sendAnswer 함수를 호출해준다.
+                sendAnswer(pcListMap.get(key), key);
+
+            });
+
+            //다른사람들의 key 리스트를 받게됨.
+            stompClient.subscribe(`/topic/others/${mySessionId}`, message => {
+                const sessions = JSON.parse(message.body);
+                sessions.forEach(otherSessionId => {
+                    if (!(mySessionId === otherSessionId)) {
+                        otherSessionIdList.push(otherSessionId);
+                    }
+                });
+            });
+
+            // 시작부분
+            stompClient.send(`/ws/spread/50/50`, {}, mySessionId);
+
+        });
+    }
+
+    let onTrack = (event, otherSessionId) => {
+
+        if (document.getElementById(`${otherSessionId}`) === null) {
+            const video = document.createElement('video');
+
+            video.autoplay = true;
+            video.controls = true;
+            video.id = otherSessionId;
+            video.srcObject = event.streams[0];
+
+            document.getElementById('remoteStreamDiv').appendChild(video);
+        }
+    };
+
+
+    const createPeerConnection = (otherSessionID) => {
+        const pc = new RTCPeerConnection(peerConfiguration);
+        var conn2;
+        try {
+            pc.addEventListener('icecandidate', (event) => {
+                onIceCandidate(event, otherSessionID);
+            });
+            pc.addEventListener('track', (event) => {
+                onTrack(event, otherSessionID);
+            });
+            pc.addEventListener('datachannel', (event) => {
+                console.log('connected to data channel');
+                conn2 = event.channel;
+                conn2.sessionId = otherSessionID;
+                event.channel.onmessage = function (evt) {
+                    accumulateStringData(conn2.sessionId, evt.data);
+                };
+            })
+            if (localStream !== undefined) {
+                localStream.getTracks().forEach(track => {
+                    pc.addTrack(track, localStream);
+                });
+            }
+            let channel = pc.createDataChannel('temp channel');
+            sendChannelMap.set(otherSessionID, channel);
+
+            channel.onmessage = function (msg) {
+                console.log("sended message is " + msg);
+            };
+            console.log('PeerConnection created');
+        } catch (error) {
+            console.error('PeerConnection failed: ', error);
+        }
+        return pc;
+    }
+
+    // 스트림 버튼 클릭시 , 다른 웹 key들 웹소켓을 가져 온뒤에 offer -> answer -> iceCandidate 통신
+    // peer 커넥션은 pcListMap 으로 저장
+    document.querySelector('#startSteamBtn').addEventListener('click', async () => {
+        await stompClient.send(`/ws/spread/50/50`, {}, {});
+
+        setTimeout(() => {
+            otherSessionIdList.map((sessionID) => {
+                if (!pcListMap.has(sessionID)) {
+                    pcListMap.set(sessionID, createPeerConnection(sessionID));
+                    sendOffer(pcListMap.get(sessionID), sessionID);
+                }
+            });
+        }, 1000);
+    });
+
+    let sendOffer = (pc, otherSessionId) => {
+        pc.createOffer().then(offer => {
+            setLocalAndSendMessage(pc, offer);
+            stompClient.send(`/ws/peer/offer/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+                mySessionId: mySessionId,
+                body: offer
+            }));
+            console.log('Send offer');
+        });
+    };
+
+    let sendAnswer = (pc, otherSessionId) => {
+        pc.createAnswer().then(answer => {
+            setLocalAndSendMessage(pc, answer);
+            stompClient.send(`/ws/peer/answer/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+                key: mySessionId,
+                body: answer
+            }));
+            console.log('Send answer');
+        });
+    };
+
+    const setLocalAndSendMessage = (pc, sessionDescription) => {
+        pc.setLocalDescription(sessionDescription);
+    }
+
+
+    let onIceCandidate = (event, otherSessionId) => {
+        if (event.candidate) {
+            console.log('ICE candidate');
+            stompClient.send(`/ws/peer/iceCandidate/${mySessionId}/${otherSessionId}`, {}, JSON.stringify({
+                key: mySessionId,
+                body: event.candidate
+            }));
+        }
+    };
+
+    //룸 번호 입력 후 캠 + 웹소켓 실행
+    document.querySelector('#enterRoomBtn').addEventListener('click', async () => {
+        await startCam();
+
+        if (localStream !== undefined) {
+            document.querySelector('#localStream').style.display = 'block';
+            document.querySelector('#startSteamBtn').style.display = '';
+        }
+        roomId = document.querySelector('#roomIdInput').value;
+        document.querySelector('#roomIdInput').disabled = true;
+        document.querySelector('#enterRoomBtn').disabled = true;
+
+        await connectSocket();
+    });
+
+    const fileInput = document.querySelector('#fileInput');
+    const sendFileBtn = document.querySelector('#sendFileBtn');
+    sendFileBtn.addEventListener('click', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            console.log('send start');
+            const chunkSize = 16384;
+            let offset = 0;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const result = event.target.result;
+                const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
+                otherSessionIdList.forEach(session => {
+                    channel = sendChannelMap.get(session);
+                    if (channel.readyState === 'open') {
+                        channel.send(base64String);
+                    } else {
+                        console.error('Channel is not open. Current state:', channel.readyState);
+                    }
+                });
+                offset += chunkSize;
+                if (offset < file.size) {
+                    readSlice(offset);
+                } else {
+                    otherSessionIdList.forEach(session => {
+                        channel = sendChannelMap.get(session);
+                        if (channel.readyState === 'open') {
+                            channel.send("end");
+                        } else {
+                            console.error('Channel is not open. Current state:', channel.readyState);
+                        }
+                    });
+                }
+            };
+
+            const readSlice = o => {
+                let slice = file.slice(offset, o + chunkSize);
+                reader.readAsArrayBuffer(slice);
+            };
+            readSlice(0);
+        }
+    });
+
+    function accumulateStringData(otherSessionId, data) {
+        if (data === "end") {
+            let finalData = dataMap.get(otherSessionId);
+            handleReceiveMessage(finalData);
+        } else {
+            if (dataMap.get(otherSessionId) == null) {
+                let temp = [];
+                temp.push(data);
+                dataMap.set(otherSessionId, temp);
+            } else {
+                dataMap.get(otherSessionId).push(data);
+            }
+        }
+    }
+
+    function handleReceiveMessage(data) {
+        let receiveFileInfo = document.querySelector('#receiveFileInfo');
+        let totalLength = 0;
+        blobs = []
+        data.forEach(part => {
+            let binaryString = atob(part);
+            let len = binaryString.length;
+            totalLength += len;
+            let bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            let blob = new Blob([bytes]) ; //, { type: 'audio/mp3' }); // or other appropriate MIME type
+            blobs.push(blob);
+        });
+
+        let largeBlob = new Blob(blobs, { type: 'audio/mp3' });
+
+        let url = URL.createObjectURL(largeBlob);
+        receiveFileInfo.innerHTML += `<p>Received file chunk. <a href="${url}" download="received.mp3">Download</a></p>`;
+        console.log("done!!!!!!!!!!!!!!!!!!!");
+    }
+</script>
+
+</html>

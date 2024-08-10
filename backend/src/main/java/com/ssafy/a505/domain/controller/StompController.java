@@ -1,6 +1,7 @@
 package com.ssafy.a505.domain.controller;
 
 import com.ssafy.a505.domain.entity.Coordinate;
+import com.ssafy.a505.global.OfferDto;
 import com.ssafy.a505.domain.service.RedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import java.util.*;
 @RestController
 //@RequiredArgsConstructor
 @RequestMapping("/ws")
-@CrossOrigin(origins = "localhost:3000/*", allowCredentials = "true")
+@CrossOrigin(origins = "localhost:3000/*,http://localhost:3000", allowCredentials = "false")
 @Slf4j
 public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
@@ -34,6 +35,13 @@ public class StompController {
         this.messagingTemplate = simpMessagingTemplate;
     }
 
+    @MessageMapping("/test")
+    @SendTo("/test")
+    public String test(@Payload String testValue) {
+        log.info("[ANSWER] {} ", testValue);
+        return testValue;
+    }
+
     /**
      *
      * @param coordinate
@@ -43,10 +51,11 @@ public class StompController {
      * 사용자 위치정보를 계속해서 업데이트한다
      */
     @MessageMapping(value = "/position")
-    public void message(Coordinate coordinate, Message<Coordinate> message) {
+    public void message(@Payload Coordinate coordinate, Message<Coordinate> message) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
         String sessionId = headerAccessor.getSessionId();
         System.out.println(coordinate.getX() + "" + coordinate.getY());
+        sessionIDs.add(sessionId);
 
         log.info(sessionId+"is sessionId");
         log.info("Session Logged In Member Info: "+ coordinate.toString());
@@ -68,25 +77,25 @@ public class StompController {
      * 현재 미개발 상태라 등록된 세션정보 모두를 반환하고 있다.
      */
     @MessageMapping("/spread/{latitude}/{longitude}")
-    public void spread(@Payload String sessionId,@DestinationVariable(value = "latitude") double latitude, @DestinationVariable(value = "longitude") double longitude) {
-        log.info("[Key] : {}  [lat,lng] : {} : {}", sessionId,latitude,longitude);
+    public void spread(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "latitude") double latitude, @DestinationVariable(value = "longitude") double longitude) {
+        log.info("[Key] : {}  [lat,lng] : {} : {}", sessionId, latitude, longitude);
+        System.out.println(sessionId);
+        System.out.println("is sessionId");
 
-        //임시적으로 맵에 모든 세션정보들을 넣어두고 이를 모두 반환하는 임시코드
-        sessionIDs.add(sessionId);
-        messagingTemplate.convertAndSend("/topic/others/"+sessionId,sessionIDs);
-        
-        //상대 세션ID 리스트 (3개이상) 탐색 및 반환기능을 서비스 로직에 추가 필요
-        //List<Member> members = redisService.get(lat,lng)
+
+        // 세션 ID를 주제로 다른 클라이언트에 전송
+        messagingTemplate.convertAndSend("/topic/others/" + sessionId, sessionIDs);
     }
 
     //클라이언트가 사전에 전달받은 상대 세션ID 리스트를 통해 mySessionId와 otherSessionId를 명시함으로써
     //WebRTC연결을 특정할 수 있다.
     @MessageMapping("/peer/offer/{mySessionId}/{otherSessionId}")
     @SendTo("/topic/peer/offer/{otherSessionId}")
-    public String PeerHandleOffer(@Payload String offer, @DestinationVariable(value = "mySessionId") String mySessionId,
+    public Object PeerHandleOffer(@Payload String offer, @DestinationVariable(value = "mySessionId") String mySessionId,
                                   @DestinationVariable(value = "otherSessionId") String otherSessionId) {
         log.info("[OFFER] {} : {}", mySessionId+" : "+otherSessionId, offer);
-
+        System.out.println("FUFUFUFUFFUFUFUF");
+        System.out.println(offer);
         return offer;
     }
 
