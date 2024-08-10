@@ -5,7 +5,7 @@ import { Stomp } from '@stomp/stompjs';
 let latitude = 0.0;
 let longitude = 0.0;
 let pcListMap = new Map();
-let mySessionId;
+let mySessionId = null;
 let otherSessionIdList = [];
 let sendChannelMap = new Map();
 let dataMap = new Map();
@@ -46,13 +46,14 @@ export default createStore({
 
             const socket = new SockJS(uri + '/stomp/handshake');
             stompClient = Stomp.over(socket);
-            stompClient.debug = () => {};
+            //stompClient.debug = () => {};
             stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
-                var url = stompClient.ws._transport.url;
-                var urls = url.split('/');
-                mySessionId = urls[6];
+
+                const randomString = generateRandomString(10);
+
+                mySessionId = randomString;
 
                 console.log(mySessionId + "is my sessionId");
                 console.log(`/topic/others/${mySessionId}`);
@@ -112,6 +113,7 @@ export default createStore({
                     console.log("receive others key");
                     console.log(`/topic/others/${mySessionId}`);
                     const sessions = JSON.parse(message.body);
+                    console.log(sessions);
                     sessions.forEach(otherSessionId => {
                         console.log("others session id is " + otherSessionId);
                         if (!(mySessionId === otherSessionId)) {
@@ -153,12 +155,12 @@ export default createStore({
         },
         async sendMessage({ state }, message) {
             console.log("send location of me");
-            //const { latitude, longitude } = await getGeo();
-            const latitude = 50.0;
-            const longitude = 50.0;
-            state.stompClient.send('/ws/position', JSON.stringify({ name: message.name, x: latitude, y: longitude }));
+            const { latitude, longitude } = await getGeo();
+            //const latitude = 50.0;
+            //const longitude = 50.0;
+            if(mySessionId === null) return;
             if (stompClient && state.isConnected) {
-                stompClient.send('/ws/position', {}, JSON.stringify({ name: 'sendMessageName', x: latitude, y: longitude }));
+                stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: latitude, y: longitude }));
             } else {
                 console.log("fail");
             }
@@ -280,7 +282,7 @@ const createPeerConnection = (otherSessionID) => {
 
 function tryPeerConnect() {
     console.log("start peer Connect");
-    stompClient.send(`/ws/spread/50/50`, {}, 'hi');
+    stompClient.send(`/ws/spread/50/50`, {}, mySessionId);
     console.log("end of try peer Connect");
 }
 
@@ -402,4 +404,16 @@ function clearConnections(){
     otherSessionIdList = [];
     sendChannelMap = new Map();
     dataMap = new Map();
+}
+
+function generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    
+    return result;
 }

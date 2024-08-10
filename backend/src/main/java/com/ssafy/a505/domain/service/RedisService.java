@@ -42,6 +42,15 @@ public class RedisService {
     public static final String VOICE_KEY = "VOICE_LOCATION";
     public static final String VOICE_TIME_KEY = "VOICE_TIME";
     public static final String MSG_KEY_PREFIX = "MSG_RECEIVED_";
+    public static final String WS_KEY_PREFIX= "WS_SESSION_";
+
+    public void addSessionId(String sessionID,String userId){
+        redisTemplate.opsForValue().set(WS_KEY_PREFIX + sessionID, userId);
+    }
+
+    public String removeSessionIdAndGetUserId(String sessionID){
+        return redisTemplate.opsForValue().getAndDelete(WS_KEY_PREFIX + sessionID).toString();
+    }
 
     // key GEO_KEY에 value 위도, 경도, id 추가(유저/포켓몬) + TIME_KEY에 memberId 추가하여 만료기간 갱신
     public void addLocation(String locationKey, String timeKey, Long id, Double longitude, Double latitude, int expHrs){
