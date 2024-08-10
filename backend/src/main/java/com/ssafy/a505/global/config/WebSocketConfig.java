@@ -35,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         //the url is for Websocket handshake
         registry.addEndpoint("/stomp/handshake") //handshake가 될 endpoint지정
-                .setAllowedOriginPatterns("*","http://localhost:3000","https://localhost:3000") // 도메인 패턴 사용
+                .setAllowedOriginPatterns("*") // 도메인 패턴 사용
                 .withSockJS(); //SockJS사용
     }
 

@@ -20,7 +20,6 @@ import java.util.*;
 @RestController
 //@RequiredArgsConstructor
 @RequestMapping("/ws")
-@CrossOrigin(origins = "localhost:3000/*,http://localhost:3000", allowCredentials = "false")
 @Slf4j
 public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
@@ -94,8 +93,6 @@ public class StompController {
     public Object PeerHandleOffer(@Payload String offer, @DestinationVariable(value = "mySessionId") String mySessionId,
                                   @DestinationVariable(value = "otherSessionId") String otherSessionId) {
         log.info("[OFFER] {} : {}", mySessionId+" : "+otherSessionId, offer);
-        System.out.println("FUFUFUFUFFUFUFUF");
-        System.out.println(offer);
         return offer;
     }
 
