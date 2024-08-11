@@ -21,7 +21,7 @@ spring:
 #    show-sql: true
 #    properties:
 #      hibernate:
-#        format_sql: flase
+#        format_sql: true
   data:
     redis:
       host: ${REDIS_HOST}

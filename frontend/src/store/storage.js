@@ -13,6 +13,8 @@ export const useStorageStore = defineStore('storage', {
     hasMoreAllVoices: true,
     hasMoreLikedVoices: true,
     activeTab: 'all',
+    newItemsAvailable: false,  
+    sseSource: null,
   }),
   getters: {
     hasMoreVoices(state) {
@@ -20,6 +22,30 @@ export const useStorageStore = defineStore('storage', {
     },
   },
   actions: {
+    initSSE() {
+      const userStore = useUserStore();
+      if (this.sseSource) {
+        this.sseSource.close();
+      }
+      this.sseSource = new EventSource(`${import.meta.env.VITE_BASE_URL}/api-sse/sse/notifications?memberId=${userStore.loginUserId}`)
+      this.sseSource.onmessage = (event) => {
+        console.log('SSE Message Received:', event.data);
+        const data = JSON.parse(event.data);
+        console.log('Parsed SSE Data:', data);
+        this.newItemsAvailable = true;
+      };
+
+      this.sseSource.onerror = (error) => {
+        console.error('SSE error: ', error);
+        this.sseSource.close();
+      }
+    },
+    stopSSE() {
+      if (this.sseSource) {
+        this.sseSource.close();
+        this.sseSource = null;
+      }
+    },
     resetPagination() {
       this.currentPageAll = 1;
       this.currentPageLiked = 1;
@@ -32,22 +58,23 @@ export const useStorageStore = defineStore('storage', {
     async fetchAllVoices(page = 1) {
       const useStore = useUserStore();
       if (!this.hasMoreAllVoices) return;
-
       this.isFetching = true;
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/spread/${page}/${this.pageSize}`, {
           params: {
-            // memberId: 1, // 테스트용. jwt 인증 구현 되면 밑에꺼 쓰면 됨
             memberId: useStore.loginUserId,
           }
         });
         if (response.data.length < this.pageSize) {
-          this.hasMoreAllVoices = false; // 더 이상 가져올 데이터가 없음을 표시
+          this.hasMoreAllVoices = false;
         }
         if (page === 1) {
           this.allVoices = response.data;
         } else {
-          this.allVoices.push(...response.data); // 추가 데이터를 기존 리스트에 추가
+          this.allVoices.push(...response.data);
+        }
+        if (page > 1 && response.data.length > 0) {
+          this.newItemsAvailable = true; 
         }
       } catch (error) {
         console.error('Error fetching all voices:', error);
@@ -67,12 +94,15 @@ export const useStorageStore = defineStore('storage', {
           } 
         });
         if (response.data.length < this.pageSize) {
-          this.hasMoreLikedVoices = false; // 더 이상 가져올 데이터가 없음을 표시
+          this.hasMoreLikedVoices = false;
         }
         if (page === 1) {
           this.likedVoices = response.data;
         } else {
-          this.likedVoices.push(...response.data); // 추가 데이터를 기존 리스트에 추가
+          this.likedVoices.push(...response.data);
+        }
+        if (page > 1 && response.data.length > 0) {
+          this.newItemsAvailable = true;  
         }
       } catch (error) {
         console.error('Error fetching liked voices:', error);
@@ -82,9 +112,7 @@ export const useStorageStore = defineStore('storage', {
     },
     async loadMoreVoices() {
       if (this.isFetching || !this.hasMoreVoices) return;
-
       this.isFetching = true;
-
       try {
         if (this.activeTab === 'all') {
           this.currentPageAll++;
@@ -115,6 +143,9 @@ export const useStorageStore = defineStore('storage', {
     reloadLikedVoices() {
       this.resetPagination();
       this.fetchLikedVoices();
-    }
+    },
+    resetNotification() {
+      this.newItemsAvailable = false; 
+    },
   },
 });

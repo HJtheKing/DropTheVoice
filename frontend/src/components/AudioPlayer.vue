@@ -19,6 +19,7 @@
           @input="seekAudio"
         >
       </v-row>
+    
       <v-container justify="center" class="btn-row">
         <v-row justify="space-between">
           <v-btn class="player-btn" @click="goToStart">

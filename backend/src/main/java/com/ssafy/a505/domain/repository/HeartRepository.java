@@ -6,10 +6,15 @@ import com.ssafy.a505.domain.entity.Voice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface HeartRepository extends JpaRepository<Heart, Long> {
 
     List<Heart> findByMember(Member member);
 
     List<Heart> findByVoice(Voice voice);
+
+    Optional<Heart> findByVoiceAndMember(Voice voice, Member member);
+
+    void deleteByVoiceAndMember(Voice voice, Member member);
 }

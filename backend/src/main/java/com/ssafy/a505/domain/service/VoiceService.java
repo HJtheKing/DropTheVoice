@@ -16,19 +16,17 @@ public interface VoiceService {
 
     List<Voice> getAllVoice();
 
-    List<Voice> findByTitleContaining(String userNam, Pageable pageable);
-
     List<Voice> findAllByTitle(String title, Pageable pageable);
-
-    VoiceResponseDTO findById(Long id);
 
     Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort);
 
-    List<Voice> findAllByMember_MemberId(Long memberId, Pageable pageable);
-
     List<Voice> findByMemberWithHeart(Long memberId, Pageable pageable);
 
-    List<Voice> findHeartedByMember(Long memberId);
-
     List<Voice> findByMemberWithSpread(Long memberId, Pageable pageable);
+
+    boolean toggleLike(Long voiceId, Member member);
+
+    Voice getVoiceById(Long voiceId);
+
+    List<VoiceResponseDTO> getNearbyVoices(double latitude, double longitude, double radius);
 }

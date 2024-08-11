@@ -42,6 +42,7 @@ public class SecurityConfig {
                                         "/api-member/check-duplicate",
                                         "/stomp/**"
                                 ).permitAll()
+                                .requestMatchers("/api-voice/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->

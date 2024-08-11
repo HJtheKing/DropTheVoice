@@ -1,16 +1,19 @@
 package com.ssafy.a505.domain.dto.response;
 
+import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.entity.VoiceType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Super;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 public class VoiceResponseDTO {
 
     private long voiceId;
@@ -28,6 +31,8 @@ public class VoiceResponseDTO {
     private VoiceType voiceType;
     private boolean isProcessed;
     private String processedPath;
+    @Builder.Default
+    private boolean isLiked = false;
 
     // 다른 필요한 필드들도 포함 가능
 
@@ -51,5 +56,28 @@ public class VoiceResponseDTO {
                 .build();
     }
 
+    public static VoiceResponseDTO fromEntity(Voice voice, Member member) {
+        boolean isLiked = voice.getHearts().stream()
+                .anyMatch(heart -> heart.getMember().getMemberId().equals(member.getMemberId()));
+
+        return VoiceResponseDTO.builder()
+                .voiceId(voice.getVoiceId())
+                .memberId(voice.getMember().getMemberId())
+                .heartCount(voice.getHeartCount())
+                .listenCount(voice.getListenCount())
+                .title(voice.getTitle())
+                .imageUrl(voice.getImageUrl())
+                .originalName(voice.getOriginalName())
+                .savePath(voice.getSavePath())
+                .saveFolder(voice.getSaveFolder())
+                .latitude(voice.getLatitude())
+                .longitude(voice.getLongitude())
+                .dateTime(voice.getDateTime())
+                .voiceType(voice.getVoiceType())
+                .isProcessed(voice.isProcessed())
+                .processedPath(voice.getProcessedVoicePath())
+                .isLiked(isLiked)
+                .build();
+    }
 
 }
