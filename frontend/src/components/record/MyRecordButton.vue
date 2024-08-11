@@ -37,7 +37,7 @@ defineExpose({
 });
 
 const recordStore = useRecordStore();
-const { isRecording, audioUrl, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
+const { isRecording, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
 
 // 초기화
 watch([analyser, dataArray, bufferLength, stream, javascriptNode], (newValues) => {
