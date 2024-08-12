@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Random;
 
 @Configuration
 @RequiredArgsConstructor
@@ -25,9 +27,9 @@ public class DataLoader {
             // 멤버 데이터 생성 및 저장
             Member member1 = Member.builder()
                     .memberId(1L)
-                    .memberEmail("user1@example.com")
-                    .memberName("김병관")
-                    .memberPassword("password1")
+                    .memberEmail("admin@example.com")
+                    .memberName("admin")
+                    .memberPassword("$2a$10$w.68Nb5lODdeU9D3H7bwpe5Q25uS7sJTFrdXK9KplB6oNtpBq56zq")
                     .profileImgUrl("")
                     .remainChangeCount(5)
                     .totalSpreadCount(10)
@@ -46,6 +48,42 @@ public class DataLoader {
             memberRepository.save(member1);
             memberRepository.save(member2);
 
+            List<String> titles = List.of(
+                    "오늘 힘든일이 있었어요", "오늘 꿀잼썰", "여러분 이거 아세요?", "오늘 기분 최고!",
+                    "속상한 일이 있었어요", "재밌는 이야기 해드릴게요", "오늘 먹은 맛있는 음식",
+                    "산책 중 만난 강아지", "이상한 경험담", "행복했던 순간", "감동적인 이야기",
+                    "오늘의 운세", "오늘 만난 사람", "기쁜 소식", "슬픈 소식",
+                    "우울할 때 들으면 좋은 노래", "스트레스 해소법", "오늘의 명언", "새로운 취미",
+                    "여행 가고 싶어요", "맛집 추천", "영화 감상 후기", "책 추천", "오늘의 운동",
+                    "재미있는 퀴즈", "유익한 정보", "고민 상담", "오늘의 목표", "작은 성취", "뜻밖의 발견"
+            );
+
+            Long k = 1L;
+            Random random = new Random();
+            for (int i = 0; i < 30; i++) {
+                long heartCount = random.nextInt(300) + 1;
+                long listenCount = random.nextInt(300) + 1;
+                Voice voice = Voice.builder()
+                        .voiceId(k)
+                        .member(member1)
+                        .title(titles.get(i % titles.size()))
+                        .imageUrl("https://picsum.photos/id/" + random.nextInt(300) + "/200/300")
+                        .originalName("original" + i + ".mp3")
+                        .savePath("http://example.com/audio" + i + ".mp3")
+                        .saveFolder("folder" + i)
+                        .latitude(37.5 + random.nextDouble() * 0.1)
+                        .longitude(127.0 + random.nextDouble() * 0.1)
+                        .heartCount(heartCount)
+                        .listenCount(listenCount)
+                        .voiceType(VoiceType.virus)
+                        .build();
+                ProcessedVoice processedVoice = ProcessedVoice.builder()
+                        .processedPath("http://example.com/processed" + i + ".mp3")
+                        .voice(voice)
+                        .build();
+                k++;
+                voiceRepository.save(voice);
+            }
             // 보이스 데이터 생성 및 저장
             Voice voice1 = Voice.builder()
                     .voiceId(1L)
@@ -59,7 +97,7 @@ public class DataLoader {
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.Processed)
+                    .voiceType(VoiceType.virus)
                     .build();
             Voice voice2 = Voice.builder()
                     .voiceId(2L)
@@ -71,9 +109,9 @@ public class DataLoader {
                     .savePath("/voices/voice2.mp3")
                     .saveFolder("/voices/")
                     .latitude(37.7749)
-                    .longitude(-122.4194)
+                    .longitude(122.4194)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.NormalVoice)
+                    .voiceType(VoiceType.pokemon)
                     .build();
             Voice voice3 = Voice.builder()
                     .voiceId(3L)
@@ -87,7 +125,7 @@ public class DataLoader {
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.Processed)
+                    .voiceType(VoiceType.virus)
                     .build();
             Voice voice4 = Voice.builder()
                     .voiceId(4L)
@@ -99,9 +137,9 @@ public class DataLoader {
                     .savePath("/voices/voice2.mp3")
                     .saveFolder("/voices/")
                     .latitude(37.7749)
-                    .longitude(-122.4194)
+                    .longitude(122.4194)
                     .dateTime(LocalDateTime.now())
-                    .voiceType(VoiceType.NormalVoice)
+                    .voiceType(VoiceType.pokemon)
                     .build();
 
 
@@ -123,10 +161,10 @@ public class DataLoader {
                     voice.setMember(member1);
                     voice.setHeartCount(3L);
                     voice.setListenCount(Math.round(Math.random() * 100000));
-                    voice.setLatitude(50);
-                    voice.setLongitude(50);
+                    voice.setLatitude(127.0 + random.nextDouble() * 0.1);
+                    voice.setLongitude(37.5 + random.nextDouble() * 0.1);
                     voice.setTitle("두부를 왜 좋아함" + i);
-                    voice.setVoiceType(VoiceType.NormalVoice);
+                    voice.setVoiceType(VoiceType.virus);
                     voice.setDateTime(LocalDateTime.now());
                     voice.setSavePath("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");
                     voice.setImageUrl("https://github.com/KoEonYack/Tistory-Coveant/blob/master/Article/JAVA/LocalDateTime_%EC%82%AC%EC%9A%A9%EB%B2%95_%EC%A0%95%EB%A6%AC/img/cover.png?raw=true");

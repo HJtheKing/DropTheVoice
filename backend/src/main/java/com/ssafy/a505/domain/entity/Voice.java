@@ -54,6 +54,8 @@ public class Voice {
     @Enumerated(EnumType.STRING)
     private VoiceType voiceType;
 
+    private boolean isProcessed;
+
     @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
     @Builder.Default
     private List<ProcessedVoice> processedVoices = new ArrayList<>();
@@ -66,5 +68,13 @@ public class Voice {
     public void addProcessedVoice(ProcessedVoice voice) {
         this.processedVoices.add(voice);
         voice.setVoice(this);
+        this.setProcessed(true);
+    }
+
+    public String getProcessedVoicePath() {
+        if (this.isProcessed && !this.processedVoices.isEmpty()) {
+            return this.processedVoices.get(0).getProcessedPath();
+        }
+        return null;
     }
 }

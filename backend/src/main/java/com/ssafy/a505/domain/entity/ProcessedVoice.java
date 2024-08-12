@@ -1,12 +1,14 @@
 package com.ssafy.a505.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProcessedVoice {
 
     @Id
@@ -21,6 +23,5 @@ public class ProcessedVoice {
     @JoinColumn(name = "voice_id")
     private Voice voice;
 
-    @Enumerated(EnumType.STRING)
-    private VoiceType voiceType;
+
 }

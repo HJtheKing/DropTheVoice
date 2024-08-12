@@ -3,6 +3,7 @@ package com.ssafy.a505.domain.service;
 import com.ssafy.a505.domain.dto.response.VoiceResponseDTO;
 import com.ssafy.a505.domain.entity.Heart;
 import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.entity.ProcessedVoice;
 import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.repository.HeartRepository;
 import com.ssafy.a505.domain.repository.MemberRepository;
@@ -10,6 +11,7 @@ import com.ssafy.a505.domain.repository.VoiceRepository;
 import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.concurrent.CircuitBreakingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,11 @@ public class VoiceServiceImpl implements VoiceService{
         Pageable pageable = PageRequest.of(page, size);
         LocalDateTime ago = LocalDateTime.now().minusDays(2);
         return voiceRepository.findAllByOrderByHeartCountDesc(ago ,pageable);
+    }
+
+    @Override
+    public List<Voice> getAllVoice() {
+        return voiceRepository.findAll();
     }
 
     @Override
@@ -65,8 +72,15 @@ public class VoiceServiceImpl implements VoiceService{
     }
 
     @Override
-    public Voice findById(Long id) {
-            return voiceRepository.findById(id).get();
+    public VoiceResponseDTO findById(Long id) {
+        Voice voice = voiceRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
+
+        Member member = memberRepository.findById(voice.getMember().getMemberId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        member.setTotalSpreadCount(member.getTotalSpreadCount() + 1);
+
+        return VoiceResponseDTO.fromEntity(voice);
     }
 
     public Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort) {

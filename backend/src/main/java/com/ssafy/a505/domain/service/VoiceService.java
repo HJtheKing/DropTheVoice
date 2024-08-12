@@ -14,11 +14,13 @@ public interface VoiceService {
 
     List<Voice> getVoiceOrderByHeartCountDesc(int page, int size);
 
+    List<Voice> getAllVoice();
+
     List<Voice> findByTitleContaining(String userNam, Pageable pageable);
 
     List<Voice> findAllByTitle(String title, Pageable pageable);
 
-    Voice findById(Long id);
+    VoiceResponseDTO findById(Long id);
 
     Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort);
 

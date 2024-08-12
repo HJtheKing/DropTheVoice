@@ -14,7 +14,7 @@
         <MyRecordButton ref="myRecordButton" />
         <audio-player ref="audioPlayer" />
         <v-row justify="center">
-          <v-btn class="load-btn" @click="playSampleAudio">오디오 불러오기 테스트</v-btn>
+          <v-btn class="load-btn" @click="navigateTo('upload-voice')">업로드</v-btn>
         </v-row>
       </v-container>
     </v-main>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import CurrentTime from '@/components/record/CurrentTime.vue';
 import MyTimer from '@/components/record/MyTimer.vue';
 import MyRecordButton from '@/components/record/MyRecordButton.vue';
@@ -33,16 +33,7 @@ import { useRecordStore } from '@/store/record';
 import { storeToRefs } from 'pinia';
 import * as lamejs from '@breezystack/lamejs';
 import axios from 'axios';
-
-////////////////////////////// 테스트용 ////////////////////////////////////
-import audioFile from '@/assets/tracks/진격 (Zinkyeok) - Rusty Ground.webm';
-function playSampleAudio() {
-  if (audioPlayer.value) {
-    audioPlayer.value.loadAudio(audioFile);
-  }
-}
-///////////////////////////////////////////////////////////////////////////
-
+import { useRouter } from 'vue-router';
 const audioPlayer = ref(null);
 const myRecordButton = ref(null);
 const locationMessage = ref('');
@@ -50,6 +41,7 @@ const spreadStore = useSpreadStore();
 const recordStore = useRecordStore();
 
 const { audioBlob } = storeToRefs(recordStore);
+const router = useRouter();
 
 let mp3Blob = null;
 let mp3Url = null;
@@ -106,7 +98,7 @@ const sendVoiceInfoToServer = (lat, lon) => {
   formData.append('voiceUrl', mp3Url);
   formData.append('voiceFile', mp3Blob);
 
-  axios.post('http://localhost:8080/api-record/record', formData)
+  axios.post('${import.meta.env.VITE_BASE_URL}/api-record/record', formData)
     .then(response => {
       console.log('Location sent to server:', response.data);
     })
@@ -150,6 +142,23 @@ async function convertWavToMp3(wavBlob) {
 
     reader.onerror = reject;
     reader.readAsArrayBuffer(wavBlob);
+  });
+}
+
+async function navigateTo(routeName) {
+  if (!audioBlob.value) return;
+  const mp3Blob = await convertWavToMp3(audioBlob.value);
+  const base64Data = await blobToBase64(mp3Blob);
+
+  localStorage.setItem('recordData', base64Data);
+  router.push({ name: routeName });
+}
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob); // Blob을 Base64 데이터 URL로 변환
   });
 }
 </script>

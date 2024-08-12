@@ -123,7 +123,7 @@ const checkDuplicate = async () => {
     return;
   }
   try {
-    const response = await axios.post('http://localhost:8080/api-member/check-duplicate', { memberName: userId.value });
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api-member/check-duplicate`, { memberName: userId.value });
     if (response.data === "fail") {
       alert('아이디가 이미 존재합니다.');
     } else if (response.data === "success" && userId.value.length >= 6) {
@@ -142,7 +142,7 @@ const submitForm = async () => {
   // 폼의 모든 입력 값이 유효한지 확인
   if (isFormValid.value && duplicateCheck.value) {
     try {
-      const response = await axios.post('http://localhost:8080/api-member/register', {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api-member/register`, {
         memberEmail: `${email.value}@${emailDomain.value === '직접 입력' ? customEmailDomain.value : emailDomain.value}`,
         memberName: userId.value,
         memberPassword: password.value,
@@ -157,10 +157,10 @@ const submitForm = async () => {
     } catch (error) {
       alert('가입 중 오류가 발생했습니다.');
     }
-  } else if (!duplicateCheck.value) {
-    alert('아이디 중복을 확인해주세요.');
-  } else {
+  } else if (!isFormValid.value) {
     alert('입력된 정보를 확인해주세요.');
+  } else {
+    alert('아이디 중복을 확인해주세요.');
   }
 };
 

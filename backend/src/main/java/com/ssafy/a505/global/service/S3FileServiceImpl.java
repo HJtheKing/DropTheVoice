@@ -3,7 +3,6 @@ package com.ssafy.a505.global.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
-import com.ssafy.a505.domain.entity.VoiceType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +42,7 @@ public class S3FileServiceImpl implements S3FileService {
 
     // - 파일 업로드 접근 메서드
     @Override
-    public String uploadFile(MultipartFile file, VoiceType category, String title) {
+    public String uploadFile(MultipartFile file,boolean isProcessed) {
         //파일 비었는지 체크
         if (file.isEmpty() || Objects.isNull(file.getOriginalFilename())) {
             throw new AmazonS3Exception("파일이 비어있습니다");
@@ -52,14 +51,14 @@ public class S3FileServiceImpl implements S3FileService {
         this.validateExtension(file.getOriginalFilename());
 
         //성공로직
-        return this.uploadFileToS3(file, category, title);
+        return this.uploadFileToS3(file, isProcessed);
     }
 
     // - 파일 확장자 유효성 검사
     private void validateExtension(String filename) {
         int lastDotIndex = filename.lastIndexOf(".");
         if (lastDotIndex == -1) {
-            throw new AmazonS3Exception("확장자명에 문제가 있습니다");
+            throw new AmazonS3Exception("파일명 문제가 있습니다.");
         }
 
         String extension = filename.substring(lastDotIndex + 1).toLowerCase();
@@ -71,8 +70,8 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     // - S3 실제 업로드
-    private String uploadFileToS3(MultipartFile file, VoiceType category, String title) {
-            String s3FileName = getFileFolder(category) + UUID.randomUUID().toString().substring(0, 10) + title;
+    private String uploadFileToS3(MultipartFile file, boolean isProcessed) {
+            String s3FileName = getFileFolder(isProcessed) + UUID.randomUUID().toString().substring(0, 10) + file.getOriginalFilename();
 
             try (InputStream is = file.getInputStream();
                  ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {
@@ -98,13 +97,8 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     // - 폴더 경로 지정 메서드
-    public String getFileFolder(VoiceType category) {
-        String folder = "";
-        if(category == VoiceType.NormalVoice) {
-            folder = this.getOriginalVoiceFolderName();
-        }else if(category == VoiceType.Processed){
-            folder = this.getProcessedVoiceFolderName();
-        }
+    public String getFileFolder(boolean isProcessed) {
+        String folder = isProcessed ? processedVoiceFolderName : originalVoiceFolderName;
         return folder;
     }
 
