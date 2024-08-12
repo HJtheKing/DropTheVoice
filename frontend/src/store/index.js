@@ -118,8 +118,7 @@ export default createStore({
                     console.log(sessions);
                     sessions.forEach(otherSessionId => {
                         console.log("others session id is " + otherSessionId);
-                        console.log(mySessionId)
-                        console.log(otherSessionId)
+                        console.log("mySessionId : " + mySessionId)
                         if (!(mySessionId == otherSessionId)) {
                             console.log("compare "+mySessionId+" "+otherSessionId);
                             otherSessionIdList.push(otherSessionId);
@@ -373,7 +372,6 @@ async function sendFileInner(file) {
         reader.onload = (event) => {
             const result = event.target.result;
             const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
-            console.log('tlqkf')
             otherSessionIdList.forEach(session => {
                 console.log("other sesion id is "+session);
                 let channel = sendChannelMap.get(session);

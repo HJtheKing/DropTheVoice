@@ -11,17 +11,18 @@
 import MenuBar from '@/components/MenuBar.vue';
 
 import { useStore } from 'vuex';
-import { useUserStore } from '@/store/user';
+import { useRoute, useRouter  } from 'vue-router';
 
-import { ref, onMounted, watch } from 'vue';
+import { onMounted } from 'vue';
 
-console.log("---a-----");
 const store = useStore();
-const userStore = useUserStore();
+const route = useRoute();
+const router = useRouter();
 
-onMounted(() => {
-  
-  if (!store.getters.isConnected) {
+onMounted(async () => {
+  await router.isReady();
+  // 로그인 이후에 웹소켓 연결
+  if (!store.getters.isConnected && route.name !== 'login') {
     store.dispatch('connectWebSocket');
   }
 });
