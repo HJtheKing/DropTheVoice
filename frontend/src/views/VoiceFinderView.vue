@@ -7,7 +7,6 @@
             <h1 class="title">주변 음성 듣기</h1>
           </v-col>
         </v-row>
-        
         <v-row>
           <naver-map style="width: 100%; height: 400px; margin-bottom: 20px;"
                      :mapOptions="mapOptions"
@@ -19,13 +18,11 @@
                           :icon="{ url: MY_POSITION_IMAGE }"
                           @onLoad="onLoadMyMarker">
             </naver-marker>
-
             <naver-circle v-if="nowPosition"
                           :latitude="nowPosition.latitude"
                           :longitude="nowPosition.longitude"
                           :radius="limitedRadius"
                           @onLoad="onLoadCircle"/>
-            
             <naver-marker v-for="(voice, index) in aroundVoices"
                           :key="voice.id"
                           :latitude="voice.latitude"
@@ -33,18 +30,16 @@
                           @onLoad="(marker) => onLoadMarker(marker, index)"
                           @click="selectMarker(voice, index)">
             </naver-marker>
-
             <naver-info-window v-for="(voice, index) in aroundVoices"
                                :key="index"
                                :marker="voiceMarkerMetas[index]"
                                :open="isOpenMarker[index]">
-              <div class="custom-infowindow">
-    <h3>{{ voice.title }}</h3>
-  </div>
+            <div class="custom-infowindow">
+            <h3>{{ voice.title }}</h3>
+            </div>
             </naver-info-window>
-          </naver-map>
+            </naver-map>
         </v-row>
-
         <v-row justify="space-between" class="py-4">
           <v-col cols="8">
             <h2>음성 목록</h2>
@@ -59,14 +54,13 @@
             </v-select>
           </v-col>
         </v-row>
-
         <v-row>
           <v-col cols="12">
   <v-card class="mb-4 list-items"
         elevation="3"
         v-for="(item, index) in aroundVoices"
         :key="index"
-        @click="selectMarker(item, index)"
+        @click="selectMarker(item, index); scrollToTop()"
         color="black">
   <v-row no-gutters>
     <v-col cols="4">
@@ -89,9 +83,22 @@
               <v-icon small class="mr-2">mdi-headphones</v-icon>
               <span>{{ item.listenCount }}</span>
             </div>
-            <v-btn @click="pickItem(item)" color="black" class="pick-button">
-              <v-icon left>mdi-hand-pointing-right</v-icon> 줍기
-            </v-btn>
+            <v-btn 
+  v-if="!item.picked"
+  @click="pickItem(item); togglePick" 
+  color="black" 
+  class="pick-button"
+>
+  <v-icon left>mdi-hand-pointing-right</v-icon> 줍기
+</v-btn>
+<v-btn 
+  v-else
+  disabled 
+  color="grey" 
+  class="pick-button"
+>
+  <v-icon left color="black">mdi-check</v-icon> 이미 줍기 완료
+</v-btn>
           </div>
         </div>
       </v-card-title>
@@ -113,7 +120,6 @@
 
 <script setup>
 import MY_POSITION_IMAGE from '@/assets/map/my-marker.png';
-import THUMBNAIL_IMAGE from '@/assets/images/thumb2.jpg';
 import { ref, watch } from "vue";
 import { NaverCircle, NaverInfoWindow, NaverMap, NaverMarker } from "vue3-naver-maps";
 import axios from 'axios';
@@ -128,6 +134,7 @@ const aroundVoices = ref([]);
 const voiceMarkerMetas = ref([]);
 const isOpenMarker = ref([]);
 const loading = ref(false);
+const pick = ref(false);
 
 const getNearbyVoices = async (latitude, longitude, radius) => {
   try {
@@ -139,7 +146,12 @@ const getNearbyVoices = async (latitude, longitude, radius) => {
         radius: radius
       },
     });
-    aroundVoices.value = response.data;
+    aroundVoices.value = response.data.map(voice => {
+      return {
+        ...voice,
+        picked: voice.picked
+      }
+    });
     console.log(aroundVoices.value)
     loading.value = false;
   } catch (error) {
@@ -151,6 +163,12 @@ const getNearbyVoices = async (latitude, longitude, radius) => {
 const onLoadMap = (mapObject) => {
   map.value = mapObject;
   moveNowPosition();
+};
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0, behavior: 'smooth'
+  });
 };
 
 const onLoadMyMarker = (markerObject) => {
@@ -169,12 +187,6 @@ const updateCircleRadius = () => {
     circle.value.setRadius(limitedRadius.value);
     circle.value.setCenter(new naver.maps.LatLng(nowPosition.value.latitude, nowPosition.value.longitude));
   }
-};
-
-const pickItem = (item) => {
-  // 줍기 버튼 클릭 시 실행할 함수
-  alert(`'${item.title}'을(를) 주웠습니다!`);
-  // 실제 로직 추가 해야함
 };
 
 const updateMapZoomAndCenter = () => {
@@ -242,6 +254,52 @@ const radiusCandidates = [
   { distance: '10km', zoom: 10 },
   { distance: '20km', zoom: 9 }
 ];
+
+const pickItem = async (item) => {
+  if (item.picked) {
+    alert(`${item.title} 음성은 이미 주웠습니다.`)
+    return;
+  } else {
+    try {
+      const success = await togglePick(item);
+      if (success) {
+        item.picked = true;
+        alert(`${item.title}을(를) 주웠습니다! 보관함을 확인해주세요`);
+      } else {
+        console.error("error");
+      }
+    } catch (error) {
+      console.error('Error picking item:', error);
+    }
+  }
+};
+
+const togglePick = async (item) => {
+  const token = sessionStorage.getItem('access-token');
+  if (!token) {
+    console.error('JWT 토큰이 없습니다.');
+    return;
+  }
+  try {
+    const url = `${import.meta.env.VITE_BASE_URL}/api-voice/${item.voiceId}/pick`;
+
+    const response = await axios.post(url, null, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (response.status === 200 && response.data) {
+      pick.value = response.data.isPicked;
+      return pick.value;
+    } else {
+      console.error('서버에서 응답이 제대로 오지 않았습니다.');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error like:', error);
+  }
+};
+
 </script>
 
 <style scoped>

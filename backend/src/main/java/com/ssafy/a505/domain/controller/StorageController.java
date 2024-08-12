@@ -5,6 +5,7 @@ import com.ssafy.a505.domain.repository.VoiceRepository;
 import com.ssafy.a505.domain.service.VoiceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class StorageController {
     private final VoiceService voiceService;
 
     @GetMapping("spread/{page}/{size}")
-    public ResponseEntity<?> findAllWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size){
+    public ResponseEntity<?> findAllWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size) {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -45,6 +46,18 @@ public class StorageController {
         log.info("findAllWithPage page={}", page - 1);
         List<Voice> result = voiceService.findByMemberWithHeart(memberId, pageRequest);
 
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("picks/{page}/{size}")
+    public ResponseEntity<?> findPickWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size) {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        List<Voice> result = voiceService.findByMemberWithPick(memberId, pageRequest);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
