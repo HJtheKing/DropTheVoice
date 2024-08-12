@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
 import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
+import com.ssafy.a505.domain.dto.response.MailDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
@@ -50,7 +51,6 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    // 멤버 정보 확인
     @Operation(summary = "멤버 아이디로 멤버 정보 확인")
     @GetMapping("{memberId}")
     public ResponseEntity<MemberResponseDTO> memberDetail(@PathVariable("memberId") long memberId) {
@@ -61,7 +61,16 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // 이름 중복 여부 확인
+    @Operation(summary = "멤버 이메일로 멤버 아이디 확인")
+    @PostMapping("/findMemberId")
+    public ResponseEntity<MemberResponseDTO> findMemberId(@RequestBody MemberRequestDTO memberRequestDTO) {
+        MemberResponseDTO memberResponseDTO = memberService.getMemberByMemberEmail(memberRequestDTO);
+        if (memberResponseDTO != null) {
+            return new ResponseEntity<>(memberResponseDTO, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @Operation(summary = "이름 중복 여부 확인")
     @PostMapping("/check-duplicate")
     public ResponseEntity<String> checkDuplicateName(@RequestBody MemberRequestDTO memberRequestDTO) {
@@ -78,7 +87,6 @@ public class MemberController {
     }
 
 
-    // 로그인 요청 검증
     @Operation(summary = "로그인 요청 검증")
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody MemberRequestDTO memberRequestDTO) {
@@ -103,7 +111,6 @@ public class MemberController {
         return new ResponseEntity<>(result, status);
     }
 
-    //회원 가입
     @Operation(summary = "회원 가입")
     @PostMapping("/register")
     public ResponseEntity<Boolean> signup(@RequestBody MemberRequestDTO memberRequestDTO) {
@@ -136,6 +143,21 @@ public class MemberController {
         return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
     }
 
+
+    @Operation(summary = "임시 비밀번호 보내기")
+    @PostMapping("/getNewPassword")
+    public ResponseEntity<Boolean> sendPassword(@RequestBody MemberRequestDTO memberRequestDTO) {
+        MemberRequestDTO target = memberService.findMemberByName(memberRequestDTO.getMemberName());
+        if(target.getMemberEmail().equals(memberRequestDTO.getMemberEmail())){
+            MailDTO mailDTO = memberService.createMailAndChangePassword(memberRequestDTO);
+            memberService.sendMail(mailDTO);
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+    }
+
+
+    
 
     @GetMapping("/image/{userImgUrl}")
     public ResponseEntity<?> getImage(@PathVariable String userImgUrl) {

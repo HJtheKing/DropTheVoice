@@ -61,13 +61,15 @@ const changePassword = () => {
   userStore.changePassword(currentPassword.value, newPassword.value)
     .then(() => {
       alert('비밀번호가 변경되었습니다.');
-      dialog.value = false;
-      currentPassword.value = '';
+      dialog.value = false; // 모달 닫기
+      currentPassword.value = ''; // 입력 필드 초기화
       newPassword.value = '';
-    }).catch((error) => {
+    })
+    .catch((error) => {
       alert('비밀번호 변경에 실패했습니다: ' + error.message);
     });
 };
+
 
 const openDialog = () => {
   dialog.value = true;
