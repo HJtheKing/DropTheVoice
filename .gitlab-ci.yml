@@ -27,4 +27,4 @@ build:
     - docker image prune -f
   only:
     - master
-    - fix/ci
+
