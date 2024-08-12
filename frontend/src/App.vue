@@ -9,6 +9,23 @@
 
 <script setup>
 import MenuBar from '@/components/MenuBar.vue';
+
+import { useStore } from 'vuex';
+import { useUserStore } from '@/store/user';
+
+import { ref, onMounted, watch } from 'vue';
+
+console.log("---a-----");
+const store = useStore();
+const userStore = useUserStore();
+
+onMounted(() => {
+  
+  if (!store.getters.isConnected) {
+    store.dispatch('connectWebSocket');
+  }
+});
+
 </script>
 
 <style scoped>

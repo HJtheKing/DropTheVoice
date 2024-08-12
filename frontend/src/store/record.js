@@ -15,6 +15,10 @@ export const useRecordStore = defineStore('record', () => {
   const javascriptNode = ref(null);
   const isPlaying = ref(false);
 
+  function loadAudio(url) {
+    audioUrl.value = url;
+  }
+
   const userStore = useUserStore();
   const memberId = computed(() => userStore.loginUserId);
   const locationMessage = ref('');
@@ -53,7 +57,7 @@ export const useRecordStore = defineStore('record', () => {
         locationMessage.value = 'An unknown error occurred.';
         break;
     }
-  };
+  }
 
   const uploadFile = async () => {
     try {
@@ -63,7 +67,6 @@ export const useRecordStore = defineStore('record', () => {
     } catch (error) {
       showError(error);
     }
-    
   }
 
   return {
@@ -77,6 +80,7 @@ export const useRecordStore = defineStore('record', () => {
     stream,
     javascriptNode,
     isPlaying,
+    loadAudio,
     uploadFile,
   };
 });

@@ -28,20 +28,6 @@ public class RedisUtils {
         this.redisMemberTemplate = redisMemberTemplate;
     }
 
-    public void setLong(String key, Long value) {
-        redisTemplate.opsForValue().set(key, value);
-    }
-
-    public void setLongTimeLimit(String key, Long value, Long expiredTime) {
-        redisTemplate.opsForValue().set(key, value, Duration.ofMinutes(expiredTime));
-    }
-
-    public Long getLong(String key) {
-        Object value = redisTemplate.opsForValue().get(key);
-        if (value == null) return null;
-        return (long) ((int) value);
-    }
-
     public void setString(String key, String value, Long expiredTime) {
         redisTemplate.opsForValue().set(key, value, Duration.ofMinutes(expiredTime));
     }

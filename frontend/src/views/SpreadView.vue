@@ -20,13 +20,13 @@
           <v-row no-gutters class="align-content-start">
             <v-col cols="6" class="d-flex justify-center ">
               <v-btn router-link class="v-alert--density-comfortable" size="x-large" prepend-icon="mdi-microphone"
-                     variant="tonal" @click="router.push({name: 'record'})">
+                     variant="tonal" @click="navigateTo('record')">
                 녹음하기
               </v-btn>
             </v-col>
             <v-col cols="6" class="d-flex justify-center ">
               <v-btn class="v-alert--density-comfortable" size="x-large" prepend-icon="mdi-upload-box" variant="tonal"
-                     @click="navigateToUpload">
+                     @click="navigateTo('upload-voice')">
                 업로드
               </v-btn>
               </v-col>
@@ -50,8 +50,9 @@ const spreadStore = useSpreadStore()
 const { activeTab } = storeToRefs(spreadStore)
 const { setTab } = spreadStore
 
-const navigateToUpload = () => {
-  router.push({path:'/spread/upload'})
+function navigateTo(routeName) {
+  localStorage.setItem('voiceType', activeTab.value)
+  router.push({ name: routeName });
 }
 </script>
 

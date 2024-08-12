@@ -1,4 +1,5 @@
 <template>
+  <WebRtcSendButton/>
   <v-app class="bg-black">
     <v-container class="login-container" max-width="600px">
       <v-form @submit.prevent="login">
@@ -73,6 +74,7 @@ import { ref } from "vue";
 import { useUserStore } from "@/store/user";
 import FindMemberNameView from '@/views/FindMemberNameView.vue';
 import GetNewPasswordView from '@/views/GetNewPasswordView.vue';
+import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";
 
 const store = useUserStore();
 const id = ref("");

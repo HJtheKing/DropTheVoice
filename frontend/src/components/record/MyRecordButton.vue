@@ -37,7 +37,7 @@ defineExpose({
 });
 
 const recordStore = useRecordStore();
-const { isRecording, audioUrl, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
+const { isRecording, audioBlob, analyser, dataArray, bufferLength, stream, javascriptNode } = storeToRefs(recordStore); // 반응형 상태 참조
 
 // 초기화
 watch([analyser, dataArray, bufferLength, stream, javascriptNode], (newValues) => {
@@ -50,11 +50,8 @@ watch([analyser, dataArray, bufferLength, stream, javascriptNode], (newValues) =
 
 // Web Audio API 관련 변수
 let audioContext = null; // AudioContext 객체를 저장할 변수
-
 const audioChunks = [];
 let mediaRecorder = null; // MediaRecorder 객체를 저장할 변수
-
-const audioPlayer = ref(null); // 오디오 플레이어를 참조하는 ref
 
 // 인코더 등록 상태 추적
 let isEncoderRegistered = false;
@@ -82,10 +79,13 @@ const startRecording = async () => {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
 
-    // 오디오 플레이어 초기화
-    if (audioPlayer.value) {
-      audioPlayer.value.loadAudio('');
-    }
+    // // 오디오 플레이어 초기화
+    // if (audioPlayer.value) {
+    //   audioPlayer.value.loadAudio('');
+    //   console.log("오디오플레이어 초기화")
+    // } else {
+    //   console.log("오디오 플레이어 초기화 필요없음")
+    // }
 
     // 인코더가 등록되지 않은 경우에만 등록
     if (!isEncoderRegistered) {
@@ -121,14 +121,10 @@ const startRecording = async () => {
 
     mediaRecorder.onstop = () => {
       audioBlob.value = new Blob(audioChunks, { type: 'audio/wav' });
-      audioUrl.value = URL.createObjectURL(audioBlob.value);
+      // audioUrl.value = URL.createObjectURL(audioBlob.value);
+      const Url = URL.createObjectURL(audioBlob.value);
+      recordStore.loadAudio(Url); // 녹음 종료 시 URL을 스토어에 저장
 
-      if (audioPlayer.value) {
-        audioPlayer.value.loadAudio(audioUrl.value);
-        console.log("Loaded recorded audio to player")
-      } else {
-        console.log("Failed")
-      }
 
       audioChunks.length = 0;
       if (audioContext) {
