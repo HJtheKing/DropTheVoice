@@ -24,7 +24,7 @@ onMounted(() => {
 <style scoped>
 .current-time {
   /* font-size: 24px; */
-  color: #1e90ff;
+  color: #ffffff;
   padding: 10px;
   border-radius: 5px;
   text-align: center;

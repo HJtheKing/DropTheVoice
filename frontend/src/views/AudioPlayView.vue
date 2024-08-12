@@ -91,6 +91,9 @@ const toggleLike = async () => {
 
     if (response.status === 200 && response.data) {
       isLiked.value = response.data.isLiked;
+      // if (!isLiked.value) {
+      //   storageStore.hasNewLikeNotifications = true;
+      // }
       likeCount.value = response.data.likeCount;
     } else {
       console.error('서버에서 응답이 제대로 오지 않았습니다.');

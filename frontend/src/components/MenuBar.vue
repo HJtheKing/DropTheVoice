@@ -12,18 +12,14 @@
       <v-icon>mdi-compass</v-icon>
       <span>음성 줍기</span>
     </v-btn>
-    <v-btn value="보관함" @click="navigateToStorage">
-      <v-badge
-        v-if="storageStore.hasNewNotifications"
-        color="yellow"
-        dot
-        overlap
-      >
-        <v-icon>mdi-folder</v-icon>
-      </v-badge>
-      <v-icon v-else>mdi-folder</v-icon>
-      <span>보관함</span>
-    </v-btn>
+      <v-btn value="보관함" @click="navigateToStorage" class="relative">
+    <v-icon v-if="storageStore.hasNewNotifications" class="mdi-folder-container">
+      <v-icon class="mdi-folder-icon">mdi-folder</v-icon>
+      <v-icon class="notification-icon">mdi-new-box</v-icon>
+    </v-icon>
+    <v-icon v-else>mdi-folder</v-icon>
+    <span>보관함</span>
+  </v-btn>
     <v-btn value="마이페이지" @click="navigateTo('mypage')">
       <v-icon>mdi-view-grid</v-icon>
       <span>마이페이지</span>
@@ -63,6 +59,36 @@ export default {
 </script>
 
 <style scoped>
+.mdi-folder-container {
+  position: relative;
+  display: inline-block;
+}
+
+.mdi-folder-icon {
+  font-size: 20px;
+  position: relative;
+}
+
+.notification-icon {
+  animation: pulse 1.5s infinite;
+  font-size: 16px;
+  color: yellow;
+  position: absolute;
+  top: -5px; /* Adjust for vertical positioning */
+  right: -10px; /* Adjust for horizontal positioning */
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 .bottom-navy {
   background-color: #252836;
   color: #808191;

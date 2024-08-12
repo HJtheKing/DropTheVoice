@@ -9,16 +9,19 @@
       </v-row>
       
       <v-row justify="center">
-        <v-col cols="12" sm="8" md="6">
+        <v-col cols="12" sm="8" md="7">
           <v-tabs v-model="activeTab" centered background-color="primary" class="mb-4">
-  <v-tab value="all" @click="store.changeTab(activeTab)">
+  <v-tab value="pick" @click="storageStore.changeTab(activeTab); storageStore.resetPickNotification()">
     줍한 음성 목록
+      <v-icon v-if="storageStore.hasNewPickNotifications" class="notification-icon">mdi-new-box</v-icon>
   </v-tab>
-  <v-tab value="liked" @click="store.changeTab(activeTab)">
+  <v-tab value="liked" @click="storageStore.changeTab(activeTab); storageStore.resetLikeNotification()">
     좋아요 음성 목록
+      <v-icon v-if="storageStore.hasNewLikeNotifications" class="notification-icon">mdi-new-box</v-icon>
   </v-tab>
   <v-tab value="alarm">
     전파된 음성 목록
+      <v-icon v-if="false" class="notification-icon">mdi-new-box</v-icon>
   </v-tab>
 </v-tabs>
         </v-col>
@@ -63,12 +66,12 @@
       </v-row>
 
       <!-- 로딩 애니메이션 -->
-      <v-row justify="center" v-if="store.isFetching">
+      <v-row justify="center" v-if="storageStore.isFetching">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
       </v-row>
 
       <!-- 더 이상 데이터가 없을 때 표시할 메시지 -->
-      <v-row justify="center" v-if="!store.hasMoreVoices && !store.isFetching">
+      <v-row justify="center" v-if="!storageStore.hasMoreVoices && !storageStore.isFetching">
         <v-alert type="info">모두 다 발견되었어요 🌈</v-alert>
       </v-row>
     </v-container>
@@ -76,22 +79,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStorageStore } from '@/store/storage';
 import { useUserStore } from "@/store/user";
 
-const store = useStorageStore();
+const storageStore = useStorageStore();
 const userStore = useUserStore();
 const router = useRouter();
 
-const activeTab = ref('all');
+const activeTab = ref('pick');
 
-const allVoices = computed(() => store.allVoices);
-const likedVoices = computed(() => store.likedVoices);
+const pickVoices = computed(() => storageStore.pickVoices);
+const likedVoices = computed(() => storageStore.likedVoices);
 
 const filteredVoices = computed(() => {
-  return activeTab.value === 'all' ? allVoices.value : likedVoices.value;
+  return activeTab.value === 'pick' ? pickVoices.value : likedVoices.value;
 });
 
 const navigateToDetail = (id) => {
@@ -100,25 +103,43 @@ const navigateToDetail = (id) => {
 
 const handleScroll = () => {
   const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 10;
-  if (bottomOfWindow && !store.isFetching && store.hasMoreVoices) {
-    store.loadMoreVoices();
+  if (bottomOfWindow && !storageStore.isFetching && storageStore.hasMoreVoices) {
+    storageStore.loadMoreVoices();
   }
 };
-
 
 onMounted(() => {
   userStore.tryAutoLogin();
   window.addEventListener('scroll', handleScroll);
-
-  if (store.activeTab === 'all') {
-    store.reloadAllVoices();
-  } else if (store.activeTab === 'liked') {
-    store.reloadLikedVoices();
+  
+  if (storageStore.activeTab === 'pick') {
+    storageStore.reloadPickVoices();
+  } else if (storageStore.activeTab === 'liked') {
+    storageStore.reloadLikedVoices();
   }
 });
 </script>
 
 <style scoped>
+.notification-icon{
+  animation:pulse 0.5s infinite;
+  font-size:20px;
+  color:yellow;
+  position:absolute;
+  top:-1px;
+  right:-5px;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 .custom-container {
   max-width: 800px;
   margin: 0 auto;

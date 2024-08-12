@@ -39,4 +39,8 @@ public class Member {
     @OrderBy("heartAt ASC")
     private Set<Heart> hearts = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("pickAt ASC")
+    private Set<Pick> picks = new LinkedHashSet<>();
+
 }

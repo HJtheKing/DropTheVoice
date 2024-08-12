@@ -11,10 +11,10 @@ import org.springframework.data.repository.query.Param;
 
 import com.ssafy.a505.domain.entity.Voice;
 import org.springframework.security.core.parameters.P;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface VoiceRepository extends JpaRepository<Voice, Long> {
-    List<Voice> findAllByTitle(String title, Pageable pageable);
-
     @Query("SELECT v FROM Voice v WHERE v.dateTime >= :dateTime ORDER BY v.heartCount DESC")
     List<Voice> findAllByOrderByHeartCountDesc(@Param("dateTime") LocalDateTime dateTime, Pageable pageable);
 
@@ -23,6 +23,9 @@ public interface VoiceRepository extends JpaRepository<Voice, Long> {
 
     @Query("select v from Voice v join Heart h on v.voiceId = h.voice.voiceId where h.member.memberId = :memberId")
     List<Voice> findByMemberWithHeart(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("SELECT v FROM Voice v JOIN Pick p ON v.voiceId = p.voice.voiceId WHERE p.member.memberId= :memberId")
+    List<Voice> findByMemberWithPick(@Param("memberId") Long memberId, Pageable pageable);
 
     @Query("select v from Voice v join Spread s on v.voiceId = s.voice.voiceId where s.member.memberId = :memberId")
     List<Voice> findByMemberWithSpread(@Param("memberId") Long memberId, Pageable pageable);

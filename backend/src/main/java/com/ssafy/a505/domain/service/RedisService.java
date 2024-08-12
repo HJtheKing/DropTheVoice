@@ -7,6 +7,7 @@ import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.SpreadRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
+import com.ssafy.a505.global.sse.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.*;
@@ -35,6 +36,7 @@ public class RedisService {
     private final MemberRepository memberRepository;
     private final SpreadRepository spreadRepository;
     private final VoiceRepository voiceRepository;
+    private final NotificationService notificationService;
 
     public static final String MEMBER_KEY = "MEMBER_LOCATION";
     public static final String MEMBER_TIME_KEY = "MEMBER_TIME";
@@ -83,6 +85,8 @@ public class RedisService {
                 spread.setMember(findMember);
                 spread.setVoice(findVoice);
                 spreadRepository.save(spread);
+                // SSE 데이터 전송
+                notificationService.sendNotification(dto.getId(), "Spread Voice: " + voice.getTitle());
             }
         }
     }

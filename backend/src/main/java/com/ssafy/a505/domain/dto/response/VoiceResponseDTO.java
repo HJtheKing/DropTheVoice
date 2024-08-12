@@ -33,6 +33,8 @@ public class VoiceResponseDTO {
     private String processedPath;
     @Builder.Default
     private boolean isLiked = false;
+    @Builder.Default
+    private boolean isPicked = false;
 
     // 다른 필요한 필드들도 포함 가능
 
@@ -57,15 +59,14 @@ public class VoiceResponseDTO {
     }
 
     public static VoiceResponseDTO fromEntity(Voice voice, Member member) {
-        // 추가적인 디버그용 로그
-        System.out.println("Checking if member has liked the voice. Member ID: " + member.getMemberId());
-
         boolean isLiked = voice.getHearts().stream()
                 .anyMatch(heart -> {
-                    System.out.println("Checking heart. Heart belongs to Member ID: " + heart.getMember().getMemberId());
                     return heart.getMember().getMemberId().equals(member.getMemberId());
                 });
-        System.out.println(isLiked);
+        boolean isPicked = voice.getPicks().stream()
+                .anyMatch(pick -> {
+                    return pick.getMember().getMemberId().equals(member.getMemberId());
+                });
         return VoiceResponseDTO.builder()
                 .voiceId(voice.getVoiceId())
                 .memberId(voice.getMember().getMemberId())
@@ -83,7 +84,7 @@ public class VoiceResponseDTO {
                 .isProcessed(voice.isProcessed())
                 .processedPath(voice.getProcessedVoicePath())
                 .isLiked(isLiked)
+                .isPicked(isPicked)
                 .build();
     }
-
 }

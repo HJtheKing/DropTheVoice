@@ -62,6 +62,9 @@ onMounted(() => {
   if (props.src && audio.value) {
     audio.value.src = props.src;
     audio.value.load();
+    audio.value.play().then(() => {
+      isPlaying.value = true;
+    }).catch(error => console.error("Play Error", error));
   }
 });
 

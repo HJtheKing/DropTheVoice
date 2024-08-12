@@ -3,54 +3,56 @@ import axios from 'axios';
 import { useUserStore } from '@/store/user';
 
 export const useStorageStore = defineStore('storage', {
-  state: () => ({
-    allVoices: [],
+  state: () =>({
+    pickVoices: [],
     likedVoices: [],
-    currentPageAll: 1,
+    currentPagePick: 1,
     currentPageLiked: 1,
     pageSize: 10,
     isFetching: false,
-    hasMoreAllVoices: true,
+    hasMorePickVoices: true,
     hasMoreLikedVoices: true,
-    activeTab: 'all',
+    activeTab: 'pick',
     eventSource: null,
     hasNewNotifications: false,
+    hasNewLikeNotifications: false,
+    hasNewPickNotifications: false,
   }),
   getters: {
     hasMoreVoices(state) {
-      return state.activeTab === 'all' ? state.hasMoreAllVoices : state.hasMoreLikedVoices;
+      return state.activeTab === 'pick' ? state.hasMorePickVoices : state.hasMoreLikedVoices;
     },
   },
   actions: {
     resetPagination() {
-      this.currentPageAll = 1;
+      this.currentPagePick = 1;
       this.currentPageLiked = 1;
-      this.hasMoreAllVoices = true;
+      this.hasMorePickVoices = true;
       this.hasMoreLikedVoices = true;
-      this.allVoices = [];
+      this.pickVoices = [];
       this.likedVoices = [];
       this.isFetching = false;
     },
-    async fetchAllVoices(page = 1) {
+    async fetchPickVoices(page = 1) {
       const userStore = useUserStore();
-      if (!this.hasMoreAllVoices) return;
+      if (!this.hasMorePickVoices) return;
       this.isFetching = true;
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/spread/${page}/${this.pageSize}`, {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/picks/${page}/${this.pageSize}`, {
           params: {
             memberId: userStore.loginUserId,
           }
         });
         if (response.data.length < this.pageSize) {
-          this.hasMoreAllVoices = false;
+          this.hasMorePickVoices = false;
         }
         if (page === 1) {
-          this.allVoices = response.data;
+          this.pickVoices = response.data;
         } else {
-          this.allVoices.push(...response.data);
+          this.pickVoices.push(...response.data);
         }
       } catch (error) {
-        console.error('Error fetching all voices:', error);
+        console.error('Error fetching pick voices:', error);
       } finally {
         this.isFetching = false;
       }
@@ -84,9 +86,9 @@ export const useStorageStore = defineStore('storage', {
       if (this.isFetching || !this.hasMoreVoices) return;
       this.isFetching = true;
       try {
-        if (this.activeTab === 'all') {
-          this.currentPageAll++;
-          await this.fetchAllVoices(this.currentPageAll);
+        if (this.activeTab === 'pick') {
+          this.currentPagePick++;
+          await this.fetchPickVoices(this.currentPagePick);
         } else {
           this.currentPageLiked++;
           await this.fetchLikedVoices(this.currentPageLiked);
@@ -100,15 +102,19 @@ export const useStorageStore = defineStore('storage', {
     changeTab(tab) {
       this.activeTab = tab;
       this.resetPagination();
-      if (tab === 'all' && this.allVoices.length === 0) {
-        this.fetchAllVoices();
-      } else if (tab === 'liked' && this.likedVoices.length === 0) {
+      if (tab === 'pick') {
+        this.hasNewPickNotifications = false;
+      } if(this.pickVoices.length === 0) {
+        this.fetchPickVoices();
+      } else if (tab === 'liked') {
+        this.hasNewLikeNotifications = false;
+      } if (this.likedVoices.length === 0) {
         this.fetchLikedVoices();
       }
     },
-    reloadAllVoices() {
+    reloadPickVoices() {
       this.resetPagination();
-      this.fetchAllVoices();
+      this.fetchPickVoices();
     },
     reloadLikedVoices() {
       this.resetPagination();
@@ -130,16 +136,25 @@ export const useStorageStore = defineStore('storage', {
       this.eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log("Received SSE: ", data);
-
+        
         if (data.type === 'Like Notification') {
-          this.hasNewNotifications = true;
-          this.fetchLikedVoices();
-        }
+        this.hasNewLikeNotifications = true;
+        this.fetchLikedVoices();
+      } else if (data.type === 'Pick Notification') {
+        this.hasNewPickNotifications = true;
+        this.fetchPickVoices();
+      }
       };
 
       this.eventSource.addEventListener('MESSAGE', (event) => {
         console.log("Message Event: ", event.data);
         this.hasNewNotifications = true;
+        const message = event.data;
+        if (message.includes('like')) {
+          this.hasNewLikeNotifications = true;
+        } else if (message.includes('Pick')) {
+          this.hasNewPickNotifications = true;
+        }
       });
 
       this.eventSource.onerror = (error) => {
@@ -149,7 +164,12 @@ export const useStorageStore = defineStore('storage', {
     },
     resetNotification() {
       this.hasNewNotifications = false;
+    },
+    resetLikeNotification() {
+      this.hasNewLikeNotifications = false;
+    },
+    resetPickNotification() {
+      this.hasNewPickNotifications = false;
     }
   },
 });
-

@@ -1,5 +1,7 @@
 package com.ssafy.a505.domain.service;
 
+import com.ssafy.a505.domain.entity.Pick;
+import com.ssafy.a505.domain.repository.PickRepository;
 import com.ssafy.a505.global.sse.NotificationController;
 import com.ssafy.a505.domain.dto.response.VoiceResponseDTO;
 import com.ssafy.a505.domain.entity.Heart;
@@ -32,6 +34,7 @@ public class VoiceServiceImpl implements VoiceService{
     private final HeartRepository heartRepository;
     private final VoiceRepository voiceRepository;
     private final NotificationService notificationService;
+    private final PickRepository pickRepository;
 
     @Override
     public List<Voice> getVoiceOrderByHeartCountDesc(int page, int size) {
@@ -50,6 +53,10 @@ public class VoiceServiceImpl implements VoiceService{
         return voiceRepository.findByMemberWithHeart(memberId, pageable);
     }
 
+    @Override
+    public List<Voice> findByMemberWithPick(Long memberId, Pageable pageable) {
+        return voiceRepository.findByMemberWithPick(memberId, pageable);
+    }
 
     @Override
     public List<Voice> findByMemberWithSpread(Long memberId, Pageable pageable) {
@@ -80,24 +87,36 @@ public class VoiceServiceImpl implements VoiceService{
     }
 
     @Override
+    @Transactional
+    public boolean togglePick(Long voiceId, Member member) {
+        Voice voice = voiceRepository.findById(voiceId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
+        Optional<Pick> existingPick = pickRepository.findByVoiceAndMember(voice, member);
+        if (existingPick.isPresent()) {
+            pickRepository.delete(existingPick.get());
+            return false;
+        } else {
+            Pick pick = new Pick(voice, member);
+            pickRepository.save(pick);
+            notificationService.sendNotification(member.getMemberId(), "Picked Voice: " + voice.getMember());
+            return true;
+        }
+    }
+
+    @Override
     public Voice getVoiceById(Long voiceId) {
+        Voice result = voiceRepository.findById(voiceId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
+        result.setListenCount(result.getListenCount() + 1);
         return voiceRepository.findById(voiceId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
     }
 
     @Override
-    public List<VoiceResponseDTO> getNearbyVoices(double latitude, double longitude, double radius) {
-        log.info("Latitude: {}, Longitude: {}, Radius: {}", latitude, longitude, radius);
+    public List<VoiceResponseDTO> getNearbyVoices(double latitude, double longitude, double radius, Member member) {
         List<Voice> voices = voiceRepository.findNearbyVoices(latitude, longitude, radius);
-        log.info("Fetched voices count: {}", voices.size());
-        return voices.stream().map(VoiceResponseDTO::fromEntity).collect(Collectors.toList());
+        return voices.stream()
+                .map(voice -> VoiceResponseDTO.fromEntity(voice, member)).collect(Collectors.toList());
     }
-
-    @Override
-    public List<Voice> findAllByTitle(String title, Pageable pageable) {
-        return voiceRepository.findAllByTitle(title, pageable);
-    }
-
 
     public Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort) {
         PageRequest pageRequest = PageRequest.of(page, size, getSort(sort));

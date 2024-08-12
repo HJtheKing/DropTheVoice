@@ -31,19 +31,6 @@ public class VoiceController {
     private final VoiceService voiceService;
     private final VoiceRepository voiceRepository;
 
-    @GetMapping("/best-voice/{page}/{size}")
-    public ResponseEntity<?> getBestVoicesV2(@PathVariable("page") int page, @PathVariable("size") int size) {
-        log.info("getBestVoicesV2");
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        List<Voice> result = voiceService.findAllByTitle("나는 두부를 좋아함", pageRequest);
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
     @GetMapping("/search/{page}/{size}")
     public ResponseEntity<?> searchVoices(@RequestParam String keyword,
                                           @RequestParam String sort,
@@ -63,6 +50,7 @@ public class VoiceController {
         List<Voice> result = voiceService.getVoiceOrderByHeartCountDesc(page, size);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
 
 
     @GetMapping("/best-voice/{voice_id}")
@@ -91,16 +79,29 @@ public class VoiceController {
         Map<String, Object> response = new HashMap<>();
         response.put("isLiked", isLiked);
         response.put("likeCount", voice.getHeartCount());  // 현재의 heartCount 반환
-        // SSE 알림 전송
-        String message = "새로운 좋아요";
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{voiceId}/pick")
+    public ResponseEntity<?> togglePick(@PathVariable("voiceId") Long voiceId, @AuthenticationPrincipal Member member) {
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+        boolean isPicked = voiceService.togglePick(voiceId, member);
+        Voice voice = voiceRepository.findById(voiceId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isPicked", isPicked);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/nearby")
     public ResponseEntity<?> getNearbyVoices(@RequestParam("latitude") double latitude,
                                              @RequestParam("longitude") double longitude,
-                                             @RequestParam("radius") double radius) {
-        List<VoiceResponseDTO> voices = voiceService.getNearbyVoices(latitude, longitude, radius);
+                                             @RequestParam("radius") double radius,
+                                             @AuthenticationPrincipal Member member) {
+        List<VoiceResponseDTO> voices = voiceService.getNearbyVoices(latitude, longitude, radius, member);
         return ResponseEntity.ok(voices);
     }
 }

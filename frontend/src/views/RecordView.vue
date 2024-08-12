@@ -4,7 +4,7 @@
       <v-container class="custom-container">
         <v-row justify="space-between" class="upper-content py-4">
           <h1 class="title">실시간 녹음하기</h1>
-          <v-icon @click="saveRecord">mdi-upload</v-icon>
+          <v-icon @click="saveRecord">mdi-download</v-icon>
         </v-row>
         <v-row justify="center">
           <CurrentTime />
@@ -189,8 +189,8 @@ function blobToBase64(blob) {
 .load-btn {
   margin-right: 10px;
   padding: 10px 20px;
-  background-color: #f3b549;
-  color: #000;
+  background-color: black;
+  color: #fff;
   font-weight: bold;
   border: none;
   border-radius: 5px;
