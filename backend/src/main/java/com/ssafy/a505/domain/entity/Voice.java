@@ -77,4 +77,9 @@ public class Voice {
         }
         return null;
     }
+
+    public boolean isLikedBy(Member member) {
+        return this.getHearts().stream()
+                .anyMatch(heart -> heart.getMember().equals(member));
+    }
 }

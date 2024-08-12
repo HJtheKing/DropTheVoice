@@ -13,6 +13,8 @@ export const useStorageStore = defineStore('storage', {
     hasMoreAllVoices: true,
     hasMoreLikedVoices: true,
     activeTab: 'all',
+    eventSource: null,
+    hasNewNotifications: false,
   }),
   getters: {
     hasMoreVoices(state) {
@@ -30,24 +32,22 @@ export const useStorageStore = defineStore('storage', {
       this.isFetching = false;
     },
     async fetchAllVoices(page = 1) {
-      const useStore = useUserStore();
+      const userStore = useUserStore();
       if (!this.hasMoreAllVoices) return;
-
       this.isFetching = true;
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/spread/${page}/${this.pageSize}`, {
           params: {
-            // memberId: 1, // 테스트용. jwt 인증 구현 되면 밑에꺼 쓰면 됨
-            memberId: useStore.loginUserId,
+            memberId: userStore.loginUserId,
           }
         });
         if (response.data.length < this.pageSize) {
-          this.hasMoreAllVoices = false; // 더 이상 가져올 데이터가 없음을 표시
+          this.hasMoreAllVoices = false;
         }
         if (page === 1) {
           this.allVoices = response.data;
         } else {
-          this.allVoices.push(...response.data); // 추가 데이터를 기존 리스트에 추가
+          this.allVoices.push(...response.data);
         }
       } catch (error) {
         console.error('Error fetching all voices:', error);
@@ -56,23 +56,23 @@ export const useStorageStore = defineStore('storage', {
       }
     },
     async fetchLikedVoices(page = 1) {
-      const useStore = useUserStore();
+      const userStore = useUserStore();
       if (!this.hasMoreLikedVoices) return;
 
       this.isFetching = true;
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/heart/${page}/${this.pageSize}`, {
           params: {
-            memberId: useStore.loginUserId,
+            memberId: userStore.loginUserId,
           } 
         });
         if (response.data.length < this.pageSize) {
-          this.hasMoreLikedVoices = false; // 더 이상 가져올 데이터가 없음을 표시
+          this.hasMoreLikedVoices = false;
         }
         if (page === 1) {
           this.likedVoices = response.data;
         } else {
-          this.likedVoices.push(...response.data); // 추가 데이터를 기존 리스트에 추가
+          this.likedVoices.push(...response.data);
         }
       } catch (error) {
         console.error('Error fetching liked voices:', error);
@@ -82,9 +82,7 @@ export const useStorageStore = defineStore('storage', {
     },
     async loadMoreVoices() {
       if (this.isFetching || !this.hasMoreVoices) return;
-
       this.isFetching = true;
-
       try {
         if (this.activeTab === 'all') {
           this.currentPageAll++;
@@ -115,6 +113,43 @@ export const useStorageStore = defineStore('storage', {
     reloadLikedVoices() {
       this.resetPagination();
       this.fetchLikedVoices();
+    },
+    initializeSSE() {  
+      const userStore = useUserStore();
+      const memberId = userStore.loginUserId;
+      if (!memberId) return;
+
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+
+      this.eventSource = new EventSource(`${import.meta.env.VITE_BASE_URL}/api-sse/subscribe/${memberId}`);
+      this.eventSource.onopen = () => {
+        console.log('SSE 연결이 열렸습니다.');
+      };
+      this.eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Received SSE: ", data);
+
+        if (data.type === 'Like Notification') {
+          this.hasNewNotifications = true;
+          this.fetchLikedVoices();
+        }
+      };
+
+      this.eventSource.addEventListener('MESSAGE', (event) => {
+        console.log("Message Event: ", event.data);
+        this.hasNewNotifications = true;
+      });
+
+      this.eventSource.onerror = (error) => {
+        console.error('SSE Error: ', error);
+        this.eventSource.close();
+      };
+    },
+    resetNotification() {
+      this.hasNewNotifications = false;
     }
   },
 });
+

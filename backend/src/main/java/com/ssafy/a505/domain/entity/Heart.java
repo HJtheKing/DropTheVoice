@@ -30,4 +30,10 @@ public class Heart {
     private Voice voice;
 
     private LocalDateTime heartAt;
+
+    public Heart(Voice voice, Member member) {
+        this.voice = voice;
+        this.member = member;
+        this.heartAt = LocalDateTime.now();
+    }
 }
