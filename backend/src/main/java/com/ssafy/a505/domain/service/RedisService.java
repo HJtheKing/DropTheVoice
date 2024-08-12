@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -36,8 +37,11 @@ public class RedisService {
     private final SpreadRepository spreadRepository;
     private final VoiceRepository voiceRepository;
 
+    public static final String WS_KEY= "WS_SESSION";
+
     public static final String MEMBER_KEY = "MEMBER_LOCATION";
     public static final String MEMBER_TIME_KEY = "MEMBER_TIME";
+
 
     public static final String VOICE_KEY = "VOICE_LOCATION";
     public static final String VOICE_TIME_KEY = "VOICE_TIME";
@@ -46,6 +50,10 @@ public class RedisService {
 
     public void addSessionId(String sessionID,String userId){
         redisTemplate.opsForValue().set(WS_KEY_PREFIX + sessionID, userId);
+    }
+
+    public void addSessionIdV2(String userId){
+        redisTemplate.opsForHash().put(WS_KEY, WS_KEY_PREFIX + userId, userId);
     }
 
     public String removeSessionIdAndGetUserId(String sessionID){
@@ -68,7 +76,7 @@ public class RedisService {
             // 온라인 유저 WebRTC 전송
 
             // 오프라인 유저 최근 접속 시간 한 시간 내의 유저에게 전송
-            List<RedisResponseDTO> findMembers = getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
+            Set<RedisResponseDTO> findMembers = getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
             for (RedisResponseDTO dto : findMembers) {
                 Spread spread = new Spread();
                 log.info("dto: {}", dto);
@@ -112,12 +120,33 @@ public class RedisService {
     }
 
     //  member의 반경 내의 다른 멤버 조회 V3
-    public List<RedisResponseDTO> getMembersByRadius(Double longitude, Double latitude, Double radiusInKm, Long voiceId, int cnt){
+    public Set<RedisResponseDTO> getMembersByRadius(Double longitude, Double latitude, Double radiusInKm, Long voiceId, int cnt){
         Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
         GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
         GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(MEMBER_KEY, within, args);
 
-        List<RedisResponseDTO> result = geoResults.getContent().stream()
+        List<RedisResponseDTO> shuffledList = geoResults.getContent().stream()
+                .map(geoResult -> {
+                    GeoLocation<Object> content = geoResult.getContent();
+                    Point point = content.getPoint();
+                    Long memberId = Long.valueOf(content.getName().toString());
+                    return new RedisResponseDTO(memberId, point.getX(), point.getY());
+                })
+                .filter(dto -> !isReceived(voiceId, dto.getId())).distinct().collect(Collectors.toList());
+
+        Collections.shuffle(shuffledList);
+        return shuffledList.stream()
+                .limit(cnt)
+                .collect(Collectors.toSet());
+    }
+
+    //  member의 반경 내의 다른 멤버 조회 V3
+    public Set<RedisResponseDTO> getMembersByRadiusV2(Double longitude, Double latitude, Double radiusInKm, Long voiceId, int cnt, Set<String> set) {
+        Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
+        GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
+        GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(MEMBER_KEY, within, args);
+
+        List<RedisResponseDTO> shuffledList = geoResults.getContent().stream()
                 .map(geoResult -> {
                     GeoLocation<Object> content = geoResult.getContent();
                     Point point = content.getPoint();
@@ -125,12 +154,14 @@ public class RedisService {
                     return new RedisResponseDTO(memberId, point.getX(), point.getY());
                 })
                 .filter(dto -> !isReceived(voiceId, dto.getId()))
+                .filter(dto -> set.contains(dto.getId().toString()))
+                .distinct()
                 .collect(Collectors.toList());
 
-        Collections.shuffle(result);
-        return result.stream()
+        Collections.shuffle(shuffledList);
+        return shuffledList.stream()
                 .limit(cnt)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     public List<RedisResponseDTO> getVoicesByRadius(Double longitude, Double latitude, Double radiusInKm, Long memberId){

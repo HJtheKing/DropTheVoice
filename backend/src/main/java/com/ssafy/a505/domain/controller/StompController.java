@@ -48,6 +48,7 @@ public class StompController {
     public void message(@Header("simpSessionId") String sessionId, @Payload Coordinate coordinate) {
         System.out.println(coordinate.getX() + "" + coordinate.getY());
 
+        log.info("sessionId: {}", sessionId);
         redisService.addSessionId(sessionId,coordinate.getName());
         sessionIDs.add(coordinate.getName());
 

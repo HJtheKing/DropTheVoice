@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.geo.Point;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.ssafy.a505.domain.service.RedisService.*;
 
@@ -51,7 +52,7 @@ public class RedisGeoSpatialServiceTest {
     @Test
     public void markMsgReceivedTestV2(){
         Long voiceId = 1L;
-        List<RedisResponseDTO> dtos = redisService.getMembersByRadius(TestLatitude, TestLongitude, 0.5d, voiceId, 3);
+        Set<RedisResponseDTO> dtos = redisService.getMembersByRadius(TestLatitude, TestLongitude, 0.5d, voiceId, 3);
         for (RedisResponseDTO dto : dtos) {
             redisService.markReceived(voiceId, dto.getId());
         }
@@ -65,7 +66,7 @@ public class RedisGeoSpatialServiceTest {
 
     @Test
     public void getWithRadiusTestV3(){
-        List<RedisResponseDTO> result = redisService.getMembersByRadius(TestLatitude, TestLongitude, 1d, 1L, 3);
+        Set<RedisResponseDTO> result = redisService.getMembersByRadius(TestLatitude, TestLongitude, 1d, 1L, 3);
 
         for (RedisResponseDTO m : result) {
             System.out.println("memberId : " + m.getId() + " coord : " + m.getX() + " " + m.getY());

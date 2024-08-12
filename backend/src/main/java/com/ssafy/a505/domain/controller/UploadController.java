@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -58,8 +59,10 @@ public class UploadController {
         }
         else {  // virus의 경우 확산 O, 온라인 유저 : WebRTC, 오프라인 유저 : Redis 저장 멤버 중 최근 접속 시간 한 시간 내
             // 온라인 유저 WebRTC 전송
+
+
             // 오프라인 유저 최근 접속 시간 한 시간 내의 유저에게 전송
-            List<RedisResponseDTO> findMembers = redisService.getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
+            Set<RedisResponseDTO> findMembers = redisService.getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
             for (RedisResponseDTO dto : findMembers) {
                 Spread spread = new Spread();
                 Member findMember = memberRepository.findByMemberId(dto.getId()).get();

@@ -1,11 +1,14 @@
 <script setup>
 import HomeSpreadOrCatch from '@/components/HomeSpreadOrCatch.vue';
 import HomePopularVoices from '@/components/HomePopularVoices.vue';
+import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
 </script>
 
 <template>
+    <WebRtcSendButton/>
+
   <v-app class="black-background">
     <v-main>
       <v-container class="custom-container">

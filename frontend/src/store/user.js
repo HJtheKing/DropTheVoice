@@ -34,6 +34,7 @@ export const useUserStore = defineStore("user", () => {
         getUser(userId);
 
         router.push("/home");
+        window.location.reload();
       })
       .catch(() => {
         alert("유효하지 않은 아이디 혹은 비번입니다");
@@ -49,6 +50,7 @@ export const useUserStore = defineStore("user", () => {
     user.value = null;
     delete axios.defaults.headers.common["Authorization"];
     router.push("/login"); // 홈페이지로 이동
+    window.location.reload();
   };
 
   // 회원가입 메서드
