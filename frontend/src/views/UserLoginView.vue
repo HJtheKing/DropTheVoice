@@ -1,5 +1,5 @@
 <template>
-  <WebRtcSendButton/>
+  <!-- <WebRtcSendButton/> -->
   <v-app class="bg-black">
     <v-container class="login-container" max-width="600px">
       <v-form @submit.prevent="login">

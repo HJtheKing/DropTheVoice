@@ -1,5 +1,9 @@
 package com.ssafy.a505.global.filter;
 
+import com.ssafy.a505.domain.entity.Member;
+import com.ssafy.a505.domain.repository.MemberRepository;
+import com.ssafy.a505.global.execption.CustomException;
+import com.ssafy.a505.global.execption.ErrorCode;
 import com.ssafy.a505.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,9 +23,11 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final MemberRepository memberRepository; // MemberRepository 추가
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, MemberRepository memberRepository) {
         this.jwtUtil = jwtUtil;
+        this.memberRepository = memberRepository;
     }
 
     @Override
@@ -45,8 +51,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (memberId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    memberId, null, null);
+                    member, null, null); // member 객체로 변경
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

@@ -46,7 +46,6 @@ export default createStore({
 
             const socket = new SockJS(uri + '/stomp/handshake');
             stompClient = Stomp.over(socket);
-            //stompClient.debug = () => {};
             stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
@@ -154,13 +153,13 @@ export default createStore({
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
-            console.log("send location of me");
+            // console.log("send location of me");
             const { latitude, longitude } = await getGeo();
             //const latitude = 50.0;
             //const longitude = 50.0;
             if(mySessionId === null) return;
             if (stompClient && state.isConnected) {
-                stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: latitude, y: longitude }));
+                // stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: latitude, y: longitude }));
             } else {
                 console.log("fail");
             }
@@ -185,8 +184,8 @@ function getGeo() {
                 (position) => {
                     latitude = position.coords.latitude;
                     longitude = position.coords.longitude;
-                    console.log(latitude);
-                    console.log(longitude);
+                    // console.log(latitude);
+                    // console.log(longitude);
                     resolve({ latitude, longitude });
 
                 },
