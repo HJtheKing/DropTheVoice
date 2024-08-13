@@ -156,10 +156,7 @@ export default createStore({
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
-            // console.log("send location of me");
             const { latitude, longitude } = await getGeo();
-            //const latitude = 50.0;
-            //const longitude = 50.0;
             if(mySessionId === null) return;
             if (stompClient && state.isConnected) {
                 stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: longitude, y: latitude }));
@@ -292,6 +289,7 @@ let sendOffer = (pc, otherSessionId) => {
     console.log("send offer init");
     pc.createOffer().then(offer => {
         setLocalAndSendMessage(pc, offer);
+        console.log("mySessionId : " + mySessionId + " otherSessionId : " + otherSessionId)
         stompClient.send(
             `/ws/peer/offer/${mySessionId}/${otherSessionId}`,
             {},
@@ -362,7 +360,7 @@ async function sendFileInner(file) {
     }
 
     if (file) {
-        await tryPeerConnect();
+        // await tryPeerConnect();
         console.log('send start');
         const chunkSize = 16384;
         let offset = 0;

@@ -76,7 +76,6 @@ public class StompController {
         System.out.println(mySessionId);
         System.out.println("is sessionId");
 
-
         // 세션 ID를 주제로 다른 클라이언트에 전송
         messagingTemplate.convertAndSend("/topic/others/" + mySessionId, sessionIDs);
     }
