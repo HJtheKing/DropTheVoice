@@ -13,6 +13,7 @@ before_script:
 build:
   stage: build
   script:
+    - rm -r -f S11P12A505/
     - git clone https://gitlab-ci-token:${GITCLONE_TOKEN}@lab.ssafy.com/s11-webmobile1-sub2/S11P12A505.git
     - cd ~/S11P12A505
     - git checkout master
@@ -27,4 +28,5 @@ build:
     - docker image prune -f
   only:
     - master
+    - fix/build
 
