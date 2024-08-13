@@ -40,15 +40,20 @@ public class SecurityConfig {
                                         "/api-member/login",
                                         "/api-member/register",
                                         "/api-member/check-duplicate",
-                                        "/stomp/**"
+                                        "/api-member/findMemberId",
+                                        "/api-member/getNewPassword",
+                                        "/api-member/check-duplicate",
+                                        "/stomp/**",
+                                        "/api-sse/**"
                                 ).permitAll()
+                                .requestMatchers("/api-voice/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(withDefaults());  // cors 설정 추가
+                .cors(withDefaults());
 
         return http.build();
     }
@@ -66,7 +71,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000","https://localhost:3000","https://i11a505.p.ssafy.io","http://i11a505.p.ssafy.io"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost", "https://localhost", "http://localhost:8080", "http://localhost:3000", "https://i11a505.p.ssafy.io"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

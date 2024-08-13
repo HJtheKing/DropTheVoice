@@ -1,9 +1,14 @@
 <script setup>
 import HomeSpreadOrCatch from '@/components/HomeSpreadOrCatch.vue';
 import HomePopularVoices from '@/components/HomePopularVoices.vue';
-import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";
-import axios from 'axios';
-import { ref, onMounted, watch } from 'vue';
+import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";  
+import { onMounted } from 'vue';
+import { useStorageStore } from '@/store/storage';
+const storageStore = useStorageStore();
+
+onMounted(() => {
+  storageStore.initializeSSE();
+})
 </script>
 
 <template>

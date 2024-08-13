@@ -12,6 +12,14 @@ spring:
     url: ${MYSQL_URL}
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: tjtkddn97@naver.com
+    password: sangwoo97@
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
 
 
   jpa:
@@ -21,7 +29,7 @@ spring:
 #    show-sql: true
 #    properties:
 #      hibernate:
-#        format_sql: flase
+#        format_sql: true
   data:
     redis:
       host: ${REDIS_HOST}

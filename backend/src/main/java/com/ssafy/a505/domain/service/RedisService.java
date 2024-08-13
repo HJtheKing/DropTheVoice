@@ -4,6 +4,7 @@ import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.SpreadRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
+import com.ssafy.a505.global.sse.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.*;
@@ -32,6 +33,7 @@ public class RedisService {
     private final MemberRepository memberRepository;
     private final SpreadRepository spreadRepository;
     private final VoiceRepository voiceRepository;
+    private final NotificationService notificationService;
 
     public static final String WS_KEY= "WS_SESSION";
 

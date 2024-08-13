@@ -1,7 +1,5 @@
 package com.ssafy.a505.domain.entity;
 
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,27 +11,25 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @NoArgsConstructor
-public class Heart {
+public class Pick {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long heartId;
+    private Long pickId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    @JsonBackReference
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voice_id", nullable = false)
-    @JsonBackReference
     private Voice voice;
 
-    private LocalDateTime heartAt;
+    private LocalDateTime pickAt;
 
-    public Heart(Voice voice, Member member) {
+    public Pick(Voice voice, Member member) {
         this.voice = voice;
         this.member = member;
-        this.heartAt = LocalDateTime.now();
+        this.pickAt = LocalDateTime.now();
     }
 }

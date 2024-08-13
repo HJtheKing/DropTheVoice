@@ -14,6 +14,14 @@ public class WebConfig implements WebMvcConfigurer {
         //자원 설정
         registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
     }
+
+//    // CORS 에러 전역 처리
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**").allowedOrigins("*").allowedMethods("POST", "GET", "PUT", "DELETE");
+//    }
+
+
 }
 
 

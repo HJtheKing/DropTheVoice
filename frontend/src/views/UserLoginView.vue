@@ -1,5 +1,5 @@
 <template>
-  <WebRtcSendButton/>
+  <!-- <WebRtcSendButton/> -->
   <v-app class="bg-black">
     <v-container class="login-container" max-width="600px">
       <v-form @submit.prevent="login">
@@ -46,13 +46,13 @@
           <v-card-actions class="footer-links">
             <v-row justify="center" no-gutters>
               <v-col class="text-center" cols="auto">
-                <a href="#">아이디 찾기</a>
+                <a href="#" @click.prevent="openNameFindModal">아이디 찾기</a>
               </v-col>
               <v-col class="text-center" cols="auto">
                 <span>|</span>
               </v-col>
               <v-col class="text-center" cols="auto">
-                <a href="#">비밀번호 찾기</a>
+                <a href="#" >비밀번호 찾기</a>
               </v-col>
               <v-col class="text-center" cols="auto">
                 <span>|</span>
@@ -65,11 +65,15 @@
         </v-card>
       </v-form>
     </v-container>
+    <FindMemberNameView ref="NameFindModal" />
+    <GetNewPasswordView ref="GetPasswordModal" />
   </v-app>
 </template>
 <script setup>
 import { ref } from "vue";
 import { useUserStore } from "@/store/user";
+import FindMemberNameView from '@/views/FindMemberNameView.vue';
+import GetNewPasswordView from '@/views/GetNewPasswordView.vue';
 import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";
 
 const store = useUserStore();
@@ -88,6 +92,19 @@ const naverLogin = () => {
 const kakaoLogin = () => {
   // Handle Kakao login
 };
+
+const NameFindModal = ref(null);
+const GetPasswordModal = ref(null);
+
+const openNameFindModal = () => {
+  NameFindModal.value.openDialog();
+};
+
+// const openGetPasswordModal = () => {
+//   GetPasswordModal.value.openDialog();
+// }
+
+
 </script>
 <style scoped>
 .login-container {

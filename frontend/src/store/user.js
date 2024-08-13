@@ -66,15 +66,22 @@ export const useUserStore = defineStore("user", () => {
       });
   };
 
-  // 비밀번호 변경
-  const changePassword = function (oldPassword, newPassword){
-    axios
+  const changePassword = function (oldPassword, newPassword) {
+    return axios
       .post(`${REST_USER_API}/changePassword`, {
-        memberName : loginUserName.value,
-        oldPassword : oldPassword,
-        newPassword : newPassword
+        memberName: loginUserName.value,
+        oldPassword: oldPassword,
+        newPassword: newPassword
       })
-  }
+      .then(() => {
+        // 비밀번호 변경 성공 시
+        return Promise.resolve();
+     })
+      .catch((error) => {
+        // 비밀번호 변경 실패 시
+        return Promise.reject(error);
+      });
+  };
 
   // 유저 정보 가져오기
   const getUser = function (userId) {
