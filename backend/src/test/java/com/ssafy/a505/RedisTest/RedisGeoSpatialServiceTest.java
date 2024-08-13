@@ -44,8 +44,8 @@ public class RedisGeoSpatialServiceTest {
 
     @Test
     public void myTest(){
-        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 2L,  127.0284288,37.5128064, 1);
-        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 3L,  127.0284288,37.5128064, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 2L,  127.0317056,37.4931456, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 3L,  127.0317056,37.4931456, 1);
 
         redisService.addSessionIdV2("2");
         redisService.addSessionIdV2("3");
