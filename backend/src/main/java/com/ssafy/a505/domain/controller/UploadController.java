@@ -71,25 +71,25 @@ public class UploadController {
              * markReceived 로직 추가
              */
             for (String membersInRadius : wsMembersInRadius) {
-                log.info(membersInRadius);
+                log.info("membersInRadius: {}", membersInRadius);
+                redisService.markReceived(voice.getVoiceId(), Long.valueOf(membersInRadius));
             }
 
             // 접속 중인 반경 내 유저 memberId 발행
             messagingTemplate.convertAndSend("/topic/others/"+memberId,wsMembersInRadius);
 
-
             /**
              * 접속 한 시간 이내의 오프라인 유저에게 전송 로직 추가
              */
-
-//            for (RedisResponseDTO dto : findMembers) {
-//                Spread spread = new Spread();
-//                Member findMember = memberRepository.findByMemberId(dto.getId()).get();
-//                Voice findVoice = voiceRepository.findById(voice.getVoiceId()).get();
-//                spread.setMember(findMember);
-//                spread.setVoice(findVoice);
-//                spreadRepository.save(spread);
-//            }
+            Set<RedisResponseDTO> membersByRadius = redisService.getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
+            for (RedisResponseDTO byRadius : membersByRadius) {
+                Spread spread = new Spread();
+                Member findMember = memberRepository.findByMemberId(byRadius.getId()).get();
+                Voice findVoice = voiceRepository.findById(voice.getVoiceId()).get();
+                spread.setMember(findMember);
+                spread.setVoice(findVoice);
+                spreadRepository.save(spread);
+            }
         }
         return new ResponseEntity<>(voice, HttpStatus.CREATED);
     }
