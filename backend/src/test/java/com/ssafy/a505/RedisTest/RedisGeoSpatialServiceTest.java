@@ -1,21 +1,23 @@
 package com.ssafy.a505.RedisTest;
 
 import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
-import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.service.RedisService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.geo.Point;
 
-import java.util.List;
+import java.util.Set;
 
 import static com.ssafy.a505.domain.service.RedisService.*;
 
 @SpringBootTest
 public class RedisGeoSpatialServiceTest {
 
+    private static final Logger log = LoggerFactory.getLogger(RedisGeoSpatialServiceTest.class);
     @Autowired
     private RedisService redisService;
 
@@ -40,18 +42,24 @@ public class RedisGeoSpatialServiceTest {
         redisService.addLocation(VOICE_KEY, VOICE_TIME_KEY, 2L, TestLongitude, TestLatitude, 24);
     }
 
-
     @Test
-    public void pokeAndVirusTest(){
-        Voice voice = new Voice();
-        voice.setVoiceId(5L);
-        redisService.extracted(TestLatitude, TestLongitude, "virus", voice);
+    public void myTest(){
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 2L,  127.0317056,37.4931456, 1);
+        redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 3L,  127.0317056 + 0.00052,37.4931456 + 0.00052, 1);
+
+        redisService.addSessionIdV2("2");
+        redisService.addSessionIdV2("3");
+
+        Set<String> wsSessionIds = redisService.getWsMemberIds();
+        for (String wsSessionId : wsSessionIds) {
+            log.info("wsSessionId : {}", wsSessionId);
+        }
     }
 
     @Test
     public void markMsgReceivedTestV2(){
         Long voiceId = 1L;
-        List<RedisResponseDTO> dtos = redisService.getMembersByRadius(TestLatitude, TestLongitude, 0.5d, voiceId, 3);
+        Set<RedisResponseDTO> dtos = redisService.getMembersByRadius(TestLatitude, TestLongitude, 0.5d, voiceId, 3);
         for (RedisResponseDTO dto : dtos) {
             redisService.markReceived(voiceId, dto.getId());
         }
@@ -65,7 +73,7 @@ public class RedisGeoSpatialServiceTest {
 
     @Test
     public void getWithRadiusTestV3(){
-        List<RedisResponseDTO> result = redisService.getMembersByRadius(TestLatitude, TestLongitude, 1d, 1L, 3);
+        Set<RedisResponseDTO> result = redisService.getMembersByRadius(TestLatitude, TestLongitude, 1d, 1L, 3);
 
         for (RedisResponseDTO m : result) {
             System.out.println("memberId : " + m.getId() + " coord : " + m.getX() + " " + m.getY());

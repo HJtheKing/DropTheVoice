@@ -48,13 +48,14 @@ public class StompController {
     public void message(@Header("simpSessionId") String sessionId, @Payload Coordinate coordinate) {
         System.out.println(coordinate.getX() + "" + coordinate.getY());
 
-        redisService.addSessionId(sessionId,coordinate.getName());
+        log.info("sessionId: {}", sessionId);
+        redisService.addSessionIdV2(coordinate.getName());
         sessionIDs.add(coordinate.getName());
 
         log.info(coordinate.getName()+" is userId");
         log.info("Session Logged In Member Info: "+ coordinate.toString());
 
-        //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자.
+        //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자. -> 위경도 좌표와 memberId를 저장하도록 변경
         redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
     }
 
@@ -108,15 +109,16 @@ public class StompController {
     }
 
     //웹소켓 세션이 종료되었을때 해당 세션 종료에 대한 후처리 기능이 적용되어야함
-
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
-        String userId = redisService.removeSessionIdAndGetUserId(sessionId);
-        sessionIDs.remove(userId);
+        log.info("sessionId: {}", sessionId);
+        redisService.removeSessionIdAndGetUserIdV2(sessionId);
+//        String userId = redisService.removeSessionIdAndGetUserId(sessionId);
+//        sessionIDs.remove(userId);
 
         log.info("Disconnected: " + sessionId);
-        log.info(sessionIDs.toString());
+//        log.info(sessionIDs.toString());
     }
 }

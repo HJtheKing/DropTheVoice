@@ -50,9 +50,11 @@ export default createStore({
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
 
-                const randomString = generateRandomString(10);
+                const token = sessionStorage.getItem("access-token");
+                const decodedToken = JSON.parse(atob(token.split(".")[1]));
+                const userId = decodedToken["id"];
 
-                mySessionId = randomString;
+                mySessionId = userId;
 
                 console.log(mySessionId + "is my sessionId");
                 console.log(`/topic/others/${mySessionId}`);
@@ -115,7 +117,8 @@ export default createStore({
                     console.log(sessions);
                     sessions.forEach(otherSessionId => {
                         console.log("others session id is " + otherSessionId);
-                        if (!(mySessionId === otherSessionId)) {
+                        console.log("mySessionId : " + mySessionId)
+                        if (!(mySessionId == otherSessionId)) {
                             console.log("compare "+mySessionId+" "+otherSessionId);
                             otherSessionIdList.push(otherSessionId);
                         }
@@ -149,7 +152,7 @@ export default createStore({
             }
         },
         async sendFile({ state }, file) {
-            console.log("send1");
+            console.log("async sendFile 시작");
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
@@ -159,7 +162,7 @@ export default createStore({
             //const longitude = 50.0;
             if(mySessionId === null) return;
             if (stompClient && state.isConnected) {
-                // stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: latitude, y: longitude }));
+                stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: longitude, y: latitude }));
             } else {
                 console.log("fail");
             }
