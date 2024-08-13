@@ -83,6 +83,7 @@ public class RedisService {
     // member의 특정 음성 수신 저장
     public void markReceived(Long voiceId, Long memberId){
         redisTemplate.opsForHash().put(MSG_KEY_PREFIX + voiceId, memberId.toString(), true);
+        redisTemplate.expire(MSG_KEY_PREFIX + voiceId, 7, TimeUnit.DAYS);
     }
 
     // 특정 음성 수신한 멤버인지 확인
