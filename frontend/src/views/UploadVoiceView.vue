@@ -253,7 +253,7 @@ const uploadFile = async (type) => {
       });
       audioUrl.value = response.data.videoUrl || response.data.processedPath;
 
-      store.dispatch('sendFile', selectedFile.value);
+      store.dispatch('sendFile', selectedFile);
 
       uploadStatus.value = '업로드 성공';
     } catch (error) {
