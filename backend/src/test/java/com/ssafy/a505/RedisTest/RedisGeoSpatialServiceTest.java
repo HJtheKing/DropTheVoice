@@ -44,6 +44,7 @@ public class RedisGeoSpatialServiceTest {
 
     @Test
     public void myTest(){
+        // 현재 위경도에 맞게 수정하여 사용
         redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 2L,  127.0317056,37.4931456, 1);
         redisService.addLocation(MEMBER_KEY, MEMBER_TIME_KEY, 3L,  127.0317056,37.4931456, 1);
 

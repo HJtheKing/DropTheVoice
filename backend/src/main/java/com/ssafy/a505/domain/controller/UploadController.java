@@ -64,6 +64,9 @@ public class UploadController {
             }
             // 접속 중인 유저 중 반경 내 있는 유저 반환
             Set<RedisResponseDTO> findMembers = redisService.getMembersByRadiusV2(longitude, latitude, 1d, voice.getVoiceId(), 5, wsMemberIds);
+            for (RedisResponseDTO findMember : findMembers) {
+                log.info("findMember: {}", findMember.getId());
+            }
             Set<String> wsMembersInRadius = findMembers.stream()
                     .map(dto -> dto.getId().toString())
                     .collect(Collectors.toSet());
