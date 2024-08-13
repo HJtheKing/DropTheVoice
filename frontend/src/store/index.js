@@ -98,17 +98,19 @@ export default createStore({
 
                     const key = JSON.parse(offer.body).mySessionId;
                     const message = JSON.parse(offer.body).body;
-                    
+
                     console.log('key ----- offer start')
                     console.log(key)
 
                     // 해당 key에 새로운 peerConnection 를 생성해준후 pcListMap 에 저장해준다.
                     pcListMap.set(key, createPeerConnection(key));
                     // 생성한 peer 에 offer정보를 setRemoteDescription 해준다.
-
+                    console.log('message.type -----------')
+                    console.log(message.type)
+                    console.log('message.sdp ------------')
+                    console.log(message.sdp)
                     pcListMap.get(key).setRemoteDescription(new RTCSessionDescription({ type: message.type, sdp: message.sdp }));
                     //sendAnswer 함수를 호출해준다.
-
                     sendAnswer(pcListMap.get(key), key);
                     console.log("------------offer end----------");
 
@@ -119,12 +121,12 @@ export default createStore({
                     console.log("------------others start----------");
 
                     console.log("receive others key");
+                    console.log("mySessionId : " + mySessionId)
                     console.log(`/topic/others/${mySessionId}`);
                     const sessions = JSON.parse(message.body);
                     console.log(sessions);
                     sessions.forEach(otherSessionId => {
                         console.log("others session id is " + otherSessionId);
-                        console.log("mySessionId : " + mySessionId)
                         if (!(mySessionId == otherSessionId)) {
                             console.log("compare "+mySessionId+" "+otherSessionId);
                             otherSessionIdList.push(otherSessionId);
