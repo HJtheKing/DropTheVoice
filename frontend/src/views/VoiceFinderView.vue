@@ -7,90 +7,112 @@
             <h1 class="title">주변 음성 듣기</h1>
           </v-col>
         </v-row>
-        
-        <div class="tab-container">
-          <h2>주변 음성 듣기</h2>
-        </div>
-        <naver-map style="width: 100%; height: 400px; margin-bottom: 20px;" :mapOptions="mapOptions" :initLayers="initLayers"
-                   @onLoad="onLoadMap($event)">
-          <section>
-            <naver-marker v-if="nowPosition" :latitude="nowPosition.latitude"
-                          :longitude="nowPosition.longitude" :icon="{ url: MY_POSITION_IMAGE }"
-                          @onLoad="onLoadMyMarker($event)">
+        <v-row>
+          <naver-map style="width: 100%; height: 400px; margin-bottom: 20px;"
+                     :mapOptions="mapOptions"
+                     :initLayers="initLayers"
+                     @onLoad="onLoadMap">
+            <naver-marker v-if="nowPosition"
+                          :latitude="nowPosition.latitude"
+                          :longitude="nowPosition.longitude"
+                          :icon="{ url: MY_POSITION_IMAGE }"
+                          @onLoad="onLoadMyMarker">
             </naver-marker>
-            <naver-circle v-if="nowPosition" :latitude="nowPosition.latitude"
-                          :longitude="nowPosition.longitude" :radius="limitedRadius" @onLoad="onLoadCircle($event)"/>
-          </section>
-
-          <section v-for="(voice, index) in randomVoiceMarkers" :key="voice.id">
-            <naver-marker :latitude="voice.latitude" :longitude="voice.longitude"
-                          @onLoad="onLoadMarker($event, index)" 
+            <naver-circle v-if="nowPosition"
+                          :latitude="nowPosition.latitude"
+                          :longitude="nowPosition.longitude"
+                          :radius="limitedRadius"
+                          @onLoad="onLoadCircle"/>
+            <naver-marker v-for="(voice, index) in aroundVoices"
+                          :key="voice.id"
+                          :latitude="voice.latitude"
+                          :longitude="voice.longitude"
+                          @onLoad="(marker) => onLoadMarker(marker, index)"
                           @click="selectMarker(voice, index)">
-                          <!-- <div class="marker">
-                            <img :src="MY_VOICE_IMAGE">
-                          </div> -->
             </naver-marker>
-
-            <naver-info-window :marker="voiceMarkerMetas[index]" :open="isOpenMarker[index]">
-              <div class="infowindow-style">제목만 나오게 합니다 {{ voice.title }}</div>
+            <naver-info-window v-for="(voice, index) in aroundVoices"
+                               :key="index"
+                               :marker="voiceMarkerMetas[index]"
+                               :open="isOpenMarker[index]">
+            <div class="custom-infowindow">
+            <h3>{{ voice.title }}</h3>
+            </div>
             </naver-info-window>
-          </section>
-        </naver-map>
-
-        <main>
-          <div>
-            <v-row>
-              <v-col cols="8">
-                <h2>음성 목록</h2>
-              </v-col>
-              <v-col cols="4" class="text-right">
-                <v-select aria-selected="true" class="radius-select" :items="radiusCandidates" item-title="distance" label="반경"
-                          v-model="selectedRadius" @change="updateRadius">
-                  <v-list-item item></v-list-item>
-                </v-select>
-              </v-col>
-            </v-row>
-            <section>
-              <v-row>
-                <v-col cols="12">
-                  <v-infinite-scroll @load="loadInfinite">
-                    <v-card class="mb-4 list-items" elevation="2" v-for="(item, index) in aroundVoices" :key="index">
-                      <v-row no-gutters @click="selectMarker(item, index)">
-                        <v-col cols="4">
-                          <v-img :src="THUMBNAIL_IMAGE" height="150px" contain></v-img>
-                        </v-col>
-                        <v-col cols="8">
-                          <v-card-title>
-                            <div class="content">
-                              <v-row class="mb-6">
-                                <v-col cols="4">
-                                  <h3 class="pa-2 ma-2"> {{ item.title }} </h3>
-                                </v-col>
-                                <v-col cols="4" offset="4">
-                                  <button class="pa-2 ma-2" @click="listen"> 듣기 </button>
-                                </v-col>
-                              </v-row>
-                              <p> {{ item.latitude }} 위도</p>
-                              <p>{{ item.longitude }} 경도</p>
-                            </div>
-                          </v-card-title>
-                        </v-col>
-                      </v-row>
-                    </v-card>
-
-                    <template v-slot:loading>
-                      <v-progress-circular color="primary" indeterminate></v-progress-circular>
-                    </template>
-
-                    <template v-if="myMarker" v-slot:empty>
-                      <v-alert type="info">모두 다 발견되었어요 🌈</v-alert>
-                    </template>
-                  </v-infinite-scroll>
-                </v-col>
-              </v-row>
-            </section>
+            </naver-map>
+        </v-row>
+        <v-row justify="space-between" class="py-4">
+          <v-col cols="8">
+            <h2>음성 목록</h2>
+          </v-col>
+          <v-col cols="4">
+            <v-select class="radius-select"
+                      :items="radiusCandidates"
+                      item-title="distance"
+                      label="반경"
+                      v-model="selectedRadius"
+                      @change="updateRadius">
+            </v-select>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+  <v-card class="mb-4 list-items"
+        elevation="3"
+        v-for="(item, index) in aroundVoices"
+        :key="index"
+        @click="selectMarker(item, index); scrollToTop()"
+        color="black">
+  <v-row no-gutters>
+    <v-col cols="4">
+      <v-img :src="item.imageUrl" height="150px" contain></v-img>
+    </v-col>
+    <v-col cols="8">
+      <v-card-title>
+        <div class="content">
+          <h3 class="item-title">{{ item.title }}</h3>
+          <div class="location-info">
+            <v-icon small class="mdi mdi-map-marker"></v-icon>
+            <p>{{ item.latitude }} | {{ item.longitude }}</p>
           </div>
-        </main>
+          <div class="stats">
+            <div class="stat-item">
+              <v-icon small class="mr-2">mdi-thumb-up</v-icon>
+              <span>{{ item.heartCount }}</span>
+            </div>
+            <div class="stat-item">
+              <v-icon small class="mr-2">mdi-headphones</v-icon>
+              <span>{{ item.listenCount }}</span>
+            </div>
+            <v-btn 
+  v-if="!item.picked"
+  @click="pickItem(item); togglePick" 
+  color="black" 
+  class="pick-button"
+>
+  <v-icon left>mdi-hand-pointing-right</v-icon> 줍기
+</v-btn>
+<v-btn 
+  v-else
+  disabled 
+  color="grey" 
+  class="pick-button"
+>
+  <v-icon left color="black">mdi-check</v-icon> 이미 줍기 완료
+</v-btn>
+          </div>
+        </div>
+      </v-card-title>
+    </v-col>
+  </v-row>
+</v-card>
+
+          </v-col>
+        </v-row>
+
+        <v-row justify="center">
+          <v-progress-circular v-if="loading" color="primary" indeterminate></v-progress-circular>
+          <v-alert v-else-if="aroundVoices.length === 0" type="info">주변에 음성이 없습니다.</v-alert>
+        </v-row>
       </v-container>
     </v-main>
   </v-app>
@@ -98,116 +120,55 @@
 
 <script setup>
 import MY_POSITION_IMAGE from '@/assets/map/my-marker.png';
-import MY_VOICE_IMAGE from '@/assets/map/voice-marker.jpg'
-import THUMBNAIL_IMAGE from '@/assets/images/thumb2.jpg';
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { NaverCircle, NaverInfoWindow, NaverMap, NaverMarker } from "vue3-naver-maps";
+import axios from 'axios';
 
 const map = ref(null);
 const myMarker = ref(null);
-const nowPosition = ref({ latitude: 37.51347, longitude: 127.041722 });
+const nowPosition = ref(null);  // 초기값을 null로 변경하여 위치 정보를 가져올 때만 설정되도록 함
 const limitedRadius = ref(1000);
 const circle = ref(null);
 const selectedRadius = ref('1km (default)');
+const aroundVoices = ref([]);
+const voiceMarkerMetas = ref([]);
+const isOpenMarker = ref([]);
+const loading = ref(false);
+const pick = ref(false);
 
-const randomVoiceMarkers = computed(() => {
-  return aroundVoices.value;
-});
-
-const flag = ref(true);
-let aroundVoices = ref(null);
-
-let randomVoice2 = ref([]);
-randomVoice2.value.push({ id: 5, title: '마', latitude: 37.50186257688321, longitude: 127.03732898332551 });
-randomVoice2.value.push({ id: 6, title: '바', latitude: 37.50116063547292, longitude: 127.03455789540513 });
-randomVoice2.value.push({ id: 7, title: '사', latitude: 37.50036670550219, longitude: 127.03796154358065 });
-randomVoice2.value.push({ id: 8, title: '아', latitude: 37.499682460030634, longitude: 127.03631009579408 });
-randomVoice2.value.push({ id: 1, title: '가', latitude: 37.522875557050604, longitude: 126.73707428498797 });
-randomVoice2.value.push({ id: 2, title: '나', latitude: 37.5216328910883, longitude: 126.73739538716526 });
-randomVoice2.value.push({ id: 3, title: '다', latitude: 37.52031663531412, longitude: 126.7370380163574 });
-randomVoice2.value.push({ id: 4, title: '라', latitude: 37.52070632570098, longitude: 126.7421496981059 });
-
-const getNearByVoice = async (lat, lng) => {
+const getNearbyVoices = async (latitude, longitude, radius) => {
   try {
-    setTimeout(() => {
-      if (!flag.value) {
-        aroundVoices.value = randomVoice.value;
-      } else {
-        aroundVoices.value = randomVoice2.value;
+    loading.value = true;
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/nearby`, {
+      params: {
+        latitude: latitude,
+        longitude: longitude,
+        radius: radius
+      },
+    });
+    aroundVoices.value = response.data.map(voice => {
+      return {
+        ...voice,
+        picked: voice.picked
       }
-    }, 2000);
+    });
+    console.log(aroundVoices.value)
+    loading.value = false;
   } catch (error) {
-    alert('관리자에게 문의해주세요. 죄송해요')
+    console.error('Error fetching nearby voices:', error);
+    loading.value = false;
   }
 };
-
-watch(nowPosition, (newPosition) => {
-  if (myMarker.value) {
-    myMarker.value.setPosition(new naver.maps.LatLng(newPosition.latitude, newPosition.longitude));
-  }
-  if (circle.value) {
-    circle.value.setCenter(new naver.maps.LatLng(newPosition.latitude, newPosition.longitude));
-    circle.value.setRadius(limitedRadius.value);
-  }
-  if (map.value) {
-    map.value.panTo(new naver.maps.LatLng(newPosition.latitude, newPosition.longitude), { duration: 500 });
-  }
-
-  nowPosition.value = newPosition;
-  getNearByVoice(newPosition.latitude, newPosition.longitude);
-});
-
-watch(limitedRadius, (newRadius) => {
-  if (circle.value) {
-    circle.value.setRadius(newRadius);
-  }
-});
-
-watch(selectedRadius, (newRadius) => {
-  const radiusOption = radiusCandidates.find(option => option.distance === newRadius);
-  if (radiusOption && map.value) {
-    map.value.setZoom(radiusOption.zoom, { duration: 500 });
-    limitedRadius.value = getRadiusFromZoom(radiusOption.zoom);
-  }
-});
-
-const getRadiusFromZoom = (zoom) => {
-  switch (zoom) {
-    case 14:
-      return 1000;
-    case 13:
-      return 2000;
-    case 12:
-      return 3000;
-    case 11:
-      return 5000;
-    case 10:
-      return 10000;
-    default:
-      return 1000;
-  }
-};
-
-const mapOptions = {
-  latitude: 37.51347,
-  longitude: 127.041722,
-  zoom: 14,
-  minZoom: 9,
-  zoomControl: false,
-  // zoomControlOptions: { position: "TOP_RIGHT" },
-};
-
-const initLayers = [
-  "BACKGROUND",
-  "BACKGROUND_DETAIL",
-  "POI_KOREAN",
-  "TRANSIT",
-  "ENGLISH",
-];
 
 const onLoadMap = (mapObject) => {
   map.value = mapObject;
   moveNowPosition();
+};
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0, behavior: 'smooth'
+  });
 };
 
 const onLoadMyMarker = (markerObject) => {
@@ -218,72 +179,126 @@ const onLoadMyMarker = (markerObject) => {
 
 const onLoadCircle = (circleObject) => {
   circle.value = circleObject;
-  circle.value.setRadius(limitedRadius.value); // 초기 반경 설정
+  updateCircleRadius();
 };
 
-const moveNowPosition = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      nowPosition.value = { latitude: lat, longitude: lng };
-      const currentLocation = new naver.maps.LatLng(lat, lng);
-      if (map.value) {
-        map.value.setCenter(currentLocation);
-      }
-    }, (error) => {
-      alert('위치 엑세스를 허용해주세요. 그리고 새로고침을 해주셔야해요.');
-    });
-  } else {
-    alert('해당 브라우저에서는 서비스 이용에 제약이 있습니다. Chrome 브라우저를 이용해주세요');
+const updateCircleRadius = () => {
+  if (circle.value && nowPosition.value) {
+    circle.value.setRadius(limitedRadius.value);
+    circle.value.setCenter(new naver.maps.LatLng(nowPosition.value.latitude, nowPosition.value.longitude));
   }
 };
 
-const listen = () => {
-  alert('listen');
+const updateMapZoomAndCenter = () => {
+  if (map.value && nowPosition.value) {
+    const radiusOption = radiusCandidates.find(option => option.distance === selectedRadius.value);
+    if (radiusOption) {
+      map.value.setZoom(radiusOption.zoom);
+      map.value.panTo(new naver.maps.LatLng(nowPosition.value.latitude, nowPosition.value.longitude));
+    }
+  }
 };
 
-const voiceMarkerMetas = ref([]);
-const isOpenMarker = ref([]);
 const onLoadMarker = (markerObject, index) => {
   voiceMarkerMetas.value[index] = markerObject;
   isOpenMarker.value[index] = false;
 };
 
-const selectedVoiceMarker = ref();
 const selectMarker = (voice, index) => {
   isOpenMarker.value[index] = !isOpenMarker.value[index];
-  selectedVoiceMarker.value = voice;
 };
 
-const loadInfinite = ({ done }) => {
-  setTimeout(() => {
-    done('empty');
-  }, 2000);
+const moveNowPosition = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      nowPosition.value = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+      map.value.setCenter(new naver.maps.LatLng(nowPosition.value.latitude, nowPosition.value.longitude));
+      updateCircleRadius();
+      updateMapZoomAndCenter();
+      getNearbyVoices(nowPosition.value.latitude, nowPosition.value.longitude, limitedRadius.value);
+    }, () => {
+      alert('위치 엑세스를 허용해주세요. 새로고침 해주세요.');
+    });
+  } else {
+    alert('해당 브라우저에서는 서비스 이용에 제약이 있습니다. Chrome 브라우저를 이용해주세요.');
+  }
+};
+
+watch(selectedRadius, (newRadius) => {
+  const radiusOption = radiusCandidates.find(option => option.distance === newRadius);
+  if (radiusOption) {
+    limitedRadius.value = getRadiusFromZoom(radiusOption.zoom);
+    updateCircleRadius();
+    updateMapZoomAndCenter();
+    getNearbyVoices(nowPosition.value.latitude, nowPosition.value.longitude, limitedRadius.value);
+  }
+});
+
+const getRadiusFromZoom = (zoom) => {
+  switch (zoom) {
+    case 14: return 1000;
+    case 13: return 2000;
+    case 12: return 3000;
+    case 11: return 5000;
+    case 10: return 10000;
+    case 9: return 20000;
+    default: return 1000;
+  }
 };
 
 const radiusCandidates = [
-  {
-    distance: '1km (default)',
-    zoom: 14
-  },
-  {
-    distance: '2km',
-    zoom: 13
-  },
-  {
-    distance: '3km',
-    zoom: 12
-  },
-  {
-    distance: '5km',
-    zoom: 11
-  },
-  {
-    distance: '10km',
-    zoom: 10
-  },
+  { distance: '1km (default)', zoom: 14 },
+  { distance: '2km', zoom: 13 },
+  { distance: '3km', zoom: 12 },
+  { distance: '5km', zoom: 11 },
+  { distance: '10km', zoom: 10 },
+  { distance: '20km', zoom: 9 }
 ];
+
+const pickItem = async (item) => {
+  if (item.picked) {
+    alert(`${item.title} 음성은 이미 주웠습니다.`)
+    return;
+  } else {
+    try {
+      const success = await togglePick(item);
+      if (success) {
+        item.picked = true;
+        alert(`${item.title}을(를) 주웠습니다! 보관함을 확인해주세요`);
+      } else {
+        console.error("error");
+      }
+    } catch (error) {
+      console.error('Error picking item:', error);
+    }
+  }
+};
+
+const togglePick = async (item) => {
+  const token = sessionStorage.getItem('access-token');
+  if (!token) {
+    console.error('JWT 토큰이 없습니다.');
+    return;
+  }
+  try {
+    const url = `${import.meta.env.VITE_BASE_URL}/api-voice/${item.voiceId}/pick`;
+
+    const response = await axios.post(url, null, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (response.status === 200 && response.data) {
+      pick.value = response.data.isPicked;
+      return pick.value;
+    } else {
+      console.error('서버에서 응답이 제대로 오지 않았습니다.');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error like:', error);
+  }
+};
 
 </script>
 
@@ -294,42 +309,24 @@ const radiusCandidates = [
   padding-bottom: 80px;
 }
 
-.infowindow-style {
-  color: black;
-  background-color: white;
+.custom-infowindow {
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
   text-align: center;
-  font-weight: 600;
-  font-size: 20px;
-  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.custom-infowindow h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 h3 {
   color: #fff;
   margin: 0;
-}
-
-.tab-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-  background-color: #333;
-  padding: 5px;
-  border-radius: 10px;
-}
-
-p {
-  color: #ccc;
-  margin: 0;
-}
-
-button {
-  color: #ccc;
-  margin: 0;
-}
-
-.list-items {
-  background-color: #000;
 }
 
 .radius-select {
@@ -346,68 +343,73 @@ button {
   h3 {
     font-size: 14px;
   }
-  p {
-    font-size: 12px;
-  }
-  button {
-    font-size: 12px;
-  }
-  .v-btn .v-icon {
-    font-size: 20px;
-  }
-  .v-btn span {
-    font-size: 10px;
-  }
-  .radius-select {
-    max-width: 100%;
-  }
 }
 
-@media (min-width: 601px) and (max-width: 960px) {
-  .infowindow-style {
-    font-size: 18px;
-  }
-  h3 {
-    font-size: 16px;
-  }
-  p {
-    font-size: 14px;
-  }
-  button {
-    font-size: 14px;
-  }
-  .v-btn .v-icon {
-    font-size: 22px;
-  }
-  .v-btn span {
-    font-size: 11px;
-  }
-  .radius-select {
-    max-width: 200px;
-  }
+.v-card {
+  background-color: #000 !important;
+  color: #fff;
 }
 
-@media (min-width: 961px) {
-  .infowindow-style {
-    font-size: 20px;
-  }
-  h3 {
-    font-size: 18px;
-  }
-  p {
-    font-size: 16px;
-  }
-  button {
-    font-size: 16px;
-  }
-  .v-btn .v-icon {
-    font-size: 24px;
-  }
-  .v-btn span {
-    font-size: 12px;
-  }
-  .radius-select {
-    max-width: 200px;
-  }
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 10px;
+}
+
+.item-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.location-info {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.location-info v-icon {
+  margin-right: 5px;
+  color: #ccc;
+}
+
+.stats {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: auto;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.stat-item v-icon {
+  margin-right: 5px;
+  color: #ccc;
+}
+
+.pick-button {
+  position: absolute; 
+  right: 10px; 
+  bottom: 10px; 
+  background-color: #4caf50; 
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.pick-button v-icon {
+  margin-right: 5px;
+  color: white;
 }
 </style>

@@ -48,14 +48,16 @@ public class StompController {
     public void message(@Header("simpSessionId") String sessionId, @Payload Coordinate coordinate) {
         System.out.println(coordinate.getX() + "" + coordinate.getY());
 
-        redisService.addSessionId(sessionId,coordinate.getName());
-        sessionIDs.add(coordinate.getName());
+        log.info("sessionId: {}", sessionId);
+        redisService.addSessionId(sessionId, coordinate.getName());
+        redisService.addSessionIdV2(coordinate.getName());
+//        sessionIDs.add(coordinate.getName());
 
         log.info(coordinate.getName()+" is userId");
-        log.info("Session Logged In Member Info: "+ coordinate.toString());
+        log.info("Session Logged In Member Info: {}, {}, {}", coordinate.getName(), coordinate.getX(), coordinate.getY());
 
-        //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자.
-        //redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
+        //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자. -> 위경도 좌표와 memberId를 저장하도록 변경
+        redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
     }
 
     /**
@@ -74,7 +76,6 @@ public class StompController {
         log.info("[Key] : {}  [lat,lng] : {} : {}", mySessionId, latitude, longitude);
         System.out.println(mySessionId);
         System.out.println("is sessionId");
-
 
         // 세션 ID를 주제로 다른 클라이언트에 전송
         messagingTemplate.convertAndSend("/topic/others/" + mySessionId, sessionIDs);
@@ -108,15 +109,16 @@ public class StompController {
     }
 
     //웹소켓 세션이 종료되었을때 해당 세션 종료에 대한 후처리 기능이 적용되어야함
-
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
+        log.info("sessionId: {}", sessionId);
         String userId = redisService.removeSessionIdAndGetUserId(sessionId);
-        sessionIDs.remove(userId);
+        redisService.removeSessionIdAndGetUserIdV2(userId);
+//        sessionIDs.remove(userId);
 
         log.info("Disconnected: " + sessionId);
-        log.info(sessionIDs.toString());
+//        log.info(sessionIDs.toString());
     }
 }

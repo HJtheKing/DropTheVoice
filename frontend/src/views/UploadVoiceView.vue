@@ -139,6 +139,9 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useUserStore } from '@/store/user';
 import { useSpreadStore } from '@/store/spread';
 import axios from 'axios';
+import { useStore } from 'vuex';
+
+const store = useStore();
 
 const userStore = useUserStore();
 const spreadStore = useSpreadStore();
@@ -275,6 +278,10 @@ try {
         }
       });
       audioUrl.value = response.data.videoUrl || response.data.processedPath;
+
+      console.log('--------------sendFile------------')
+      store.dispatch('sendFile', selectedFile);
+
       uploadStatus.value = '업로드 성공';
     } catch (error) {
       uploadStatus.value = '업로드 실패';

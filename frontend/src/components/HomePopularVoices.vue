@@ -61,11 +61,14 @@ const hasMoreVoices = ref(true);
 const router = useRouter();
 
 async function fetchBestVoices(page = 1) {
-  if (isFetching.value || !hasMoreVoices.value) return;
+  const token = sessionStorage.getItem('access-token')
+  if (isFetching.value || !hasMoreVoices.value || !token) return;
   isFetching.value = true;
 
   try {
-    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-heart-voice/${page}/${pageSize.value}`);
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-heart-voice/${page}/${pageSize.value}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     if (res.data.length < pageSize.value) {
       hasMoreVoices.value = false;
     }

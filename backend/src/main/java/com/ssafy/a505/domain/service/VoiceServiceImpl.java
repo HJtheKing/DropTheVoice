@@ -1,17 +1,21 @@
 package com.ssafy.a505.domain.service;
 
+import com.ssafy.a505.domain.entity.Pick;
+import com.ssafy.a505.domain.repository.PickRepository;
+import com.ssafy.a505.global.sse.NotificationController;
 import com.ssafy.a505.domain.dto.response.VoiceResponseDTO;
 import com.ssafy.a505.domain.entity.Heart;
 import com.ssafy.a505.domain.entity.Member;
-import com.ssafy.a505.domain.entity.ProcessedVoice;
 import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.repository.HeartRepository;
-import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
 import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
+import com.ssafy.a505.global.sse.NotificationService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.concurrent.CircuitBreakingException;
+import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.configuration.SpringDocUIConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,15 +24,17 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VoiceServiceImpl implements VoiceService{
     private final HeartRepository heartRepository;
-    private final MemberRepository memberRepository;
     private final VoiceRepository voiceRepository;
-
+    private final NotificationService notificationService;
+    private final PickRepository pickRepository;
 
     @Override
     public List<Voice> getVoiceOrderByHeartCountDesc(int page, int size) {
@@ -47,13 +53,9 @@ public class VoiceServiceImpl implements VoiceService{
         return voiceRepository.findByMemberWithHeart(memberId, pageable);
     }
 
-
     @Override
-    public List<Voice> findHeartedByMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-        List<Heart> hearts = heartRepository.findByMember(member);
-        return hearts.stream().map(Heart::getVoice).collect(Collectors.toList());
+    public List<Voice> findByMemberWithPick(Long memberId, Pageable pageable) {
+        return voiceRepository.findByMemberWithPick(memberId, pageable);
     }
 
     @Override
@@ -62,25 +64,58 @@ public class VoiceServiceImpl implements VoiceService{
     }
 
     @Override
-    public List<Voice> findByTitleContaining(String userNam, Pageable pageable) {
-        return voiceRepository.findByTitleContaining(userNam, pageable);
-    }
-
-    @Override
-    public List<Voice> findAllByTitle(String title, Pageable pageable) {
-        return voiceRepository.findAllByTitle(title, pageable);
-    }
-
-    @Override
-    public VoiceResponseDTO findById(Long id) {
-        Voice voice = voiceRepository.findById(id)
+    @Transactional
+    public boolean toggleLike(Long voiceId, Member member) {
+        Voice voice = voiceRepository.findById(voiceId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
 
-        Member member = memberRepository.findById(voice.getMember().getMemberId())
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-        member.setTotalSpreadCount(member.getTotalSpreadCount() + 1);
+        Optional<Heart> existingHeart = heartRepository.findByVoiceAndMember(voice, member);
+        if (existingHeart.isPresent()) {
+            // 좋아요가 이미 있는 경우: 좋아요 취소
+            heartRepository.delete(existingHeart.get());
+            voice.setHeartCount(voice.getHeartCount() - 1);
+            return false;
+        } else {
+            // 좋아요가 없는 경우: 좋아요 추가
+            Heart heart = new Heart(voice, member);
+            heartRepository.save(heart);
+            voice.setHeartCount(voice.getHeartCount() + 1);
+            // SSE 알림 전송
+            notificationService.sendNotification(member.getMemberId(), "You've liked the voice: " + voice.getTitle());
+            return true;
+        }
+    }
 
-        return VoiceResponseDTO.fromEntity(voice);
+    @Override
+    @Transactional
+    public boolean togglePick(Long voiceId, Member member) {
+        Voice voice = voiceRepository.findById(voiceId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
+        Optional<Pick> existingPick = pickRepository.findByVoiceAndMember(voice, member);
+        if (existingPick.isPresent()) {
+            pickRepository.delete(existingPick.get());
+            return false;
+        } else {
+            Pick pick = new Pick(voice, member);
+            pickRepository.save(pick);
+            notificationService.sendNotification(member.getMemberId(), "Picked Voice: " + voice.getMember());
+            return true;
+        }
+    }
+
+    @Override
+    public Voice getVoiceById(Long voiceId) {
+        Voice result = voiceRepository.findById(voiceId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
+        result.setListenCount(result.getListenCount() + 1);
+        return voiceRepository.findById(voiceId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_VOICE));
+    }
+
+    @Override
+    public List<VoiceResponseDTO> getNearbyVoices(double latitude, double longitude, double radius, Member member) {
+        List<Voice> voices = voiceRepository.findNearbyVoices(latitude, longitude, radius);
+        return voices.stream()
+                .map(voice -> VoiceResponseDTO.fromEntity(voice, member)).collect(Collectors.toList());
     }
 
     public Page<VoiceResponseDTO> searchVoices(String keyword, int page, int size, String sort) {
@@ -88,10 +123,6 @@ public class VoiceServiceImpl implements VoiceService{
         return voiceRepository.findVoicesWithKeyword(keyword, pageRequest).map(VoiceResponseDTO::fromEntity);
     }
 
-    @Override
-    public List<Voice> findAllByMember_MemberId(Long memberId, Pageable pageable) {
-        return null;
-    }
 
     private Sort getSort(String sort) {
         switch (sort) {

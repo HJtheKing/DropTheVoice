@@ -21,8 +21,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -59,18 +59,42 @@ public class UploadController {
             redisService.addLocation(RedisService.VOICE_KEY, RedisService.VOICE_TIME_KEY, voice.getVoiceId(), longitude, latitude, 24);
         }
         else {  // virus의 경우 확산 O, 온라인 유저 : WebRTC, 오프라인 유저 : Redis 저장 멤버 중 최근 접속 시간 한 시간 내
-            // 온라인 유저 WebRTC 전송
-            // 오프라인 유저 최근 접속 시간 한 시간 내의 유저에게 전송
-            List<RedisResponseDTO> findMembers = redisService.getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
-            for (RedisResponseDTO dto : findMembers) {
+            // 현재 접속 중 유저 반환
+            Set<String> wsMemberIds = redisService.getWsMemberIds();
+            for (String wsMemberId : wsMemberIds) {
+                log.info("wsMemberId: {}", wsMemberId);
+            }
+            // 접속 중인 유저 중 반경 내 있는 유저 반환
+            Set<RedisResponseDTO> findMembers = redisService.getMembersByRadiusV2(longitude, latitude, 1d, voice.getVoiceId(), 5, wsMemberIds);
+            for (RedisResponseDTO findMember : findMembers) {
+                log.info("findMember: {}", findMember.getId());
+            }
+            Set<String> wsMembersInRadius = findMembers.stream()
+                    .map(dto -> dto.getId().toString())
+                    .collect(Collectors.toSet());
+            /**
+             * markReceived 로직 추가
+             */
+            for (String membersInRadius : wsMembersInRadius) {
+                log.info("membersInRadius: {}", membersInRadius);
+                redisService.markReceived(voice.getVoiceId(), Long.valueOf(membersInRadius));
+            }
+
+            // 접속 중인 반경 내 유저 memberId 발행
+            messagingTemplate.convertAndSend("/topic/others/"+memberId,wsMembersInRadius);
+
+            /**
+             * 접속 한 시간 이내의 오프라인 유저에게 전송 로직 추가
+             */
+            Set<RedisResponseDTO> membersByRadius = redisService.getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
+            for (RedisResponseDTO byRadius : membersByRadius) {
                 Spread spread = new Spread();
-                Member findMember = memberRepository.findByMemberId(dto.getId()).get();
+                Member findMember = memberRepository.findByMemberId(byRadius.getId()).get();
                 Voice findVoice = voiceRepository.findById(voice.getVoiceId()).get();
                 spread.setMember(findMember);
                 spread.setVoice(findVoice);
                 spreadRepository.save(spread);
             }
-            messagingTemplate.convertAndSend("/topic/others/"+memberId,findMembers);
         }
         return new ResponseEntity<>(voice, HttpStatus.CREATED);
     }

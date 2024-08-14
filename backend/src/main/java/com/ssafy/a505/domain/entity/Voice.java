@@ -65,6 +65,11 @@ public class Voice {
     @JsonBackReference
     private Set<Heart> hearts = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "voice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("pickAt ASC")
+    @JsonBackReference
+    private Set<Pick> picks = new LinkedHashSet<>();
+
     public void addProcessedVoice(ProcessedVoice voice) {
         this.processedVoices.add(voice);
         voice.setVoice(this);
@@ -77,4 +82,6 @@ public class Voice {
         }
         return null;
     }
+
+
 }

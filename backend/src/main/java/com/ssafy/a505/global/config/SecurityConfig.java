@@ -43,15 +43,17 @@ public class SecurityConfig {
                                         "/api-member/findMemberId",
                                         "/api-member/getNewPassword",
                                         "/api-member/check-duplicate",
-                                        "/stomp/**"
+                                        "/stomp/**",
+                                        "/api-sse/**"
                                 ).permitAll()
+                                .requestMatchers("/api-voice/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(withDefaults());  // cors 설정 추가
+                .cors(withDefaults());
 
         return http.build();
     }

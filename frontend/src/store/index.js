@@ -46,14 +46,15 @@ export default createStore({
 
             const socket = new SockJS(uri + '/stomp/handshake');
             stompClient = Stomp.over(socket);
-            //stompClient.debug = () => {};
             stompClient.connect({}, () => {
                 commit('SET_IS_CONNECTED', true);
                 console.log('WebSocket connected');
 
-                const randomString = generateRandomString(10);
+                const token = sessionStorage.getItem("access-token");
+                const decodedToken = JSON.parse(atob(token.split(".")[1]));
+                const userId = decodedToken["id"];
 
-                mySessionId = randomString;
+                mySessionId = userId;
 
                 console.log(mySessionId + "is my sessionId");
                 console.log(`/topic/others/${mySessionId}`);
@@ -67,6 +68,10 @@ export default createStore({
                     console.log("------------ice candidate start----------");
                     const key = JSON.parse(candidate.body).key
                     const message = JSON.parse(candidate.body).body;
+                    console.log("key ------ ice candidate start")
+                    console.log(key);
+                    console.log("message ------ ice candidate start")
+                    console.log(message);
 
                     // 해당 key에 해당되는 peer 에 받은 정보를 addIceCandidate 해준다.
                     pcListMap.get(key).addIceCandidate(new RTCIceCandidate({ candidate: message.candidate, sdpMLineIndex: message.sdpMLineIndex, sdpMid: message.sdpMid }));
@@ -94,10 +99,16 @@ export default createStore({
                     const key = JSON.parse(offer.body).mySessionId;
                     const message = JSON.parse(offer.body).body;
 
+                    console.log('key ----- offer start')
+                    console.log(key)
+
                     // 해당 key에 새로운 peerConnection 를 생성해준후 pcListMap 에 저장해준다.
                     pcListMap.set(key, createPeerConnection(key));
                     // 생성한 peer 에 offer정보를 setRemoteDescription 해준다.
-
+                    console.log('message.type -----------')
+                    console.log(message.type)
+                    console.log('message.sdp ------------')
+                    console.log(message.sdp)
                     pcListMap.get(key).setRemoteDescription(new RTCSessionDescription({ type: message.type, sdp: message.sdp }));
                     //sendAnswer 함수를 호출해준다.
 
@@ -111,12 +122,13 @@ export default createStore({
                     console.log("------------others start----------");
 
                     console.log("receive others key");
+                    console.log("mySessionId : " + mySessionId)
                     console.log(`/topic/others/${mySessionId}`);
                     const sessions = JSON.parse(message.body);
                     console.log(sessions);
                     sessions.forEach(otherSessionId => {
                         console.log("others session id is " + otherSessionId);
-                        if (!(mySessionId === otherSessionId)) {
+                        if (!(mySessionId == otherSessionId)) {
                             console.log("compare "+mySessionId+" "+otherSessionId);
                             otherSessionIdList.push(otherSessionId);
                         }
@@ -150,7 +162,7 @@ export default createStore({
             }
         },
         async sendFile({ state }, file) {
-            console.log("send1");
+            console.log("async sendFile 시작");
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
@@ -160,8 +172,7 @@ export default createStore({
             //const longitude = 50.0;
             if(mySessionId === null) return;
             if (stompClient && state.isConnected) {
-                console.log(mySessionId)
-                stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: latitude, y: longitude }));
+                stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: longitude, y: latitude }));
             } else {
                 console.log("fail");
             }
@@ -186,8 +197,8 @@ function getGeo() {
                 (position) => {
                     latitude = position.coords.latitude;
                     longitude = position.coords.longitude;
-                    console.log(latitude);
-                    console.log(longitude);
+                    // console.log(latitude);
+                    // console.log(longitude);
                     resolve({ latitude, longitude });
 
                 },
@@ -291,6 +302,7 @@ let sendOffer = (pc, otherSessionId) => {
     console.log("send offer init");
     pc.createOffer().then(offer => {
         setLocalAndSendMessage(pc, offer);
+        console.log("mySessionId : " + mySessionId + " otherSessionId : " + otherSessionId)
         stompClient.send(
             `/ws/peer/offer/${mySessionId}/${otherSessionId}`,
             {},
@@ -361,7 +373,7 @@ async function sendFileInner(file) {
     }
 
     if (file) {
-        await tryPeerConnect();
+        // await tryPeerConnect();
         console.log('send start');
         const chunkSize = 16384;
         let offset = 0;

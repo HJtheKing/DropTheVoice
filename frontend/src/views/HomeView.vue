@@ -1,17 +1,25 @@
 <script setup>
 import HomeSpreadOrCatch from '@/components/HomeSpreadOrCatch.vue';
 import HomePopularVoices from '@/components/HomePopularVoices.vue';
-import axios from 'axios';
-import { ref, onMounted, watch } from 'vue';
+import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";  
+import { onMounted } from 'vue';
+import { useStorageStore } from '@/store/storage';
+const storageStore = useStorageStore();
+
+onMounted(() => {
+  storageStore.initializeSSE();
+})
 </script>
 
 <template>
+    <WebRtcSendButton/>
+
   <v-app class="black-background">
     <v-main>
       <v-container class="custom-container">
         <v-row justify="center" class="py-4">
           <v-col cols="12" class="text-center">
-          <h1 class="title">Drop The Voice</h1>
+          <h1 class="title">Drop The Voice V08140953</h1>
           </v-col>
         </v-row>
         <HomeSpreadOrCatch />

@@ -1,12 +1,10 @@
 package com.ssafy.a505.domain.service;
 
 import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
-import com.ssafy.a505.domain.entity.Member;
-import com.ssafy.a505.domain.entity.Spread;
-import com.ssafy.a505.domain.entity.Voice;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.SpreadRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
+import com.ssafy.a505.global.sse.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.*;
@@ -35,21 +33,45 @@ public class RedisService {
     private final MemberRepository memberRepository;
     private final SpreadRepository spreadRepository;
     private final VoiceRepository voiceRepository;
+    private final NotificationService notificationService;
+
+    public static final String WS_KEY= "WS_SESSION";
 
     public static final String MEMBER_KEY = "MEMBER_LOCATION";
     public static final String MEMBER_TIME_KEY = "MEMBER_TIME";
+
 
     public static final String VOICE_KEY = "VOICE_LOCATION";
     public static final String VOICE_TIME_KEY = "VOICE_TIME";
     public static final String MSG_KEY_PREFIX = "MSG_RECEIVED_";
     public static final String WS_KEY_PREFIX= "WS_SESSION_";
 
+    // eventListner로 각 세션 관리하기 위함
     public void addSessionId(String sessionID,String userId){
         redisTemplate.opsForValue().set(WS_KEY_PREFIX + sessionID, userId);
     }
 
+    // hash로 동일 키에 hashKey-value 저장 -> 반경 탐색으로 사용하기 위해 memberId 값 저장
+    public void addSessionIdV2(String userId){
+        redisTemplate.opsForHash().put(WS_KEY, WS_KEY_PREFIX + userId, userId);
+    }
+    //
+    public Set<String> getWsMemberIds(){
+        return redisTemplate.opsForHash().values(WS_KEY).stream()
+                .map(Object::toString)
+                .collect(Collectors.toSet());
+    }
+
     public String removeSessionIdAndGetUserId(String sessionID){
         return redisTemplate.opsForValue().getAndDelete(WS_KEY_PREFIX + sessionID).toString();
+    }
+
+    // 세션 종료시
+    public void removeSessionIdAndGetUserIdV2(String sessionID){
+        Object o = redisTemplate.opsForHash().get(WS_KEY, WS_KEY_PREFIX + sessionID);
+        if(o != null){
+            redisTemplate.opsForHash().delete(WS_KEY, WS_KEY_PREFIX + sessionID);
+        }
     }
 
     // key GEO_KEY에 value 위도, 경도, id 추가(유저/포켓몬) + TIME_KEY에 memberId 추가하여 만료기간 갱신
@@ -59,37 +81,10 @@ public class RedisService {
         redisTemplate.opsForZSet().add(timeKey, id.toString(), expirationTime);
     }
 
-    public void extracted(Double latitude, Double longitude, String voiceType, Voice voice) {
-        // voiceType이 poke일 경우 확산 X, Redis에 저장(음성 찾기 기능 위해서)
-        if(voiceType.equals("pokemon")){
-            addLocation(RedisService.VOICE_KEY, RedisService.VOICE_TIME_KEY, voice.getVoiceId(), longitude, latitude, 24);
-        }
-        else {  // virus의 경우 확산 O, 온라인 유저 : WebRTC, 오프라인 유저 : Redis 저장 멤버 중 최근 접속 시간 한 시간 내
-            // 온라인 유저 WebRTC 전송
-
-            // 오프라인 유저 최근 접속 시간 한 시간 내의 유저에게 전송
-            List<RedisResponseDTO> findMembers = getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
-            for (RedisResponseDTO dto : findMembers) {
-                Spread spread = new Spread();
-                log.info("dto: {}", dto);
-                Member findMember = memberRepository.findByMemberId(dto.getId()).get();
-                Voice findVoice = voiceRepository.findById(voice.getVoiceId()).get();
-                log.info("findVoice: {}", findVoice.getVoiceId());
-                log.info("findMember: {}", findMember.getMemberId());
-//                Member findMember = new Member();
-//                findMember.setMemberId(dto.getId());
-//                Voice findVoice = new Voice();
-//                voice.setVoiceId(voice.getVoiceId());
-                spread.setMember(findMember);
-                spread.setVoice(findVoice);
-                spreadRepository.save(spread);
-            }
-        }
-    }
-
     // member의 특정 음성 수신 저장
     public void markReceived(Long voiceId, Long memberId){
         redisTemplate.opsForHash().put(MSG_KEY_PREFIX + voiceId, memberId.toString(), true);
+        redisTemplate.expire(MSG_KEY_PREFIX + voiceId, 7, TimeUnit.DAYS);
     }
 
     // 특정 음성 수신한 멤버인지 확인
@@ -112,12 +107,33 @@ public class RedisService {
     }
 
     //  member의 반경 내의 다른 멤버 조회 V3
-    public List<RedisResponseDTO> getMembersByRadius(Double longitude, Double latitude, Double radiusInKm, Long voiceId, int cnt){
+    public Set<RedisResponseDTO> getMembersByRadius(Double longitude, Double latitude, Double radiusInKm, Long voiceId, int cnt){
         Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
         GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
         GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(MEMBER_KEY, within, args);
 
-        List<RedisResponseDTO> result = geoResults.getContent().stream()
+        List<RedisResponseDTO> shuffledList = geoResults.getContent().stream()
+                .map(geoResult -> {
+                    GeoLocation<Object> content = geoResult.getContent();
+                    Point point = content.getPoint();
+                    Long memberId = Long.valueOf(content.getName().toString());
+                    return new RedisResponseDTO(memberId, point.getX(), point.getY());
+                })
+                .filter(dto -> !isReceived(voiceId, dto.getId())).distinct().collect(Collectors.toList());
+
+        Collections.shuffle(shuffledList);
+        return shuffledList.stream()
+                .limit(cnt)
+                .collect(Collectors.toSet());
+    }
+
+    //  member의 반경 내 현재 접속 중인 유저 반환
+    public Set<RedisResponseDTO> getMembersByRadiusV2(Double longitude, Double latitude, Double radiusInKm, Long voiceId, int cnt, Set<String> set) {
+        Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
+        GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
+        GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(MEMBER_KEY, within, args);
+
+        List<RedisResponseDTO> shuffledList = geoResults.getContent().stream()
                 .map(geoResult -> {
                     GeoLocation<Object> content = geoResult.getContent();
                     Point point = content.getPoint();
@@ -125,12 +141,14 @@ public class RedisService {
                     return new RedisResponseDTO(memberId, point.getX(), point.getY());
                 })
                 .filter(dto -> !isReceived(voiceId, dto.getId()))
+                .filter(dto -> set.contains(dto.getId().toString()))
+                .distinct()
                 .collect(Collectors.toList());
 
-        Collections.shuffle(result);
-        return result.stream()
+        Collections.shuffle(shuffledList);
+        return shuffledList.stream()
                 .limit(cnt)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     public List<RedisResponseDTO> getVoicesByRadius(Double longitude, Double latitude, Double radiusInKm, Long memberId){
