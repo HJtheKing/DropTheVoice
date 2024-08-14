@@ -46,11 +46,12 @@ public class RedisService {
     public static final String MSG_KEY_PREFIX = "MSG_RECEIVED_";
     public static final String WS_KEY_PREFIX= "WS_SESSION_";
 
+    // eventListner로 각 세션 관리하기 위함
     public void addSessionId(String sessionID,String userId){
         redisTemplate.opsForValue().set(WS_KEY_PREFIX + sessionID, userId);
     }
 
-    // hash로 동일 키에 hashKey-value 저장
+    // hash로 동일 키에 hashKey-value 저장 -> 반경 탐색으로 사용하기 위해 memberId 값 저장
     public void addSessionIdV2(String userId){
         redisTemplate.opsForHash().put(WS_KEY, WS_KEY_PREFIX + userId, userId);
     }
