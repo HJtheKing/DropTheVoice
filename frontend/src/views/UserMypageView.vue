@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/store/user";
 import { useRouter } from 'vue-router';
 import axios from "axios";
@@ -182,6 +182,10 @@ const submitImg = () => {
       console.log(err);
     });
 };
+
+onMounted(() => {
+  userStore.tryAutoLogin();
+});
 
 </script>
 

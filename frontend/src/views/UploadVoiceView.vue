@@ -161,6 +161,10 @@ const mp3Blob = ref(null);
 
 const imageUrl = ref('');
 
+onMounted(() => {
+  userStore.tryAutoLogin();
+});
+
 onMounted(async () => {
   const base64Data = localStorage.getItem('recordData');
   if (base64Data) {
@@ -240,7 +244,6 @@ const uploadFile = async (type) => {
   } catch (error) {
     showError(error);
   }
-
 
   if (selectedFile.value && title.value) {
     const formData = new FormData();
