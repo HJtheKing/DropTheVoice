@@ -49,11 +49,12 @@ public class StompController {
         System.out.println(coordinate.getX() + "" + coordinate.getY());
 
         log.info("sessionId: {}", sessionId);
+        redisService.addSessionId(sessionId, coordinate.getName());
         redisService.addSessionIdV2(coordinate.getName());
-        sessionIDs.add(coordinate.getName());
+//        sessionIDs.add(coordinate.getName());
 
         log.info(coordinate.getName()+" is userId");
-        log.info("Session Logged In Member Info: "+ coordinate.toString());
+        log.info("Session Logged In Member Info: {}, {}, {}", coordinate.getName(), coordinate.getX(), coordinate.getY());
 
         //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자. -> 위경도 좌표와 memberId를 저장하도록 변경
         redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
@@ -113,8 +114,8 @@ public class StompController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
         log.info("sessionId: {}", sessionId);
-        redisService.removeSessionIdAndGetUserIdV2(sessionId);
-//        String userId = redisService.removeSessionIdAndGetUserId(sessionId);
+        String userId = redisService.removeSessionIdAndGetUserId(sessionId);
+        redisService.removeSessionIdAndGetUserIdV2(userId);
 //        sessionIDs.remove(userId);
 
         log.info("Disconnected: " + sessionId);
