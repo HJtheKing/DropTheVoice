@@ -137,16 +137,13 @@ function searchItems() {
   padding-bottom: 80px;
 }
 
-.white-placeholder .v-input__control .v-input__slot::before {
+.white-placeholder .v-input__control .v-input__slot::before .v-input__slot::after {
   border-color: #fff;
 }
 
-.white-placeholder .v-input__control .v-input__slot::after {
-  border-color: #fff;
-}
 
 .white-placeholder input::placeholder {
-  color: #b0b0b0;
+  color: #000;
 }
 
 button {

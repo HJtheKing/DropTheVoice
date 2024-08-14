@@ -137,13 +137,12 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useUserStore } from '@/store/user';
-import { useSpreadStore } from '@/store/spread';
 import axios from 'axios';
+import { useStore } from 'vuex';
 
 const userStore = useUserStore();
-const spreadStore = useSpreadStore();
 const member = computed(() => userStore.user);
-
+const store = useStore();
 const title = ref('');
 const selectedFile = ref(null);
 const pitch = ref(0);
@@ -158,6 +157,7 @@ const latitude = ref(0);
 const longitude = ref(0);
 
 const mp3Blob = ref(null);
+
 
 const imageUrl = ref('');
 
@@ -262,7 +262,14 @@ const uploadFile = async (type) => {
         }
       });
       audioUrl.value = response.data.videoUrl || response.data.processedPath;
+
+      console.log('--------------sendFile------------')
+      store.dispatch('sendFile', selectedFile);
+
       uploadStatus.value = '업로드 성공';
+      if (pitch.value === 0) {
+        store.dispatch('sendFile', selectedFile);
+      }
     } catch (error) {
       uploadStatus.value = '업로드 실패';
     } finally {

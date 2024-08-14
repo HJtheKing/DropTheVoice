@@ -13,13 +13,15 @@
 <script setup>
 import MenuBar from '@/components/MenuBar.vue';
 import { useStore } from 'vuex';
-import { useRoute, useRouter  } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useStorageStore } from './store/storage';
 
 import { onMounted } from 'vue';
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
+const storageStore = useStorageStore();
 
 const goBack = () => {
   router.back();

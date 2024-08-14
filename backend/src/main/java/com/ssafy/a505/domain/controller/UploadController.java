@@ -13,6 +13,7 @@ import com.ssafy.a505.domain.repository.VoiceRepository;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.domain.service.RedisService;
 import com.ssafy.a505.domain.service.VoiceUploadService;
+import com.ssafy.a505.global.sse.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ public class UploadController {
     private final RedisService redisService;
     private final SpreadRepository spreadRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
     Random random = new Random();
 
     /**
@@ -58,7 +60,7 @@ public class UploadController {
         // voiceType이 poke일 경우 확산 X, Redis에 저장(음성 찾기 기능 위해서)
         if(voiceType.equals("pokemon")){
             redisService.addLocation(RedisService.VOICE_KEY, RedisService.VOICE_TIME_KEY, voice.getVoiceId(), longitude, latitude, 24);
-        }
+        }git
         else {  // virus의 경우 확산 O, 온라인 유저 : WebRTC, 오프라인 유저 : Redis 저장 멤버 중 최근 접속 시간 한 시간 내
             // 현재 접속 중 유저 반환
             Set<String> wsMemberIds = redisService.getWsMemberIds();
@@ -95,6 +97,7 @@ public class UploadController {
                 spread.setMember(findMember);
                 spread.setVoice(findVoice);
                 spreadRepository.save(spread);
+                notificationService.sendNotification(byRadius.getId(), "Spread");
             }
         }
         return new ResponseEntity<>(voice, HttpStatus.CREATED);
