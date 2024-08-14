@@ -63,8 +63,8 @@
           </div>
 
           <div id="app">
-            <h1>Generate Image with OpenAI</h1>
-            <button @click="generateImage">Generate</button>
+            <h1>AI로 썸네일 이미지 생성</h1>
+            <button @click="generateImage">생성</button>
             <div v-if="imageUrl">
               <img :src="imageUrl" alt="Generated Image" />
             </div>
@@ -139,9 +139,6 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useUserStore } from '@/store/user';
 import { useSpreadStore } from '@/store/spread';
 import axios from 'axios';
-import { useStore } from 'vuex';
-
-const store = useStore();
 
 const userStore = useUserStore();
 const spreadStore = useSpreadStore();
@@ -243,24 +240,11 @@ const uploadFile = async (type) => {
   } catch (error) {
     showError(error);
   }
-  
-  let blob;
-try {
-  const response = await fetch(imageUrl.value);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch image: ${response.statusText}`);
-  }
-  blob = await response.blob();
-} catch (error) {
-  console.error('Error downloading image:', error);
-  return; // 이미지 다운로드에 실패하면 함수 종료
-}
 
 
   if (selectedFile.value && title.value) {
     const formData = new FormData();
     formData.append('audioFile', selectedFile.value);
-    formData.append('imgFile', blob, 'generated_image.png');
     formData.append('memberId', memberId.value);
     formData.append('title', title.value);
     formData.append('voiceType', localStorage.getItem('voiceType'));
@@ -278,10 +262,6 @@ try {
         }
       });
       audioUrl.value = response.data.videoUrl || response.data.processedPath;
-
-      console.log('--------------sendFile------------')
-      store.dispatch('sendFile', selectedFile);
-
       uploadStatus.value = '업로드 성공';
     } catch (error) {
       uploadStatus.value = '업로드 실패';

@@ -21,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,13 +38,13 @@ public class UploadController {
     private final RedisService redisService;
     private final SpreadRepository spreadRepository;
     private final MemberRepository memberRepository;
+    Random random = new Random();
 
     /**
      * Flask로 데이터 전송
      */
     @PostMapping(value = "/upload")
     public ResponseEntity<?> uploadVoice(@RequestPart(value = "audioFile", required = false) MultipartFile audioFile,
-                                         @RequestPart(value = "imgFile", required = false) MultipartFile imgFile,
                                          @RequestParam(value = "memberId") Long memberId,
                                          @RequestPart(value = "title") String title, @RequestParam(value = "latitude", required = false) Double latitude, @RequestParam(value = "longitude", required = false) Double longitude, @RequestParam(value = "voiceType") String voiceType,
                                          @RequestParam("pitchShift") float pitchShift) throws JsonProcessingException {
@@ -52,7 +53,7 @@ public class UploadController {
         log.info("latitude: {}, longitude: {}, voiceType: {}, memberId: {}", latitude, longitude, voiceType, memberId);
         voice.setLatitude(latitude);
         voice.setLongitude(longitude);
-        voice.setImageUrl(voiceUploadService.uploadAndSendImg(imgFile));
+        voice.setImageUrl("https://picsum.photos/id/" + random.nextInt(300) + "/200/300");
         voiceRepository.save(voice);
         // voiceType이 poke일 경우 확산 X, Redis에 저장(음성 찾기 기능 위해서)
         if(voiceType.equals("pokemon")){
