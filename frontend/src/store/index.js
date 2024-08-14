@@ -277,6 +277,18 @@ const createPeerConnection = (otherSessionID) => {
                 accumulateStringData(conn2.sessionId, evt.data);
             };
         })
+        pc.addEventListener('iceconnectionstatechange', () => {
+            if (pc.iceConnectionState === 'connected') {
+                console.log('ICE connection established!');
+                // 두 피어 간의 연결이 성공적으로 성립됨.
+            } else if (pc.iceConnectionState === 'completed') {
+                console.log('ICE connection is complete!');
+                // 모든 ICE 프로세스가 완료되고, 연결이 안정됨.
+            } else if (pc.iceConnectionState === 'failed') {
+                console.log('ICE connection failed.');
+                // 연결 시도 실패
+            }
+        });
 
         let channel = pc.createDataChannel('temp channel');
         console.log("data channel created");

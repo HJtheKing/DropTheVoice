@@ -37,7 +37,7 @@ export const useUserStore = defineStore("user", () => {
         loginUserId.value = userId;
 
         getUser(userId);
-        initializeSSE(); // SSE 연결 초기화
+        // initializeSSE(); // SSE 연결 초기화
 
         router.push("/home");
       })
@@ -181,7 +181,7 @@ export const useUserStore = defineStore("user", () => {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
     getUser(userId);
-    initializeSSE(); // 자동 로그인 시에도 SSE 연결 초기화
+    // initializeSSE(); // 자동 로그인 시에도 SSE 연결 초기화
   };
 
   // Store 초기화 시 자동 로그인 시도
