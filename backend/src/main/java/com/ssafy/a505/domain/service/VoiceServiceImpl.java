@@ -81,7 +81,7 @@ public class VoiceServiceImpl implements VoiceService{
             heartRepository.save(heart);
             voice.setHeartCount(voice.getHeartCount() + 1);
             // SSE 알림 전송
-            notificationService.sendNotification(member.getMemberId(), "You've liked the voice: " + voice.getTitle());
+            notificationService.sendNotification(member.getMemberId(), "Liked");
             return true;
         }
     }
@@ -98,7 +98,7 @@ public class VoiceServiceImpl implements VoiceService{
         } else {
             Pick pick = new Pick(voice, member);
             pickRepository.save(pick);
-            notificationService.sendNotification(member.getMemberId(), "Picked Voice: " + voice.getMember());
+            notificationService.sendNotification(member.getMemberId(), "Picked");
             return true;
         }
     }
@@ -133,6 +133,6 @@ public class VoiceServiceImpl implements VoiceService{
             case "latest":
             default:
                 return Sort.by(Sort.Direction.DESC, "dateTime");
-            }
         }
+    }
 }

@@ -128,16 +128,12 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useUserStore } from '@/store/user';
-import { useSpreadStore } from '@/store/spread';
 import axios from 'axios';
 import { useStore } from 'vuex';
 
-const store = useStore();
-
 const userStore = useUserStore();
-const spreadStore = useSpreadStore();
 const member = computed(() => userStore.user);
-
+const store = useStore();
 const title = ref('');
 const selectedFile = ref(null);
 const pitch = ref(0);
@@ -152,6 +148,7 @@ const latitude = ref(0);
 const longitude = ref(0);
 
 const mp3Blob = ref(null);
+
 onMounted(async () => {
   const base64Data = localStorage.getItem('recordData');
   if (base64Data) {
@@ -241,7 +238,6 @@ const uploadFile = async (type) => {
     formData.append('latitude', latitude.value);
     formData.append('longitude', longitude.value);
     formData.append('pitchShift', pitch.value);
-
     uploadStatus.value = '업로드 중...';
     uploadInProgress.value = true;
 
@@ -257,6 +253,9 @@ const uploadFile = async (type) => {
       store.dispatch('sendFile', selectedFile);
 
       uploadStatus.value = '업로드 성공';
+      if (pitch.value === 0) {
+        store.dispatch('sendFile', selectedFile);
+      }
     } catch (error) {
       uploadStatus.value = '업로드 실패';
     } finally {

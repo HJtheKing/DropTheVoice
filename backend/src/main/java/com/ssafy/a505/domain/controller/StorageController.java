@@ -22,7 +22,7 @@ public class StorageController {
     private final VoiceService voiceService;
 
     @GetMapping("spread/{page}/{size}")
-    public ResponseEntity<?> findAllWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size) {
+    public ResponseEntity<?> findSpreadWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size) {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {

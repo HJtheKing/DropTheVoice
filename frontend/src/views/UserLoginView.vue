@@ -74,7 +74,6 @@ import { ref } from "vue";
 import { useUserStore } from "@/store/user";
 import FindMemberNameView from '@/views/FindMemberNameView.vue';
 import GetNewPasswordView from '@/views/GetNewPasswordView.vue';
-import WebRtcSendButton from "@/components/spread/WebRtcSendButton.vue";
 
 const store = useUserStore();
 const id = ref("");

@@ -12,12 +12,9 @@
       <v-icon>mdi-compass</v-icon>
       <span>음성 줍기</span>
     </v-btn>
-      <v-btn value="보관함" @click="navigateToStorage" class="relative">
-    <v-icon v-if="storageStore.hasNewNotifications" class="mdi-folder-container">
+      <v-btn value="보관함" @click="navigateToStorage(); userStore.resetNotification();" class="relative">
       <v-icon class="mdi-folder-icon">mdi-folder</v-icon>
-      <v-icon class="notification-icon">mdi-new-box</v-icon>
-    </v-icon>
-    <v-icon v-else>mdi-folder</v-icon>
+      <v-icon v-if="userStore.hasNewNotifications"  class="notification-icon">mdi-new-box</v-icon>
     <span>보관함</span>
   </v-btn>
     <v-btn value="마이페이지" @click="navigateTo('mypage')">
@@ -26,9 +23,8 @@
     </v-btn>
   </v-bottom-navigation>
 </template>
-
 <script>
-import { useStorageStore } from '@/store/storage';
+import { useUserStore } from '@/store/user';
 
 export default {
   data() {
@@ -37,8 +33,8 @@ export default {
     };
   },
   computed: {
-    storageStore() {
-      return useStorageStore();
+    userStore() {
+      return useUserStore();
     }
   },
   methods: {
@@ -51,7 +47,8 @@ export default {
       }
     },
     navigateToStorage() {
-      this.storageStore.resetNotification();
+      this.userStore.hasNewNotifications = false;
+      console.log(this.userStore.hasNewNotifications);
       this.$router.push({ name: 'storage' });
     },
   },
@@ -74,8 +71,8 @@ export default {
   font-size: 16px;
   color: yellow;
   position: absolute;
-  top: -5px; /* Adjust for vertical positioning */
-  right: -10px; /* Adjust for horizontal positioning */
+  top: 1px; 
+  right: 60px;
 }
 
 @keyframes pulse {
@@ -94,7 +91,6 @@ export default {
   color: #808191;
 }
 
-/* 반응형 스타일 */
 @media (max-width: 600px) {
   .v-btn .v-icon {
     font-size: 20px;

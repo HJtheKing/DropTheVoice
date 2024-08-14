@@ -6,39 +6,50 @@ export const useStorageStore = defineStore('storage', {
   state: () =>({
     pickVoices: [],
     likedVoices: [],
+    spreadVoices: [],
     currentPagePick: 1,
     currentPageLiked: 1,
-    pageSize: 10,
+    currentPageSpread: 1, 
+    pageSize:10,
     isFetching: false,
     hasMorePickVoices: true,
     hasMoreLikedVoices: true,
+    hasMoreSpreadVoices: true,
     activeTab: 'pick',
-    eventSource: null,
-    hasNewNotifications: false,
-    hasNewLikeNotifications: false,
-    hasNewPickNotifications: false,
   }),
   getters: {
     hasMoreVoices(state) {
-      return state.activeTab === 'pick' ? state.hasMorePickVoices : state.hasMoreLikedVoices;
+      if (state.activeTab === 'pick') {
+        return state.hasMorePickVoices;
+      } else if (state.activeTab === 'liked') {
+        return state.hasMoreLikedVoices;
+      } else if (state.activeTab === 'spread') {
+        return state.hasMoreSpreadVoices;
+      }
+      return false;
     },
   },
   actions: {
     resetPagination() {
       this.currentPagePick = 1;
       this.currentPageLiked = 1;
+      this.currentPageSpread = 1;  
       this.hasMorePickVoices = true;
       this.hasMoreLikedVoices = true;
+      this.hasMoreSpreadVoices = true;
       this.pickVoices = [];
       this.likedVoices = [];
+      this.spreadVoices = [];
       this.isFetching = false;
     },
     async fetchPickVoices(page = 1) {
       const userStore = useUserStore();
+      const token = sessionStorage.getItem('access-token')
       if (!this.hasMorePickVoices) return;
       this.isFetching = true;
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/picks/${page}/${this.pageSize}`, {
+          headers: { Authorization: `Bearer ${token}` },
           params: {
             memberId: userStore.loginUserId,
           }
@@ -59,11 +70,12 @@ export const useStorageStore = defineStore('storage', {
     },
     async fetchLikedVoices(page = 1) {
       const userStore = useUserStore();
+      const token = sessionStorage.getItem('access-token')
       if (!this.hasMoreLikedVoices) return;
-
       this.isFetching = true;
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/heart/${page}/${this.pageSize}`, {
+          headers: { Authorization: `Bearer ${token}` },
           params: {
             memberId: userStore.loginUserId,
           } 
@@ -82,6 +94,32 @@ export const useStorageStore = defineStore('storage', {
         this.isFetching = false;
       }
     },
+    async fetchSpreadVoices(page = 1) {
+      const userStore = useUserStore();
+      const token = sessionStorage.getItem('access-token')
+      if (!this.hasMoreSpreadVoices) return;
+      this.isFetching = true;
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-storage/spread/${page}/${this.pageSize}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            memberId: userStore.loginUserId
+          }
+        });
+        if (response.data.length < this.pageSize) {
+          this.hasMoreSpreadVoices = false;
+        }
+        if (page === 1) {
+          this.spreadVoices = response.data;
+        } else {
+          this.spreadVoices.push(...response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching spread voices:', error);
+      } finally {
+        this.isFetching = false;
+      }
+    },
     async loadMoreVoices() {
       if (this.isFetching || !this.hasMoreVoices) return;
       this.isFetching = true;
@@ -89,9 +127,12 @@ export const useStorageStore = defineStore('storage', {
         if (this.activeTab === 'pick') {
           this.currentPagePick++;
           await this.fetchPickVoices(this.currentPagePick);
-        } else {
+        } else if(this.activeTab ==='liked') {
           this.currentPageLiked++;
           await this.fetchLikedVoices(this.currentPageLiked);
+        } else if (this.activeTab === 'spread') {
+          this.currentPageSpread++;
+          await this.fetchSpreadVoices(this.currentPageSpread);
         }
       } catch (error) {
         console.error('Error loading more voices:', error);
@@ -100,16 +141,24 @@ export const useStorageStore = defineStore('storage', {
       }
     },
     changeTab(tab) {
+      const userStore = useUserStore();
       this.activeTab = tab;
       this.resetPagination();
       if (tab === 'pick') {
-        this.hasNewPickNotifications = false;
-      } if(this.pickVoices.length === 0) {
-        this.fetchPickVoices();
+        userStore.hasNewPickNotifications = false;
+        if (this.pickVoices.length === 0) {
+          this.fetchPickVoices();
+        }
       } else if (tab === 'liked') {
-        this.hasNewLikeNotifications = false;
-      } if (this.likedVoices.length === 0) {
-        this.fetchLikedVoices();
+        userStore.hasNewLikeNotifications = false;
+        if (this.likedVoices.length === 0) {
+          this.fetchLikedVoices();
+        }
+      } else if (tab === 'spread') {
+        userStore.hasNewSpreadNotifications = false;
+        if (this.spreadVoices.length === 0) {
+          this.fetchSpreadVoices();
+        }
       }
     },
     reloadPickVoices() {
@@ -120,56 +169,9 @@ export const useStorageStore = defineStore('storage', {
       this.resetPagination();
       this.fetchLikedVoices();
     },
-    initializeSSE() {  
-      const userStore = useUserStore();
-      const memberId = userStore.loginUserId;
-      if (!memberId) return;
-
-      if (this.eventSource) {
-        this.eventSource.close();
-      }
-
-      this.eventSource = new EventSource(`${import.meta.env.VITE_BASE_URL}/api-sse/subscribe/${memberId}`);
-      this.eventSource.onopen = () => {
-        console.log('SSE 연결이 열렸습니다.');
-      };
-      this.eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("Received SSE: ", data);
-        
-        if (data.type === 'Like Notification') {
-        this.hasNewLikeNotifications = true;
-        this.fetchLikedVoices();
-      } else if (data.type === 'Pick Notification') {
-        this.hasNewPickNotifications = true;
-        this.fetchPickVoices();
-      }
-      };
-
-      this.eventSource.addEventListener('MESSAGE', (event) => {
-        console.log("Message Event: ", event.data);
-        this.hasNewNotifications = true;
-        const message = event.data;
-        if (message.includes('like')) {
-          this.hasNewLikeNotifications = true;
-        } else if (message.includes('Pick')) {
-          this.hasNewPickNotifications = true;
-        }
-      });
-
-      this.eventSource.onerror = (error) => {
-        console.error('SSE Error: ', error);
-        this.eventSource.close();
-      };
+    reloadSpreadVoices() {
+      this.resetPagination();
+      this.fetchSpreadVoices();
     },
-    resetNotification() {
-      this.hasNewNotifications = false;
-    },
-    resetLikeNotification() {
-      this.hasNewLikeNotifications = false;
-    },
-    resetPickNotification() {
-      this.hasNewPickNotifications = false;
-    }
-  },
-});
+  }
+}); 

@@ -10,6 +10,11 @@ export const useUserStore = defineStore("user", () => {
   const loginUserId = ref(null);
   const loginUserName = ref(null);
   const user = ref(null);
+  const eventSource = ref(null);
+  const hasNewNotifications = ref(false);
+  const hasNewLikeNotifications = ref(false);
+  const hasNewPickNotifications = ref(false);
+  const hasNewSpreadNotifications = ref(false);
 
   const userLogin = function (id, password) {
     axios
@@ -22,8 +27,8 @@ export const useUserStore = defineStore("user", () => {
         sessionStorage.setItem("access-token", token);
 
         const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        let userName = decodedToken["name"];
-        let userId = decodedToken["id"];
+        const userName = decodedToken["name"];
+        const userId = decodedToken["id"];
 
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
@@ -32,9 +37,9 @@ export const useUserStore = defineStore("user", () => {
         loginUserId.value = userId;
 
         getUser(userId);
+        initializeSSE(); // SSE 연결 초기화
 
         router.push("/home");
-        window.location.reload();
       })
       .catch(() => {
         alert("유효하지 않은 아이디 혹은 비번입니다");
@@ -45,12 +50,69 @@ export const useUserStore = defineStore("user", () => {
   // 로그아웃 메서드
   const logout = () => {
     sessionStorage.removeItem("access-token");
-    isLogin.value = false; // 로그인 상태 업데이트
+    isLogin.value = false;
     loginUserId.value = null;
     user.value = null;
     delete axios.defaults.headers.common["Authorization"];
-    router.push("/login"); // 홈페이지로 이동
+    if (eventSource.value) {
+      eventSource.value.close(); // SSE 연결 해제
+      eventSource.value = null;
+    }
+    router.push("/login");
     window.location.reload();
+  };
+
+  // SSE 초기화 메서드
+  const initializeSSE = () => {
+    if (!loginUserId.value) return;
+    
+    if (eventSource.value) {
+      eventSource.value.close();
+    }
+
+    eventSource.value = new EventSource(`${import.meta.env.VITE_BASE_URL}/api-sse/subscribe/${loginUserId.value}`);
+    
+    eventSource.value.onopen = () => {
+      console.log('SSE 연결 성공');
+    };
+
+    eventSource.value.onmessage = (event) => {
+      console.log("SSE 메시지 수신")
+      console.log(event.data);
+
+      if (event.data === 'Picked') {
+        hasNewPickNotifications.value = true;
+        hasNewNotifications.value = true;
+      } else if (event.data === 'Liked') {
+        hasNewLikeNotifications.value = true;
+        hasNewNotifications.value = true;
+      } else if (event.data === 'Spread') {
+        hasNewSpreadNotifications.value = true;
+        hasNewNotifications.value = true;
+      }
+    };
+
+    eventSource.value.onerror = (error) => {
+      console.error('SSE Error: ', error);
+      eventSource.value.close();
+      eventSource.value = null;
+    };
+  };
+
+  const resetNotification = () => {
+    hasNewNotifications.value = false;
+  };
+
+  const resetPickNotification = () => {
+    hasNewPickNotifications.value = false;
+  };
+
+  const resetLikeNotification = () => {
+    hasNewLikeNotifications.value = false;
+  };
+
+  const resetSpreadNotification = () => {
+    hasNewSpreadNotifications.value = false;
   };
 
   // 회원가입 메서드
@@ -71,14 +133,12 @@ export const useUserStore = defineStore("user", () => {
       .post(`${REST_USER_API}/changePassword`, {
         memberName: loginUserName.value,
         oldPassword: oldPassword,
-        newPassword: newPassword
+        newPassword: newPassword,
       })
       .then(() => {
-        // 비밀번호 변경 성공 시
         return Promise.resolve();
-     })
+      })
       .catch((error) => {
-        // 비밀번호 변경 실패 시
         return Promise.reject(error);
       });
   };
@@ -121,10 +181,10 @@ export const useUserStore = defineStore("user", () => {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
     getUser(userId);
-    
+    initializeSSE(); // 자동 로그인 시에도 SSE 연결 초기화
   };
 
-  // Call tryAutoLogin when the store is initialized
+  // Store 초기화 시 자동 로그인 시도
   onMounted(() => {
     tryAutoLogin();
   });
@@ -132,6 +192,7 @@ export const useUserStore = defineStore("user", () => {
   return {
     isLogin,
     loginUserId,
+    loginUserName,
     user,
     userLogin,
     logout,
@@ -140,5 +201,14 @@ export const useUserStore = defineStore("user", () => {
     deleteUser,
     tryAutoLogin,
     changePassword,
+    initializeSSE,
+    resetNotification,
+    resetPickNotification,
+    resetLikeNotification,
+    resetSpreadNotification,
+    hasNewNotifications,
+    hasNewPickNotifications,
+    hasNewLikeNotifications,
+    hasNewSpreadNotifications,
   };
 });
