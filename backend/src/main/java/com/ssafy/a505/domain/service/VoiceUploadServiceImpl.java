@@ -88,6 +88,16 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         return voice;
     }
 
+    public String uploadAndSendImg(MultipartFile imgFile){
+        String imgUrl = "";
+        if(imgFile != null){
+            imgUrl = s3FileService.uploadFile(imgFile, 4);
+        }
+        else System.out.println("file is null");
+
+        return imgUrl;
+    }
+
 
     @Transactional
     public String sendToFlask(Voice voice, float pitchShift) throws JsonProcessingException {
@@ -118,8 +128,11 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
     }
 
     private Voice uploadAudioFileToS3(Voice voice, MultipartFile multipartFile) {
-        String saveFile = s3FileService.uploadFile(multipartFile, voice.isProcessed());
-        voice.setSaveFolder(s3FileService.getFileFolder(voice.isProcessed()));
+        int dataType;
+        if(voice.isProcessed()) dataType = 2;
+        else dataType = 1;
+        String saveFile = s3FileService.uploadFile(multipartFile, dataType);
+        voice.setSaveFolder(s3FileService.getFileFolder(dataType));
         voice.setSavePath(saveFile);
         voice.setOriginalName(multipartFile.getOriginalFilename());
         return voice;

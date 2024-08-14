@@ -22,6 +22,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ public class UploadController {
     private final SpreadRepository spreadRepository;
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
+    Random random = new Random();
 
     /**
      * Flask로 데이터 전송
@@ -53,11 +55,12 @@ public class UploadController {
         log.info("latitude: {}, longitude: {}, voiceType: {}, memberId: {}", latitude, longitude, voiceType, memberId);
         voice.setLatitude(latitude);
         voice.setLongitude(longitude);
+        voice.setImageUrl("https://picsum.photos/id/" + random.nextInt(300) + "/200/300");
         voiceRepository.save(voice);
         // voiceType이 poke일 경우 확산 X, Redis에 저장(음성 찾기 기능 위해서)
         if(voiceType.equals("pokemon")){
             redisService.addLocation(RedisService.VOICE_KEY, RedisService.VOICE_TIME_KEY, voice.getVoiceId(), longitude, latitude, 24);
-        }
+        }git
         else {  // virus의 경우 확산 O, 온라인 유저 : WebRTC, 오프라인 유저 : Redis 저장 멤버 중 최근 접속 시간 한 시간 내
             // 현재 접속 중 유저 반환
             Set<String> wsMemberIds = redisService.getWsMemberIds();

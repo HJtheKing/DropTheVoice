@@ -62,6 +62,15 @@
             </v-row>
           </div>
 
+          <div id="app">
+            <h1>AI로 썸네일 이미지 생성</h1>
+            <button @click="generateImage">생성</button>
+            <div v-if="imageUrl">
+              <img :src="imageUrl" alt="Generated Image" />
+            </div>
+          </div>
+
+
           <v-row justify="center" class="py-4">
             <v-col cols="12" class="text-center">
               <v-btn
@@ -149,6 +158,9 @@ const longitude = ref(0);
 
 const mp3Blob = ref(null);
 
+
+const imageUrl = ref('');
+
 onMounted(async () => {
   const base64Data = localStorage.getItem('recordData');
   if (base64Data) {
@@ -229,6 +241,7 @@ const uploadFile = async (type) => {
     showError(error);
   }
 
+
   if (selectedFile.value && title.value) {
     const formData = new FormData();
     formData.append('audioFile', selectedFile.value);
@@ -238,6 +251,7 @@ const uploadFile = async (type) => {
     formData.append('latitude', latitude.value);
     formData.append('longitude', longitude.value);
     formData.append('pitchShift', pitch.value);
+
     uploadStatus.value = '업로드 중...';
     uploadInProgress.value = true;
 
@@ -265,6 +279,45 @@ const uploadFile = async (type) => {
     alert ('제목 혹은 파일은 선택해 주세요.');
   }
 }
+
+// 이미지 생성
+
+const generateImage = async () => {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const url = 'https://api.openai.com/v1/images/generations';
+
+  const headers = {
+    'Authorization': `Bearer ${apiKey}`,
+    'Content-Type': 'application/json',
+  };
+
+  const body = {
+    prompt: `${title.value}`,
+    n: 1,
+    size: '512x512',
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      imageUrl.value = data.data[0].url;
+      console.log('Generated image URL:', imageUrl.value);  // 확인 로그
+    } else {
+      console.error('Error generating image:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error generating image:', error);
+  }
+};
+
+
+
 </script>
 <style scoped>
 .title {

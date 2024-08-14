@@ -111,6 +111,7 @@ export default createStore({
                     console.log(message.sdp)
                     pcListMap.get(key).setRemoteDescription(new RTCSessionDescription({ type: message.type, sdp: message.sdp }));
                     //sendAnswer 함수를 호출해준다.
+
                     sendAnswer(pcListMap.get(key), key);
                     console.log("------------offer end----------");
 
@@ -165,7 +166,10 @@ export default createStore({
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
+            console.log("send location of me");
             const { latitude, longitude } = await getGeo();
+            //const latitude = 50.0;
+            //const longitude = 50.0;
             if(mySessionId === null) return;
             if (stompClient && state.isConnected) {
                 stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: longitude, y: latitude }));

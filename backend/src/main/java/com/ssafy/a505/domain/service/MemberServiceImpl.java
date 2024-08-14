@@ -8,6 +8,7 @@ import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
+import com.ssafy.a505.global.service.S3FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -27,7 +29,7 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-
+    private final S3FileService s3FileService;
     private final JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username}")
@@ -105,7 +107,15 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean setUserImg(String memberId, String newImageName) {
+    public boolean setUserImg(long memberId, MultipartFile file) {
+        Optional<Member> findOptional = memberRepository.findByMemberId(memberId);
+        Member target = findOptional.get();
+        if(target != null){
+            String imgUrl = s3FileService.uploadFile(file, 3);
+            target.setProfileImgUrl(imgUrl);
+            memberRepository.save(target);
+            return true;
+        }
         return false;
     }
 
