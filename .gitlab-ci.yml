@@ -24,9 +24,8 @@ build:
     - docker build -t gbds234/flask:latest --push ~/S11P12A505/backend-flask #$DOCKER_IMAGE .
     - cd ~/S11P12A505/dockercompose
     - docker compose -f docker-compose-prod.yml pull
-    - docker compose -f docker-compose-prod.yml up -d
+    - docker compose -f docker-compose-prod.yml up -d --force-recreate
     - docker image prune -f
   only:
     - master
-    - fix/build
-
+    - test/cicd
