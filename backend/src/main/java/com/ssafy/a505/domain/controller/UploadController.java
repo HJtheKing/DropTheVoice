@@ -60,7 +60,7 @@ public class UploadController {
         // voiceType이 poke일 경우 확산 X, Redis에 저장(음성 찾기 기능 위해서)
         if(voiceType.equals("pokemon")){
             redisService.addLocation(RedisService.VOICE_KEY, RedisService.VOICE_TIME_KEY, voice.getVoiceId(), longitude, latitude, 24);
-        }git
+        }
         else {  // virus의 경우 확산 O, 온라인 유저 : WebRTC, 오프라인 유저 : Redis 저장 멤버 중 최근 접속 시간 한 시간 내
             // 현재 접속 중 유저 반환
             Set<String> wsMemberIds = redisService.getWsMemberIds();
