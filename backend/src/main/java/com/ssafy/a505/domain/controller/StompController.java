@@ -1,5 +1,6 @@
 package com.ssafy.a505.domain.controller;
 
+import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
 import com.ssafy.a505.domain.entity.Coordinate;
 import com.ssafy.a505.global.OfferDto;
 import com.ssafy.a505.domain.service.RedisService;
@@ -19,6 +20,7 @@ import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 //@RequiredArgsConstructor
@@ -77,8 +79,21 @@ public class StompController {
         System.out.println(mySessionId);
         System.out.println("is sessionId");
 
+        Set<String> wsMemberIds = redisService.getWsMemberIds();
+        for (String wsMemberId : wsMemberIds) {
+            log.info("wsMemberId: {}", wsMemberId);
+        }
+        // 접속 중인 유저 중 반경 내 있는 유저 반환
+        Set<Coordinate> findMembers = redisService.getMembersByRadiusV4(longitude, latitude, 10d,  5, wsMemberIds);
+        for (Coordinate findMember : findMembers) {
+            log.info("findMember: {}", findMember.getName());
+        }
+        Set<String> wsMembersInRadius = findMembers.stream()
+                .map(Coordinate::getName)
+                .collect(Collectors.toSet());
+
         // 세션 ID를 주제로 다른 클라이언트에 전송
-        messagingTemplate.convertAndSend("/topic/others/" + mySessionId, sessionIDs);
+        messagingTemplate.convertAndSend("/topic/others/" + mySessionId, wsMembersInRadius);
     }
 
     //클라이언트가 사전에 전달받은 상대 세션ID 리스트를 통해 mySessionId와 otherSessionId를 명시함으로써

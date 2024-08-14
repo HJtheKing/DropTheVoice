@@ -68,10 +68,6 @@ export default createStore({
                     console.log("------------ice candidate start----------");
                     const key = JSON.parse(candidate.body).key
                     const message = JSON.parse(candidate.body).body;
-                    console.log("key ------ ice candidate start")
-                    console.log(key);
-                    console.log("message ------ ice candidate start")
-                    console.log(message);
 
                     // 해당 key에 해당되는 peer 에 받은 정보를 addIceCandidate 해준다.
                     pcListMap.get(key).addIceCandidate(new RTCIceCandidate({ candidate: message.candidate, sdpMLineIndex: message.sdpMLineIndex, sdpMid: message.sdpMid }));
@@ -98,9 +94,6 @@ export default createStore({
 
                     const key = JSON.parse(offer.body).mySessionId;
                     const message = JSON.parse(offer.body).body;
-
-                    console.log('key ----- offer start')
-                    console.log(key)
 
                     // 해당 key에 새로운 peerConnection 를 생성해준후 pcListMap 에 저장해준다.
                     pcListMap.set(key, createPeerConnection(key));
@@ -137,8 +130,8 @@ export default createStore({
                     otherSessionIdList.map((sessionID) => {
                         if (!pcListMap.has(sessionID)) {
                             console.log("new ssession connection peer");
-                            pcListMap.set(sessionID, createPeerConnection(sessionID));
-                            sendOffer(pcListMap.get(sessionID), sessionID);
+                            pcListMap.set(Number(sessionID), createPeerConnection(sessionID));
+                            sendOffer(pcListMap.get(Number(sessionID)), Number(sessionID));
                         }
                     });
                     console.log("------------others end----------");
@@ -163,6 +156,8 @@ export default createStore({
         },
         async sendFile({ state }, file) {
             console.log("async sendFile 시작");
+            // const { latitude, longitude } = await getGeo();
+            // await stompClient.send(`/ws/spread/${latitude}/${longitude}`, {}, mySessionId);
             sendFileInner(file);
         },
         async sendMessage({ state }, message) {
