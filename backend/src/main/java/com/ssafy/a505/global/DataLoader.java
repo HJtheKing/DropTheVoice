@@ -188,7 +188,7 @@ public class DataLoader {
                 double longitude = 126.5 + (random.nextDouble() * 1.2);
                 Voice voice = Voice.builder()
                         .member(member1)
-                        .imageUrl("https://picsum.photos/1920/1080?random")
+                        .imageUrl("https://picsum.photos/id/" + random.nextInt(500) + "/200/300")
                         .heartCount(Math.round(Math.random() * 10))
                         .listenCount(Math.round(Math.random() * 1000))
                         .latitude(latitude)
