@@ -68,7 +68,7 @@ public class UploadController {
                 log.info("wsMemberId: {}", wsMemberId);
             }
             // 접속 중인 유저 중 반경 내 있는 유저 반환
-            Set<RedisResponseDTO> findMembers = redisService.getMembersByRadiusV2(longitude, latitude, 1d, voice.getVoiceId(), 5, wsMemberIds);
+            Set<RedisResponseDTO> findMembers = redisService.getMembersByRadiusV2(longitude, latitude, 10d, voice.getVoiceId(), 5, wsMemberIds);
             for (RedisResponseDTO findMember : findMembers) {
                 log.info("findMember: {}", findMember.getId());
             }
@@ -89,7 +89,7 @@ public class UploadController {
             /**
              * 접속 한 시간 이내의 오프라인 유저에게 전송 로직 추가
              */
-            Set<RedisResponseDTO> membersByRadius = redisService.getMembersByRadius(longitude, latitude, 1d, voice.getVoiceId(), 5);
+            Set<RedisResponseDTO> membersByRadius = redisService.getMembersByRadius(longitude, latitude, 10d, voice.getVoiceId(), 5);
             for (RedisResponseDTO byRadius : membersByRadius) {
                 Spread spread = new Spread();
                 Member findMember = memberRepository.findByMemberId(byRadius.getId()).get();
