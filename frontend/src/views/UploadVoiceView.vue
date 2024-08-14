@@ -267,12 +267,12 @@ const uploadFile = async (type) => {
       audioUrl.value = response.data.videoUrl || response.data.processedPath;
 
       console.log('--------------sendFile------------')
-      store.dispatch('sendFile', selectedFile);
+      store.dispatch('sendFile', selectedFile.value);
 
       uploadStatus.value = '업로드 성공';
-      if (pitch.value === 0) {
-        store.dispatch('sendFile', selectedFile);
-      }
+      // if (pitch.value === 0) {
+      //   store.dispatch('sendFile', selectedFile);
+      // }
     } catch (error) {
       uploadStatus.value = '업로드 실패';
     } finally {

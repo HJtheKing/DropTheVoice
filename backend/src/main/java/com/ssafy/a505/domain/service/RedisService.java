@@ -1,6 +1,7 @@
 package com.ssafy.a505.domain.service;
 
 import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
+import com.ssafy.a505.domain.entity.Coordinate;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.SpreadRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
@@ -140,6 +141,29 @@ public class RedisService {
                 })
                 .filter(dto -> !isReceived(voiceId, dto.getId()))
                 .filter(dto -> set.contains(dto.getId().toString()))
+                .distinct()
+                .collect(Collectors.toList());
+
+        Collections.shuffle(shuffledList);
+        return shuffledList.stream()
+                .limit(cnt)
+                .collect(Collectors.toSet());
+    }
+
+    // 반경 내 Member 반환 -> 최초 전파시에 사용됨으로 isReceived 로직 거칠 필요 없음!
+    public Set<Coordinate> getMembersByRadiusV4(Double longitude, Double latitude, Double radiusInKm, int cnt, Set<String> set){
+        Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
+        GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
+        GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(MEMBER_KEY, within, args);
+
+        List<Coordinate> shuffledList = geoResults.getContent().stream()
+                .map(geoResult -> {
+                    GeoLocation<Object> content = geoResult.getContent();
+                    Point point = content.getPoint();
+                    String memberId = content.getName().toString();
+                    return new Coordinate(memberId, point.getX(), point.getY());
+                })
+                .filter(coord -> set.contains(coord.getName()))
                 .distinct()
                 .collect(Collectors.toList());
 
