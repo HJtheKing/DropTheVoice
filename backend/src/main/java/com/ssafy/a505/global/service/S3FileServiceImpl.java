@@ -78,6 +78,8 @@ public class S3FileServiceImpl implements S3FileService {
 
                 ObjectMetadata metadata = new ObjectMetadata();
                 metadata.setContentType(file.getContentType());
+                // 다운 로드 버전
+//                metadata.setContentType("application/octet-stream");
                 metadata.setContentLength(byteArrayInputStream.available());
 
                 // S3에 파일 올리기

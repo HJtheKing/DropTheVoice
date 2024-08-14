@@ -66,8 +66,8 @@ public class DataLoader {
                 double latitude = 37.0 + (random.nextDouble() * 1.3);  // 37.0 ~ 38.3 사이의 랜덤 값
                 double longitude = 126.5 + (random.nextDouble() * 1.2);  // 126.5 ~ 127.7 사이의 랜덤 값
 
-                long heartCount = random.nextInt(300) + 1;
-                long listenCount = random.nextInt(300) + 1;
+                long heartCount = random.nextInt(100) + 1;
+                long listenCount = random.nextInt(800) + 1;
 
                 Voice voice = Voice.builder()
                         .voiceId(k)
@@ -96,8 +96,8 @@ public class DataLoader {
                 double latitude = centerLatitude + (random.nextDouble() * range * 2 - range);
                 double longitude = centerLongitude + (random.nextDouble() * range * 2 - range);
 
-                long heartCount = random.nextInt(300) + 1;
-                long listenCount = random.nextInt(300) + 1;
+                long heartCount = random.nextInt(100) + 1;
+                long listenCount = random.nextInt(800) + 1;
 
                 Voice voice = Voice.builder()
                         .voiceId(k)
@@ -188,7 +188,7 @@ public class DataLoader {
                 double longitude = 126.5 + (random.nextDouble() * 1.2);
                 Voice voice = Voice.builder()
                         .member(member1)
-                        .imageUrl("https://picsum.photos/id/" + random.nextInt(300) + "/200/300")
+                        .imageUrl("https://picsum.photos/1920/1080?random")
                         .heartCount(Math.round(Math.random() * 10))
                         .listenCount(Math.round(Math.random() * 1000))
                         .latitude(latitude)
@@ -197,26 +197,6 @@ public class DataLoader {
                         .build();
                 voiceRepository.save(voice);
             }
-
-            Heart heart1 = new Heart();
-            heart1.setMember(member1);
-            heart1.setVoice(voice1);
-            heartRepository.save(heart1);
-
-            Heart heart2 = new Heart();
-            heart2.setMember(member1);
-            heart2.setVoice(voice2);
-            heartRepository.save(heart2);
-
-            Spread spread1 = new Spread();
-            spread1.setMember(member1);
-            spread1.setVoice(voice1);
-            spreadRepository.save(spread1);
-
-            Spread spread2 = new Spread();
-            spread2.setMember(member2);
-            spread2.setVoice(voice2);
-            spreadRepository.save(spread2);
         };
     }
 }

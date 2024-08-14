@@ -11,17 +11,17 @@
       <v-row justify="center">
         <v-col cols="12" sm="8" md="7">
           <v-tabs v-model="activeTab" centered background-color="primary" class="mb-4">
-  <v-tab value="pick" @click="storageStore.changeTab(activeTab); storageStore.resetPickNotification()">
+            <v-tab value="pick" @click="storageStore.changeTab(activeTab); userStore.resetPickNotification()">
+    <v-icon v-if="userStore.hasNewPickNotifications" class="notification-icon">mdi-new-box</v-icon>
     줍한 음성 목록
-      <v-icon v-if="storageStore.hasNewPickNotifications" class="notification-icon">mdi-new-box</v-icon>
   </v-tab>
-  <v-tab value="liked" @click="storageStore.changeTab(activeTab); storageStore.resetLikeNotification()">
+  <v-tab value="liked" @click="storageStore.changeTab(activeTab); userStore.resetLikeNotification()">
+    <v-icon v-if="userStore.hasNewLikeNotifications" class="notification-icon">mdi-new-box</v-icon>
     좋아요 음성 목록
-      <v-icon v-if="storageStore.hasNewLikeNotifications" class="notification-icon">mdi-new-box</v-icon>
   </v-tab>
-  <v-tab value="alarm">
+  <v-tab value="spread" @click="storageStore.changeTab(activeTab); userStore.resetSpreadNotification()">
+    <v-icon v-if="userStore.hasNewSpreadNotifications" class="notification-icon">mdi-new-box</v-icon>
     전파된 음성 목록
-      <v-icon v-if="false" class="notification-icon">mdi-new-box</v-icon>
   </v-tab>
 </v-tabs>
         </v-col>
@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStorageStore } from '@/store/storage';
 import { useUserStore } from "@/store/user";
@@ -92,9 +92,17 @@ const activeTab = ref('pick');
 
 const pickVoices = computed(() => storageStore.pickVoices);
 const likedVoices = computed(() => storageStore.likedVoices);
+const spreadVoices = computed(() => storageStore.spreadVoices);
 
 const filteredVoices = computed(() => {
-  return activeTab.value === 'pick' ? pickVoices.value : likedVoices.value;
+  if (activeTab.value === 'pick') {
+    return pickVoices.value;
+  } else if (activeTab.value === 'liked') {
+    return likedVoices.value;
+  } else if (activeTab.value === 'spread') {
+    return spreadVoices.value;
+  }
+  return false;
 });
 
 const navigateToDetail = (id) => {
@@ -111,11 +119,13 @@ const handleScroll = () => {
 onMounted(() => {
   userStore.tryAutoLogin();
   window.addEventListener('scroll', handleScroll);
-  
+
   if (storageStore.activeTab === 'pick') {
     storageStore.reloadPickVoices();
   } else if (storageStore.activeTab === 'liked') {
     storageStore.reloadLikedVoices();
+  } else if (storageStore.activeTab === 'spread') {
+    storageStore.reloadSpreadVoices();
   }
 });
 </script>

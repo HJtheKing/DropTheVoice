@@ -13,6 +13,7 @@ import com.ssafy.a505.domain.repository.VoiceRepository;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.domain.service.RedisService;
 import com.ssafy.a505.domain.service.VoiceUploadService;
+import com.ssafy.a505.global.sse.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,7 @@ public class UploadController {
     private final RedisService redisService;
     private final SpreadRepository spreadRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     /**
      * Flask로 데이터 전송
@@ -92,6 +94,7 @@ public class UploadController {
                 spread.setMember(findMember);
                 spread.setVoice(findVoice);
                 spreadRepository.save(spread);
+                notificationService.sendNotification(byRadius.getId(), "Spread");
             }
         }
         return new ResponseEntity<>(voice, HttpStatus.CREATED);

@@ -111,7 +111,7 @@
 
         <v-row justify="center">
           <v-progress-circular v-if="loading" color="primary" indeterminate></v-progress-circular>
-          <v-alert v-else-if="aroundVoices.length === 0" type="info">주변에 음성이 없습니다.</v-alert>
+          <v-dialog v-else-if="aroundVoices.length === 0" type="info">주변에 음성이 없습니다.</v-dialog>
         </v-row>
       </v-container>
     </v-main>
@@ -126,7 +126,7 @@ import axios from 'axios';
 
 const map = ref(null);
 const myMarker = ref(null);
-const nowPosition = ref(null);  // 초기값을 null로 변경하여 위치 정보를 가져올 때만 설정되도록 함
+const nowPosition = ref(null);  
 const limitedRadius = ref(1000);
 const circle = ref(null);
 const selectedRadius = ref('1km (default)');
@@ -139,7 +139,9 @@ const pick = ref(false);
 const getNearbyVoices = async (latitude, longitude, radius) => {
   try {
     loading.value = true;
+    const token = sessionStorage.getItem('access-token')
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/nearby`, {
+      headers: { Authorization: `Bearer ${token}` },
       params: {
         latitude: latitude,
         longitude: longitude,

@@ -35,7 +35,6 @@ const uploadFile = (event) => {
   }
   fileInput.value.value = ""; // 추가된 부분
 };
-
 </script>
 
 <style scoped>
