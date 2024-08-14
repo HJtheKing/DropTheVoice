@@ -43,6 +43,7 @@ public class UploadController {
      */
     @PostMapping(value = "/upload")
     public ResponseEntity<?> uploadVoice(@RequestPart(value = "audioFile", required = false) MultipartFile audioFile,
+                                         @RequestPart(value = "imgFile", required = false) MultipartFile imgFile,
                                          @RequestParam(value = "memberId") Long memberId,
                                          @RequestPart(value = "title") String title, @RequestParam(value = "latitude", required = false) Double latitude, @RequestParam(value = "longitude", required = false) Double longitude, @RequestParam(value = "voiceType") String voiceType,
                                          @RequestParam("pitchShift") float pitchShift) throws JsonProcessingException {
@@ -51,6 +52,7 @@ public class UploadController {
         log.info("latitude: {}, longitude: {}, voiceType: {}, memberId: {}", latitude, longitude, voiceType, memberId);
         voice.setLatitude(latitude);
         voice.setLongitude(longitude);
+        voice.setImageUrl(voiceUploadService.uploadAndSendImg(imgFile));
         voiceRepository.save(voice);
         // voiceType이 poke일 경우 확산 X, Redis에 저장(음성 찾기 기능 위해서)
         if(voiceType.equals("pokemon")){

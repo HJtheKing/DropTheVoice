@@ -32,6 +32,11 @@ public class S3FileServiceImpl implements S3FileService {
 
     private final AmazonS3 amazonS3;
 
+    private static int originalVoice = 1;
+    private static int processedVoice = 2;
+    private static int memberImg = 3;
+    private static int voiceImg = 4;
+
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
 
@@ -39,10 +44,14 @@ public class S3FileServiceImpl implements S3FileService {
     private String originalVoiceFolderName;
     @Value("${cloud.aws.s3.folder2}")
     private String processedVoiceFolderName;
+    @Value("${cloud.aws.s3.folder3}")
+    private String memberImgFolderName;
+    @Value("${cloud.aws.s3.folder4}")
+    private String voiceImgFolderName;
 
     // - 파일 업로드 접근 메서드
     @Override
-    public String uploadFile(MultipartFile file,boolean isProcessed) {
+    public String uploadFile(MultipartFile file, int dataType) {
         //파일 비었는지 체크
         if (file.isEmpty() || Objects.isNull(file.getOriginalFilename())) {
             throw new AmazonS3Exception("파일이 비어있습니다");
@@ -51,7 +60,7 @@ public class S3FileServiceImpl implements S3FileService {
         this.validateExtension(file.getOriginalFilename());
 
         //성공로직
-        return this.uploadFileToS3(file, isProcessed);
+        return this.uploadFileToS3(file, dataType);
     }
 
     // - 파일 확장자 유효성 검사
@@ -70,8 +79,8 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     // - S3 실제 업로드
-    private String uploadFileToS3(MultipartFile file, boolean isProcessed) {
-            String s3FileName = getFileFolder(isProcessed) + UUID.randomUUID().toString().substring(0, 10) + file.getOriginalFilename();
+    private String uploadFileToS3(MultipartFile file, int dataType) {
+            String s3FileName = getFileFolder(dataType) + UUID.randomUUID().toString().substring(0, 10) + file.getOriginalFilename();
 
             try (InputStream is = file.getInputStream();
                  ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {
@@ -97,8 +106,20 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     // - 폴더 경로 지정 메서드
-    public String getFileFolder(boolean isProcessed) {
-        String folder = isProcessed ? processedVoiceFolderName : originalVoiceFolderName;
+    public String getFileFolder(int dataType) {
+        String folder = "";
+        switch (dataType){
+            case 1: folder = originalVoiceFolderName;
+            break;
+            case 2: folder = processedVoiceFolderName;
+            break;
+            case 3: folder = memberImgFolderName;
+            break;
+            case 4: folder = voiceImgFolderName;
+            break;
+            default: folder = "Invalid datatype";
+            break;
+        }
         return folder;
     }
 

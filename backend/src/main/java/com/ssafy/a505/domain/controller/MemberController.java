@@ -157,45 +157,31 @@ public class MemberController {
     }
 
 
-    
-
-    @GetMapping("/image/{userImgUrl}")
-    public ResponseEntity<?> getImage(@PathVariable String userImgUrl) {
-        File file = new File("image", userImgUrl);
-        Resource imgResource = new FileSystemResource(file);
-        Map<String, String> response = new HashMap<>();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + userImgUrl + "\"")
-                .body(imgResource);
-    }
-
-    // 프로필 업로드
     @PostMapping("/image")
     public ResponseEntity<?> uploadFile(@RequestPart("userData") String userData,
-                                        @RequestPart(required = false) MultipartFile file) throws IllegalStateException, IOException {
+                                        @RequestPart(value = "file", required = false) MultipartFile file) throws IllegalStateException, IOException {
 
+        if(file == null) System.out.println("couldnt recieve the file");
+        else System.out.println("file recieved");
         // JSON 문자열을 Map으로 변환
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> jsonMap = objectMapper.readValue(userData, HashMap.class);
+        Map<String, Object> jsonMap = objectMapper.readValue(userData, HashMap.class);
 
-        File imageFolder = new File("image/");
-        if (!imageFolder.exists()) {
-            imageFolder.mkdir();
+        // "id" 값을 Long으로 변환
+        Long id = null;
+        if (jsonMap.get("id") instanceof Integer) {
+            id = ((Integer) jsonMap.get("id")).longValue();
+        } else if (jsonMap.get("id") instanceof Long) {
+            id = (Long) jsonMap.get("id");
         }
 
-        if (file != null && !file.isEmpty() && file.getSize() != 0) {
-            String today = Long.toString(System.currentTimeMillis());
-            String newImageName = today + "_" + file.getOriginalFilename();
-
-            File saveFile = new File(imageFolder.getAbsolutePath(), newImageName);
-
-            memberService.setUserImg(jsonMap.get("id"), newImageName);
-
-            file.transferTo(saveFile);
+        if (id != null && memberService.setUserImg(id, file)) {
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-
-        return new ResponseEntity<String>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
+
+
 }
 
 

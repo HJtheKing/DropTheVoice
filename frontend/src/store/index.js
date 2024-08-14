@@ -160,6 +160,7 @@ export default createStore({
             //const longitude = 50.0;
             if(mySessionId === null) return;
             if (stompClient && state.isConnected) {
+                console.log(mySessionId)
                 stompClient.send('/ws/position', {}, JSON.stringify({ name: mySessionId, x: latitude, y: longitude }));
             } else {
                 console.log("fail");

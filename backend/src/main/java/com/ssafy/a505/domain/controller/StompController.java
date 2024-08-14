@@ -55,7 +55,7 @@ public class StompController {
         log.info("Session Logged In Member Info: "+ coordinate.toString());
 
         //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자.
-        redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
+        //redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
     }
 
     /**

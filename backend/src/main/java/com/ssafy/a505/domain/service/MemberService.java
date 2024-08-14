@@ -5,6 +5,7 @@ import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MailDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
 import com.ssafy.a505.domain.entity.Member;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
 
@@ -34,7 +35,7 @@ public interface MemberService {
     void sendMail(MailDTO mailDTO);
 
     // 유저 이미지 변경
-    boolean setUserImg(String memberId, String newImageName);
+    boolean setUserImg(long memberId, MultipartFile file);
 
     int findRemainChangeCount(Long memberId);
 

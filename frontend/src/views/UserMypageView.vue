@@ -8,15 +8,19 @@
           </v-col>
         </v-row>
         <v-card-title class="profile-header" v-if="member">
-          <v-avatar size="50">
-            <img :src="userImage" alt="Profile Image" class="profile-image" />
+          <v-avatar size="50" @click="openUploadModal">
+            <template v-if="member.profileImgUrl">
+              <img :src="member.profileImgUrl" alt="Profile Image" class="profile-image" />
+            </template>
+            <template v-else>
+              <img :src="userImage" alt="Profile Image" class="profile-image" />
+            </template>
           </v-avatar>
           <div class="profile-info">
             <h2>{{ member.memberName }}</h2>
             <p>{{ member.memberEmail }}</p>
           </div>
           <v-avatar size="50">
-            <!-- badgeImage computed property를 사용하여 배지 이미지를 동적으로 설정 -->
             <img :src="badgeImage" alt="Badge" class="badge-image" />
           </v-avatar>
         </v-card-title>
@@ -52,6 +56,21 @@
         </v-card-text>
       </v-container>
       <ChangePassword ref="changePasswordModal" />
+
+      <!-- 이미지 업로드 모달 -->
+      <v-dialog v-model="uploadDialog" max-width="500px">
+        <v-card>
+          <v-card-title>프로필 사진 업로드</v-card-title>
+          <v-card-text>
+            <input type="file" @change="appendImage" />
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="closeUploadModal">취소</v-btn>
+            <v-btn color="blue darken-1" text @click="submitImg">업로드</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-main>
   </v-app>
 </template>
@@ -60,9 +79,9 @@
 import { ref, computed } from "vue";
 import { useUserStore } from "@/store/user";
 import { useRouter } from 'vue-router';
+import axios from "axios";
 import ChangePassword from '@/views/ChangePasswordView.vue';
 
-// 이미지 파일들을 모듈로 가져오기
 import userImageSrc from '@/assets/images/user.png';
 import unranked from '@/assets/images/unranked.png'
 import bronzeBadgeSrc from '@/assets/images/bronze.png';
@@ -78,6 +97,8 @@ const member = computed(() => userStore.user);
 const loginUserId = computed(() => userStore.loginUserId);
 
 const changePasswordModal = ref(null);
+const uploadDialog = ref(false);
+let file = null;
 
 const logout = () => {
   userStore.logout();
@@ -101,13 +122,21 @@ const openPasswordChangeModal = () => {
   changePasswordModal.value.openDialog();
 };
 
+const openUploadModal = () => {
+  uploadDialog.value = true;
+};
+
+const closeUploadModal = () => {
+  uploadDialog.value = false;
+};
+
 // 프로필 이미지 경로 설정
 const userImage = userImageSrc;
 
 // 배지 이미지를 동적으로 결정하는 computed property
 const badgeImage = computed(() => {
   if (!member.value.totalUploadCount || member.value.totalUploadCount <= 5) {
-    return unranked; // 업로드 수가 0인 경우 기본 배지로 설정
+    return unranked;
   }
 
   const spreadRatio = member.value.totalSpreadCount / member.value.totalUploadCount;
@@ -124,7 +153,38 @@ const badgeImage = computed(() => {
     return bronzeBadgeSrc;
   }
 });
+
+const appendImage = (e) => {
+  file = e.target.files[0];
+};
+
+const submitImg = () => {
+  let formData = new FormData();
+  formData.append("file", file);
+
+  const userData = JSON.stringify({ id: loginUserId.value });
+  formData.append("userData", userData);
+
+  axios({
+    method: "post",
+    url: `http://localhost:8080/api-member/image`,
+    data: formData,
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+    .then((response) => {
+      alert("프로필 사진이 업데이트 되었습니다.");
+      console.log(response);
+      closeUploadModal(); // 업로드 후 모달 닫기
+      window.location.reload();
+    })
+    .catch((err) => {
+      alert("프로필 사진이 업데이트 중 오류가 발생했습니다.");
+      console.log(err);
+    });
+};
+
 </script>
+
 
 
 
