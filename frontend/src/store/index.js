@@ -83,7 +83,11 @@ export default createStore({
                     const message = JSON.parse(answer.body).body;
 
                     // 해당 key에 해당되는 Peer 에 받은 정보를 setRemoteDescription 해준다.
-                    pcListMap.get(key).setRemoteDescription(new RTCSessionDescription(message));
+                    if(pcListMap.get(key).signalingState !== "stable"){
+                        pcListMap.get(key).setRemoteDescription(new RTCSessionDescription(message));
+                    } else{
+                        console.warn("PeerConnection is already in stable state. Skipping setRemoteDescription.");
+                    }
                     console.log("------------answer end----------");
 
                 });
@@ -372,12 +376,37 @@ function handleReceiveMessage(data) {
     console.log("file transfer complete");
 }
 
+async function waitForConnectionReady() {
+    return new Promise((resolve, reject) => {
+        let checkInterval = setInterval(() => {
+            let allChannelsReady = true;
+            otherSessionIdList.forEach(session => {
+                let channel = sendChannelMap.get(session);
+                if (channel.readyState !== 'open') {
+                    allChannelsReady = false;
+                }
+            });
+
+            if (allChannelsReady) {
+                clearInterval(checkInterval);
+                resolve();
+            }
+        }, 100); // 100ms마다 연결 상태를 체크
+    });
+}
+
 async function sendFileInner(file) {
 
     if (!file) {
         console.log("file has some error");
         return;
     }
+
+    console.log("Waiting for all connections to be ready...");
+
+    await waitForConnectionReady();
+
+    console.log('All connections are ready. Sending file...');
 
     if (file) {
         // await tryPeerConnect();
@@ -394,6 +423,7 @@ async function sendFileInner(file) {
                 let channel = sendChannelMap.get(session);
                 if (channel.readyState === 'open') {
                     channel.send(base64String);
+                    console.log('##############Send Done##############')
                 }
             });
             offset += chunkSize;
