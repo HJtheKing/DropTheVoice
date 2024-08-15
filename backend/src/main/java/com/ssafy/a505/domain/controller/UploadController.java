@@ -57,6 +57,9 @@ public class UploadController {
         voice.setLongitude(longitude);
         voice.setImageUrl("https://picsum.photos/id/" + random.nextInt(300) + "/200/300");
         voiceRepository.save(voice);
+
+        messagingTemplate.convertAndSend("/topic/voiceId/" + memberId, voice.getVoiceId());
+
         // voiceType이 poke일 경우 확산 X, Redis에 저장(음성 찾기 기능 위해서)
         if(voiceType.equals("pokemon")){
             redisService.addLocation(RedisService.VOICE_KEY, RedisService.VOICE_TIME_KEY, voice.getVoiceId(), longitude, latitude, 24);
