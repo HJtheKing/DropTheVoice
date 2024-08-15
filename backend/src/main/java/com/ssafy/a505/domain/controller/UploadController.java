@@ -90,6 +90,7 @@ public class UploadController {
                 spread.setVoice(findVoice);
                 spreadRepository.save(spread);
                 notificationService.sendNotification(Long.parseLong(membersInRadius), "Spread");
+                System.out.println(Long.parseLong(membersInRadius));
             }
 
             // 접속 중인 반경 내 유저 memberId 발행
@@ -119,7 +120,6 @@ public class UploadController {
     public String receiveProcessedAudio(@RequestBody ProcessedVoice dto) {
         // 처리된 데이터 출력
         System.out.println("Where is processed Audio? : " + dto.getProcessedPath());
-
         return "";
     }
 

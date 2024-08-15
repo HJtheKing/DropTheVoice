@@ -37,9 +37,9 @@ export const useUserStore = defineStore("user", () => {
         loginUserId.value = userId;
 
         getUser(userId);
-        window.location.reload();
-
+        
         router.push("/home");
+        window.location.reload();
       })
       .catch(() => {
         alert("유효하지 않은 아이디 혹은 비번입니다");
@@ -54,29 +54,25 @@ export const useUserStore = defineStore("user", () => {
     loginUserId.value = null;
     user.value = null;
     delete axios.defaults.headers.common["Authorization"];
-    if (eventSource.value) {
-      eventSource.value.close(); // SSE 연결 해제
-      eventSource.value = null;
-    }
+    
     router.push("/login");
-    window.location.reload();
+    // window.location.reload();
   };
 
   // SSE 초기화 메서드
   const initializeSSE = () => {
     if (!loginUserId.value) return;
     
-    if (eventSource.value) {
-      eventSource.value.close();
+    if (!eventSource.value) {
+      eventSource.value = new EventSource(`${import.meta.env.VITE_BASE_URL}/api-sse/subscribe/${loginUserId.value}`);
     }
-
-    eventSource.value = new EventSource(`${import.meta.env.VITE_BASE_URL}/api-sse/subscribe/${loginUserId.value}`);
     
     eventSource.value.onopen = () => {
       console.log('SSE 연결 성공');
     };
 
-    eventSource.value.onmessage = (event) => {
+    eventSource.value.onmessage = (event) =>
+    {
       console.log("SSE 메시지 수신")
       console.log(event.data);
 
@@ -96,6 +92,10 @@ export const useUserStore = defineStore("user", () => {
       console.error('SSE Error: ', error);
       eventSource.value.close();
       eventSource.value = null;
+
+      setTimeout(() => {
+      initializeSSE();
+    }, 3000);
     };
   };
 

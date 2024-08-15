@@ -68,11 +68,11 @@ export default {
 
 .notification-icon {
   animation: pulse 1.5s infinite;
-  font-size: 16px;
+  font-size: 1rem;
   color: yellow;
   position: absolute;
-  top: 1px; 
-  right: 60px;
+   top: 0.0625rem;
+  right: 3.75rem; 
 }
 
 @keyframes pulse {
@@ -89,6 +89,12 @@ export default {
 .bottom-navy {
   background-color: #252836;
   color: #808191;
+}
+@media (max-width: 768px) {
+  .notification-icon {
+    font-size: 0.875rem; 
+    right: 1.7rem; 
+  }
 }
 
 @media (max-width: 600px) {

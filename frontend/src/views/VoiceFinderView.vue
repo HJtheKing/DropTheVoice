@@ -97,7 +97,7 @@
   color="grey" 
   class="pick-button"
 >
-  <v-icon left color="black">mdi-check</v-icon> 이미 줍기 완료
+  <v-icon left color="black">mdi-check</v-icon> 줍기 완료
 </v-btn>
           </div>
         </div>

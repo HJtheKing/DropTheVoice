@@ -32,8 +32,8 @@ onMounted(async () => {
   // 로그인 이후에 웹소켓 연결
   if (!store.getters.isConnected && route.name !== 'login') {
     store.dispatch('connectWebSocket');
-    userStore.initializeSSE(); // SSE 연결 초기화
   }
+  userStore.initializeSSE(); // SSE 연결 초기화
 });
 </script>
 
