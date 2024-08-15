@@ -82,6 +82,15 @@ public class UploadController {
                 log.info("membersInRadius: {}", membersInRadius);
                 redisService.markReceived(voice.getVoiceId(), Long.valueOf(membersInRadius));
             }
+            for (String membersInRadius : wsMembersInRadius) {
+                Spread spread = new Spread();
+                Member findMember = memberRepository.findByMemberId(Long.parseLong(membersInRadius)).get();
+                Voice findVoice = voiceRepository.findById(voice.getVoiceId()).get();
+                spread.setMember(findMember);
+                spread.setVoice(findVoice);
+                spreadRepository.save(spread);
+                notificationService.sendNotification(Long.parseLong(membersInRadius), "Spread");
+            }
 
             // 접속 중인 반경 내 유저 memberId 발행
             messagingTemplate.convertAndSend("/topic/others/"+memberId,wsMembersInRadius);

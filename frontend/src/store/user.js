@@ -37,7 +37,7 @@ export const useUserStore = defineStore("user", () => {
         loginUserId.value = userId;
 
         getUser(userId);
-        // initializeSSE(); // SSE 연결 초기화
+        window.location.reload();
 
         router.push("/home");
       })

@@ -23,11 +23,11 @@ public class StorageController {
 
     @GetMapping("spread/{page}/{size}")
     public ResponseEntity<?> findSpreadWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size) {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Thread.sleep(500);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         log.info("findAllWithPage page={}", page - 1);
         List<Voice> result = voiceService.findByMemberWithSpread(memberId, pageRequest);
@@ -37,11 +37,11 @@ public class StorageController {
 
     @GetMapping("heart/{page}/{size}")
     public ResponseEntity<?> findLikeWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size) {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Thread.sleep(500);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         log.info("findAllWithPage page={}", page - 1);
         List<Voice> result = voiceService.findByMemberWithHeart(memberId, pageRequest);
@@ -51,11 +51,11 @@ public class StorageController {
 
     @GetMapping("picks/{page}/{size}")
     public ResponseEntity<?> findPickWithPage(@RequestParam("memberId") Long memberId, @PathVariable("page") int page, @PathVariable("size") int size) {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Thread.sleep(500);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         List<Voice> result = voiceService.findByMemberWithPick(memberId, pageRequest);
         return new ResponseEntity<>(result, HttpStatus.OK);

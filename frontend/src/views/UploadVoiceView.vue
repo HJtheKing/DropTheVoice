@@ -62,13 +62,13 @@
             </v-row>
           </div>
 
-          <div id="app">
+          <!-- <div id="app">
             <h1>AI로 썸네일 이미지 생성</h1>
             <button @click="generateImage">생성</button>
             <div v-if="imageUrl">
               <img :src="imageUrl" alt="Generated Image" />
             </div>
-          </div>
+          </div> -->
 
 
           <v-row justify="center" class="py-4">
