@@ -14,14 +14,14 @@
 import MenuBar from '@/components/MenuBar.vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
-import { useStorageStore } from './store/storage';
+import { useUserStore } from './store/user';
 
 import { onMounted } from 'vue';
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
-const storageStore = useStorageStore();
+const userStore = useUserStore();
 
 const goBack = () => {
   router.back();
@@ -32,6 +32,7 @@ onMounted(async () => {
   // 로그인 이후에 웹소켓 연결
   if (!store.getters.isConnected && route.name !== 'login') {
     store.dispatch('connectWebSocket');
+    userStore.initializeSSE(); // SSE 연결 초기화
   }
 });
 </script>

@@ -376,6 +376,31 @@ function handleReceiveMessage(data) {
     console.log("file transfer complete");
 }
 
+// function handleReceiveMessage(data) {
+//     let blobs = [];
+  
+//     data.forEach((part) => {
+//       let binaryString = atob(part);
+//       let len = binaryString.length;
+//       let bytes = new Uint8Array(len);
+//       for (let i = 0; i < len; i++) {
+//         bytes[i] = binaryString.charCodeAt(i);
+//       }
+//       let blob = new Blob([bytes], { type: 'audio/mp3' }); // 필요한 경우 MIME 타입 조정
+//       blobs.push(blob);
+//     });
+  
+//     let largeBlob = new Blob(blobs, { type: 'audio/mp3' });
+  
+//     // 고유한 파일 ID 생성
+//     let fileId = uuidv4();
+  
+//     // Vuex 스토어에 파일 저장
+//     store.commit('addReceivedFile', { fileId, fileBlob: largeBlob });
+  
+//     console.log('File received and stored with ID:', fileId);
+//   }
+
 async function waitForConnectionReady() {
     return new Promise((resolve, reject) => {
         let checkInterval = setInterval(() => {
