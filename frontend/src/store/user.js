@@ -2,6 +2,7 @@ import { ref, onMounted } from "vue";
 import { defineStore } from "pinia";
 import router from "@/router";
 import axios from "axios";
+import { deleteDB } from "@/utils/rtc";
 
 const REST_USER_API = `${import.meta.env.VITE_BASE_URL}/api-member`;
 
@@ -54,9 +55,10 @@ export const useUserStore = defineStore("user", () => {
     loginUserId.value = null;
     user.value = null;
     delete axios.defaults.headers.common["Authorization"];
+    deleteDB('dropthevoice');
     
     router.push("/login");
-    // window.location.reload();
+    window.location.reload();
   };
 
   // SSE 초기화 메서드

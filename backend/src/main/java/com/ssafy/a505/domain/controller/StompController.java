@@ -48,15 +48,10 @@ public class StompController {
      */
     @MessageMapping(value = "/position")
     public void message(@Header("simpSessionId") String sessionId, @Payload Coordinate coordinate) {
-        System.out.println(coordinate.getX() + "" + coordinate.getY());
-
-        log.info("sessionId: {}", sessionId);
         redisService.addSessionId(sessionId, coordinate.getName());
         redisService.addSessionIdV2(coordinate.getName());
-//        sessionIDs.add(coordinate.getName());
 
-        log.info(coordinate.getName()+" is userId");
-        log.info("Session Logged In Member Info: {}, {}, {}", coordinate.getName(), coordinate.getX(), coordinate.getY());
+        log.info("Member Info. sessionId: {}, memberId: {}, X: {}, y: {}", sessionId, coordinate.getName(), coordinate.getX(), coordinate.getY());
 
         //레디스에 위경도 좌표와 세션ID를 포함해서 저장하자. -> 위경도 좌표와 memberId를 저장하도록 변경
         redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
@@ -76,18 +71,11 @@ public class StompController {
     @MessageMapping("/spread/{latitude}/{longitude}")
     public void spread(@Payload String mySessionId, @DestinationVariable(value = "latitude") double latitude, @DestinationVariable(value = "longitude") double longitude) {
         log.info("[Key] : {}  [lat,lng] : {} : {}", mySessionId, latitude, longitude);
-        System.out.println(mySessionId);
-        System.out.println("is sessionId");
 
         Set<String> wsMemberIds = redisService.getWsMemberIds();
-        for (String wsMemberId : wsMemberIds) {
-            log.info("wsMemberId: {}", wsMemberId);
-        }
+
         // 접속 중인 유저 중 반경 내 있는 유저 반환
         Set<Coordinate> findMembers = redisService.getMembersByRadiusV4(longitude, latitude, 10d,  5, wsMemberIds);
-        for (Coordinate findMember : findMembers) {
-            log.info("findMember: {}", findMember.getName());
-        }
         Set<String> wsMembersInRadius = findMembers.stream()
                 .map(Coordinate::getName)
                 .collect(Collectors.toSet());
@@ -128,12 +116,7 @@ public class StompController {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
-        log.info("sessionId: {}", sessionId);
         String userId = redisService.removeSessionIdAndGetUserId(sessionId);
         redisService.removeSessionIdAndGetUserIdV2(userId);
-//        sessionIDs.remove(userId);
-
-        log.info("Disconnected: " + sessionId);
-//        log.info(sessionIDs.toString());
     }
 }

@@ -93,7 +93,7 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         if(imgFile != null){
             imgUrl = s3FileService.uploadFile(imgFile, 4);
         }
-        else System.out.println("file is null");
+        else log.info("file is null");
 
         return imgUrl;
     }

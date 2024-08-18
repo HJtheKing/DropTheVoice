@@ -48,7 +48,6 @@ export default {
     },
     navigateToStorage() {
       this.userStore.hasNewNotifications = false;
-      console.log(this.userStore.hasNewNotifications);
       this.$router.push({ name: 'storage' });
     },
   },

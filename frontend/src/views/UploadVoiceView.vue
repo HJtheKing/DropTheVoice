@@ -62,15 +62,6 @@
             </v-row>
           </div>
 
-          <!-- <div id="app">
-            <h1>AI로 썸네일 이미지 생성</h1>
-            <button @click="generateImage">생성</button>
-            <div v-if="imageUrl">
-              <img :src="imageUrl" alt="Generated Image" />
-            </div>
-          </div> -->
-
-
           <v-row justify="center" class="py-4">
             <v-col cols="12" class="text-center">
               <v-btn
@@ -121,7 +112,7 @@
             color="white"
             text-color="black"
             class="mt-4 font-weight-bold"
-            @click="$router.push('/')"
+            @click="navigateTo('home')"
           >
             홈으로 돌아가기
           </v-btn>
@@ -139,6 +130,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useUserStore } from '@/store/user';
 import axios from 'axios';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
 const member = computed(() => userStore.user);
@@ -150,6 +142,7 @@ const audioUrl = ref(null);
 const uploadStatus = ref('');
 const showPitchControls = ref(false);
 const uploadInProgress = ref(false);
+const router = useRouter();
 
 const memberId = computed(() => userStore.loginUserId);
 
@@ -174,6 +167,12 @@ onMounted(async () => {
     selectedFile.value = new File([mp3Blob.value], 'recorded-audio.mp3', { type: 'audio/mp3' });
   }
 });
+
+function navigateTo(routeName) {
+  router.push({ name: routeName }).then(()=>{
+    location.reload();
+  })
+}
 
 function base64ToBlob(base64) {
   const [prefix, base64Data] = base64.split(',');
@@ -282,44 +281,6 @@ const uploadFile = async (type) => {
     alert ('제목 혹은 파일은 선택해 주세요.');
   }
 }
-
-// 이미지 생성
-
-const generateImage = async () => {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const url = 'https://api.openai.com/v1/images/generations';
-
-  const headers = {
-    'Authorization': `Bearer ${apiKey}`,
-    'Content-Type': 'application/json',
-  };
-
-  const body = {
-    prompt: `${title.value}`,
-    n: 1,
-    size: '512x512',
-  };
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(body),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      imageUrl.value = data.data[0].url;
-      console.log('Generated image URL:', imageUrl.value);  // 확인 로그
-    } else {
-      console.error('Error generating image:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error generating image:', error);
-  }
-};
-
-
 
 </script>
 <style scoped>

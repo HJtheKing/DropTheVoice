@@ -45,29 +45,39 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import AudioPlayer from '@/components/AudioPlayer.vue';
+import { getVoice } from '@/utils/rtc';
 
 const route = useRoute();
 const voice = ref({});
 const likeCount = ref(0);
 const isLiked = ref(false);
 const isLoading = ref(true);
+const audioSrc = ref(null);
 
 // 오디오 소스 결정
-const audioSrc = computed(() => {
-  return voice.value.processedPath ? voice.value.processedPath : voice.value.savePath;
-});
+// const audioSrc = computed(() => {
+//     return voice.value.processedPath ? voice.value.processedPath : voice.value.savePath;
+// });
+
 onMounted(async () => {
   const voiceId = route.params.id;
   try {
+    const voiceFromIdxDB = await getVoice(Number(voiceId));
     const token = sessionStorage.getItem('access-token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
     const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`, { headers });
     
     voice.value = res.data;
     likeCount.value = voice.value.heartCount;
     isLiked.value = voice.value.liked; 
-    isLoading.value = false; 
+    isLoading.value = false;
+    if(voiceFromIdxDB){
+      const url = URL.createObjectURL(voiceFromIdxDB);
+      audioSrc.value = url;
+    } else {
+      audioSrc.value = voice.value.processedPath ? voice.value.processedPath : voice.value.savePath;
+    }
+    console.log(audioSrc.value)
   } catch (error) {
     console.error(`Error ${voiceId}:`, error);
     isLoading.value = false; 

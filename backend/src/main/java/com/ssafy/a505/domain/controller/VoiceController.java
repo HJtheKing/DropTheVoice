@@ -42,11 +42,6 @@ public class VoiceController {
 
     @GetMapping("/best-heart-voice/{page}/{size}")
     public ResponseEntity<?> getHeartsVoices(@PathVariable("page") int page, @PathVariable("size") int size) {
-//        try {
-//            Thread.sleep(500);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
         List<Voice> result = voiceService.getVoiceOrderByHeartCountDesc(page, size);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

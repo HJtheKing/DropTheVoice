@@ -15,6 +15,7 @@ import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
 import com.ssafy.a505.global.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Slf4j
 @RestController
 @RequestMapping("/api-member")
 @Tag(name = "MemberController")
@@ -90,6 +92,7 @@ public class MemberController {
     @Operation(summary = "로그인 요청 검증")
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody MemberRequestDTO memberRequestDTO) {
+        log.info("login start");
 
         HttpStatus status = null;
         Map<String, Object> result = new HashMap<>();
@@ -103,7 +106,7 @@ public class MemberController {
             // id 같이 보내면 덜 번거로움
             status = HttpStatus.ACCEPTED;
         }else {
-            System.out.println("로그인 실패");
+            log.info("로그인 실패");
             result.put("message", FAIL);
             status = HttpStatus.NO_CONTENT;
         }
@@ -135,8 +138,6 @@ public class MemberController {
     @Operation(summary = "회원 삭제")
     @PostMapping("/changePassword")
     public ResponseEntity<String> changePassword(@RequestBody PasswordRequestDTO passwordRequestDTO) {
-        System.out.println(passwordRequestDTO.getMemberName()+" "+passwordRequestDTO.getOldPassword()+" "+passwordRequestDTO.getNewPassword());
-        System.out.println("비밀번호 변경 시작");
         if (memberService.changePassword(passwordRequestDTO)) {
             return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
         }
@@ -161,8 +162,8 @@ public class MemberController {
     public ResponseEntity<?> uploadFile(@RequestPart("userData") String userData,
                                         @RequestPart(value = "file", required = false) MultipartFile file) throws IllegalStateException, IOException {
 
-        if(file == null) System.out.println("couldnt recieve the file");
-        else System.out.println("file recieved");
+        if(file == null) log.info("couldnt recieve the file");
+        else log.info("file recieved");
         // JSON 문자열을 Map으로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> jsonMap = objectMapper.readValue(userData, HashMap.class);

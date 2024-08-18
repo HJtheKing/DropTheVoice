@@ -31,8 +31,8 @@ public interface MemberService {
     //임시비밀번호 메일 생성 및 비밀번호 변경
     MailDTO createMailAndChangePassword(MemberRequestDTO memberRequestDTO);
     
-    // 메일 전송
-    void sendMail(MailDTO mailDTO);
+//    // 메일 전송
+//    void sendMail(MailDTO mailDTO);
 
     // 유저 이미지 변경
     boolean setUserImg(long memberId, MultipartFile file);
@@ -43,4 +43,5 @@ public interface MemberService {
 
     MemberResponseDTO getMemberByMemberEmail(MemberRequestDTO memberRequestDTO);
 
+    void sendMail(MailDTO mailDTO);
 }

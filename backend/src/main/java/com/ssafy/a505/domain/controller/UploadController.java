@@ -74,6 +74,7 @@ public class UploadController {
             Set<RedisResponseDTO> findMembers = redisService.getMembersByRadiusV2(longitude, latitude, 10d, voice.getVoiceId(), 5, wsMemberIds);
             for (RedisResponseDTO findMember : findMembers) {
                 log.info("findMember: {}", findMember.getId());
+                messagingTemplate.convertAndSend("/topic/voiceId/" + findMember.getId(), voice.getVoiceId());
             }
             Set<String> wsMembersInRadius = findMembers.stream()
                     .map(dto -> dto.getId().toString())
@@ -86,6 +87,7 @@ public class UploadController {
                 redisService.markReceived(voice.getVoiceId(), Long.valueOf(membersInRadius));
             }
             for (String membersInRadius : wsMembersInRadius) {
+                if(Long.parseLong(membersInRadius) == memberId) continue;
                 Spread spread = new Spread();
                 Member findMember = memberRepository.findByMemberId(Long.parseLong(membersInRadius)).get();
                 Voice findVoice = voiceRepository.findById(voice.getVoiceId()).get();
@@ -93,7 +95,7 @@ public class UploadController {
                 spread.setVoice(findVoice);
                 spreadRepository.save(spread);
                 notificationService.sendNotification(Long.parseLong(membersInRadius), "Spread");
-                System.out.println(Long.parseLong(membersInRadius));
+                log.info("sendNotification in RTC");
             }
 
             // 접속 중인 반경 내 유저 memberId 발행
@@ -104,6 +106,8 @@ public class UploadController {
              */
             Set<RedisResponseDTO> membersByRadius = redisService.getMembersByRadius(longitude, latitude, 10d, voice.getVoiceId(), 5);
             for (RedisResponseDTO byRadius : membersByRadius) {
+                if(byRadius.getId().equals(memberId)) continue;
+                log.info("byRadius.getId = {}, memberId = {}", byRadius.getId(), memberId);
                 Spread spread = new Spread();
                 Member findMember = memberRepository.findByMemberId(byRadius.getId()).get();
                 Voice findVoice = voiceRepository.findById(voice.getVoiceId()).get();
@@ -111,6 +115,7 @@ public class UploadController {
                 spread.setVoice(findVoice);
                 spreadRepository.save(spread);
                 notificationService.sendNotification(byRadius.getId(), "Spread");
+                log.info("sendNotification in OffLine");
             }
         }
         return new ResponseEntity<>(voice, HttpStatus.CREATED);
@@ -122,7 +127,7 @@ public class UploadController {
     @PostMapping("/receive_processed_audio")
     public String receiveProcessedAudio(@RequestBody ProcessedVoice dto) {
         // 처리된 데이터 출력
-        System.out.println("Where is processed Audio? : " + dto.getProcessedPath());
+        log.info("Where is processed Audio? : {} ", dto.getProcessedPath());
         return "";
     }
 

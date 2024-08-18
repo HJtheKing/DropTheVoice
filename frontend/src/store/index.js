@@ -1,7 +1,7 @@
 import { createStore } from 'vuex';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import { useRtcStore } from './rtc';
+import { saveVoice, getVoice } from '../utils/rtc';
 
 let latitude = 0.0;
 let longitude = 0.0;
@@ -167,13 +167,7 @@ export default createStore({
             }
         },
         async sendFile({ state }, file) {
-            console.log("async sendFile 시작");
-            // const { latitude, longitude } = await getGeo();
-            // await stompClient.send(`/ws/spread/${latitude}/${longitude}`, {}, mySessionId);
-
-            // 보이스id 받는 await 함수 추가
-            
-            sendFileInner(file, voiceId);
+            sendFileInner(file);
         },
         async sendMessage({ state }, message) {
             console.log("send location of me");
@@ -314,12 +308,6 @@ const createPeerConnection = (otherSessionID) => {
     return pc;
 }
 
-function tryPeerConnect() {
-    console.log("start peer Connect");
-    stompClient.send(`/ws/spread/50/50`, {}, mySessionId);
-    console.log("end of try peer Connect");
-}
-
 let sendOffer = (pc, otherSessionId) => {
     console.log("send offer init");
     pc.createOffer().then(offer => {
@@ -333,11 +321,9 @@ let sendOffer = (pc, otherSessionId) => {
                 body: offer
             })
         )
-
         console.log('Send offer end');
     });
 };
-
 
 function accumulateStringData(otherSessionId, data) {
     if (data === "end") {
@@ -355,109 +341,42 @@ function accumulateStringData(otherSessionId, data) {
     }
 }
 
-// function handleReceiveMessage(data) {
-//     let receiveFileInfo = document.querySelector('#receiveFileInfo');
-//     let totalLength = 0;
-//     let blobs = []
-//     data.forEach(part => {
-//         let binaryString = atob(part);
-//         let len = binaryString.length;
-//         totalLength += len;
-//         let bytes = new Uint8Array(len);
-//         for (let i = 0; i < len; i++) {
-//             bytes[i] = binaryString.charCodeAt(i);
-//         }
-//         let blob = new Blob([bytes]); //, { type: 'audio/mp3' }); // or other appropriate MIME type
-//         blobs.push(blob);
-//     });
-
-//     let largeBlob = new Blob(blobs, { type: 'audio/mp3' });
-
-//     let url = URL.createObjectURL(largeBlob);
-//     //receiveFileInfo.innerHTML += `<p>Received file chunk. <a href="${url}" download="received.mp3">Download</a></p>`;
-//     let a = document.createElement('a');
-//     a.style.display = 'none';
-//     a.href = url;
-//     a.download = 'received.mp3';
-//     document.body.appendChild(a);
-//     a.click();
-//     document.body.removeChild(a);
-
-//     //receiveFileInfo.innerHTML += `<p>Received file and triggered download.</p>`;
-//     console.log("file transfer complete");
-// }
-
-// function handleReceiveMessage(data) {
-//     let blobs = [];
-//     const rtcStore = useRtcStore();
-  
-//     data.forEach((part) => {
-//       let binaryString = atob(part);
-//       let len = binaryString.length;
-//       let bytes = new Uint8Array(len);
-//       for (let i = 0; i < len; i++) {
-//         bytes[i] = binaryString.charCodeAt(i);
-//       }
-//       let blob = new Blob([bytes], { type: 'audio/mp3' }); // 필요한 경우 MIME 타입 조정
-//       blobs.push(blob);
-//     });
-  
-//     let largeBlob = new Blob(blobs, { type: 'audio/mp3' });
-  
-//     // Vuex 스토어에 파일 저장
-//     rtcStore.addFile(voiceId, largeBlob);
-  
-//     console.log('File received and stored with ID:', voiceId);
-//   }
-
-let receivedId = null;
 let receivedFileData = [];
+async function handleReceiveMessage(data) {
 
-function handleReceiveMessage(data) {
-    const rtcStore = useRtcStore();
-
-    // 데이터를 처리하기 전에 먼저 ID를 체크
-    if (typeof data === 'string') {
-        try {
-            const parsedData = JSON.parse(data);
-            if (parsedData.type === 'id') {
-                receivedId = parsedData.id;
-                console.log("Received ID:", receivedId);
-                return; // ID만 수신했으므로 파일 처리를 계속하지 않음
-            }
-        } catch (e) {
-            console.log("Error parsing JSON data:", e);
-        }
-    }
+    await waitForVoiceId();
 
     // ID가 설정된 후에만 파일 데이터를 처리
-    if (receivedId) {
-        data.forEach((part) => {
-            let binaryString = atob(part);
-            let len = binaryString.length;
-            let bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            receivedFileData.push(bytes);
-        });
-
-        // 모든 파일 조각을 받아서 Blob으로 변환
-        let largeBlob = new Blob(receivedFileData, { type: 'audio/mp3' });
-
-        // Vuex 스토어에 파일 저장
-        rtcStore.addFile(receivedId, largeBlob);
-
-        console.log('File received and stored with ID:', receivedId);
-
-        // 상태 초기화
-        receivedId = null;
-        receivedFileData = [];
-    } else {
-        console.log("Waiting for ID before processing file data.");
-    }
+    console.log('@@@@@@@@@@@@@@@@@@@@ receivedId : ', voiceId)
+    data.forEach((part) => {
+        let binaryString = atob(part);
+        let len = binaryString.length;
+        let bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        receivedFileData.push(bytes);
+    });
+    // 모든 파일 조각을 받아서 Blob으로 변환
+    let largeBlob = new Blob(receivedFileData, { type: 'audio/mp3' });
+    console.log(largeBlob);
+    // indexedDB에 파일 저장
+    saveVoice(voiceId, largeBlob);
+    // 상태 초기화
+    receivedFileData = [];
+    voiceId = null;
 }
 
+function waitForVoiceId() {
+    return new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+            if (voiceId) {
+                clearInterval(checkInterval);
+                resolve();
+            }
+        }, 100); // 100ms마다 voiceId를 확인
+    });
+}
 
 async function waitForConnectionReady() {
     return new Promise((resolve, reject) => {
@@ -478,7 +397,7 @@ async function waitForConnectionReady() {
     });
 }
 
-async function sendFileInner(file, id) {
+async function sendFileInner(file) {
 
     if (!file) {
         console.log("file has some error");
@@ -496,16 +415,6 @@ async function sendFileInner(file, id) {
         const chunkSize = 16384;
         let offset = 0;
         const reader = new FileReader();
-
-        otherSessionIdList.forEach(session => {
-            console.log("other sesion id is ", session);
-            let channel = sendChannelMap.get(session);
-            if (channel.readyState === 'open') {
-                channel.send(JSON.stringify({ id: id, type: 'id'}));
-            } else {
-                console.log('Channel is not open yet for session : ', session);
-            }
-        });
 
         reader.onload = (event) => {
             const result = event.target.result;
@@ -546,16 +455,4 @@ function clearConnections(){
     otherSessionIdList = [];
     sendChannelMap = new Map();
     dataMap = new Map();
-}
-
-function generateRandomString(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    const charactersLength = characters.length;
-    
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    
-    return result;
 }
