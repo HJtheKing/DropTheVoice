@@ -45,8 +45,19 @@ public class DataLoader {
                     .totalSpreadCount(8)
                     .totalUploadCount(12)
                     .build();
+            Member member3 = Member.builder()
+                    .memberId(3L)
+                    .memberEmail("user3@example.com")
+                    .memberName("user2")
+                    .memberPassword("$2a$10$w.68Nb5lODdeU9D3H7bwpe5Q25uS7sJTFrdXK9KplB6oNtpBq56zq")
+                    .profileImgUrl("")
+                    .remainChangeCount(3)
+                    .totalSpreadCount(8)
+                    .totalUploadCount(12)
+                    .build();
             memberRepository.save(member1);
             memberRepository.save(member2);
+            memberRepository.save(member3);
 
             List<String> titles = List.of(
                     "오늘 힘든일이 있었어요", "오늘 꿀잼썰", "여러분 이거 아세요?", "오늘 기분 최고!",

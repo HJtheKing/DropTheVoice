@@ -98,7 +98,7 @@ public class MemberController {
         Map<String, Object> result = new HashMap<>();
 
         long memberID = memberService.login(memberRequestDTO);
-        MemberResponseDTO findMemberDto = memberService.getMemberByMemberId(memberID);
+//        MemberResponseDTO findMemberDto = memberService.getMemberByMemberId(memberID);
         if(memberID != -1) {
             // 토큰 만들어서 넘김
             result.put("message", SUCCESS);

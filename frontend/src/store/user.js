@@ -87,6 +87,9 @@ export const useUserStore = defineStore("user", () => {
       } else if (event.data === 'Spread') {
         hasNewSpreadNotifications.value = true;
         hasNewNotifications.value = true;
+      } else if (event.data === 'hasNew'){
+        hasNewSpreadNotifications.value = true;
+        hasNewNotifications.value = true;
       }
     };
 

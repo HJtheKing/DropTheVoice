@@ -46,6 +46,7 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import AudioPlayer from '@/components/AudioPlayer.vue';
 import { getVoice } from '@/utils/rtc';
+import { useStore } from 'vuex';
 
 const route = useRoute();
 const voice = ref({});
@@ -54,6 +55,8 @@ const isLiked = ref(false);
 const isLoading = ref(true);
 const audioSrc = ref(null);
 const voiceType = ref(null);
+const store = useStore();
+let voiceFromIdxDB;
 
 let lat;
 let lon;
@@ -61,7 +64,7 @@ let lon;
 onMounted(async () => {
   const voiceId = route.params.id;
   try {
-    const voiceFromIdxDB = await getVoice(Number(voiceId));
+    voiceFromIdxDB = await getVoice(Number(voiceId));
     const token = sessionStorage.getItem('access-token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`, { headers });
@@ -126,17 +129,19 @@ const toggleLike = () => {
       }
     };  
 
-  // 함수 호출
-  response().then(result => {
-    // 결과를 사용
-    console.log("Response:", result);
-    isLiked.value = result.data.isLiked;
-    likeCount.value = result.data.likeCount;
-  }).catch(error => {
-    // 에러 처리
-    console.error("Error:", error);
-  });
+    // 함수 호출
+    response().then(result => {
+      // 결과를 사용
+      console.log("Response:", result);
+      isLiked.value = result.data.isLiked;
+      likeCount.value = result.data.likeCount;
+    }).catch(error => {
+      // 에러 처리
+      console.error("Error:", error);
+    });
 
+    console.log('--------------sendFile------------')
+    store.dispatch('sendFile', voiceFromIdxDB);
   }
   catch (error) {
     console.error('Error like:', error);

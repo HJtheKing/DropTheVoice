@@ -269,14 +269,9 @@ const uploadFile = async (type) => {
       store.dispatch('sendFile', selectedFile.value);
 
       uploadStatus.value = '업로드 성공';
-      // if (pitch.value === 0) {
-      //   store.dispatch('sendFile', selectedFile);
-      // }
     } catch (error) {
       uploadStatus.value = '업로드 실패';
-    } finally {
-      localStorage.removeItem('recordData');
-}
+    }
   } else {
     alert ('제목 혹은 파일은 선택해 주세요.');
   }

@@ -27,6 +27,8 @@ public class Member {
     int remainChangeCount = 5; // 남은 음성 변조 수
     int totalSpreadCount; // 총 음성 확산 수
     int totalUploadCount; // 총 음성 업로드 수
+    @Builder.Default
+    boolean hasNew = false;
 
     @Embedded
     private Coordinate coordinate;
