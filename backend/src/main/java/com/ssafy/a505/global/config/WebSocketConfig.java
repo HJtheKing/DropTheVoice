@@ -1,7 +1,6 @@
 package com.ssafy.a505.global.config;
 
 import com.ssafy.a505.domain.service.RedisService;
-import com.ssafy.a505.global.util.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;

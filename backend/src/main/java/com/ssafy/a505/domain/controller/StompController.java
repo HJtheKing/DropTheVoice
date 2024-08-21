@@ -57,33 +57,6 @@ public class StompController {
         redisService.addLocation(RedisService.MEMBER_KEY, RedisService.MEMBER_TIME_KEY, Long.valueOf(coordinate.getName()), coordinate.getX(), coordinate.getY(), 1);
     }
 
-    /**
-     *
-     * @param latitude - 위도
-     * @param longitude - 경도
-     * @throws NullPointerException
-     *
-     * 사용자가 음원을 퍼트리기 위해 사용
-     * 반환값으로 인근 1km이내 세션들에 대한 리스트를 반환
-     * 만약 1km 이내에 사람이 없다면 에러 반환
-     * 현재 미개발 상태라 등록된 세션정보 모두를 반환하고 있다.
-     */
-    @MessageMapping("/spread/{latitude}/{longitude}")
-    public void spread(@Payload String mySessionId, @DestinationVariable(value = "latitude") double latitude, @DestinationVariable(value = "longitude") double longitude) {
-        log.info("[Key] : {}  [lat,lng] : {} : {}", mySessionId, latitude, longitude);
-
-        Set<String> wsMemberIds = redisService.getWsMemberIds();
-
-        // 접속 중인 유저 중 반경 내 있는 유저 반환
-        Set<Coordinate> findMembers = redisService.getMembersByRadiusV4(longitude, latitude, 10d,  5, wsMemberIds);
-        Set<String> wsMembersInRadius = findMembers.stream()
-                .map(Coordinate::getName)
-                .collect(Collectors.toSet());
-
-        // 세션 ID를 주제로 다른 클라이언트에 전송
-        messagingTemplate.convertAndSend("/topic/others/" + mySessionId, wsMembersInRadius);
-    }
-
     //클라이언트가 사전에 전달받은 상대 세션ID 리스트를 통해 mySessionId와 otherSessionId를 명시함으로써
     //WebRTC연결을 특정할 수 있다.
     @MessageMapping("/peer/offer/{mySessionId}/{otherSessionId}")

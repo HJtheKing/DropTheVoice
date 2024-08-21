@@ -3,10 +3,7 @@ package com.ssafy.a505.domain.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ssafy.a505.domain.dto.request.VoiceCreateRequestDTO;
 import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
-import com.ssafy.a505.domain.entity.Member;
-import com.ssafy.a505.domain.entity.ProcessedVoice;
-import com.ssafy.a505.domain.entity.Spread;
-import com.ssafy.a505.domain.entity.Voice;
+import com.ssafy.a505.domain.entity.*;
 import com.ssafy.a505.domain.repository.MemberRepository;
 import com.ssafy.a505.domain.repository.SpreadRepository;
 import com.ssafy.a505.domain.repository.VoiceRepository;
@@ -55,6 +52,7 @@ public class UploadController {
         log.info("latitude: {}, longitude: {}, voiceType: {}, memberId: {}", latitude, longitude, voiceType, memberId);
         voice.setLatitude(latitude);
         voice.setLongitude(longitude);
+        voice.setVoiceType(VoiceType.valueOf(voiceType));
         voice.setImageUrl("https://picsum.photos/id/" + random.nextInt(300) + "/200/300");
         voiceRepository.save(voice);
 

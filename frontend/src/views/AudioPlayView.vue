@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import AudioPlayer from '@/components/AudioPlayer.vue';
@@ -53,11 +53,10 @@ const likeCount = ref(0);
 const isLiked = ref(false);
 const isLoading = ref(true);
 const audioSrc = ref(null);
+const voiceType = ref(null);
 
-// 오디오 소스 결정
-// const audioSrc = computed(() => {
-//     return voice.value.processedPath ? voice.value.processedPath : voice.value.savePath;
-// });
+let lat;
+let lon;
 
 onMounted(async () => {
   const voiceId = route.params.id;
@@ -66,11 +65,15 @@ onMounted(async () => {
     const token = sessionStorage.getItem('access-token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api-voice/best-voice/${voiceId}`, { headers });
-    
+
     voice.value = res.data;
     likeCount.value = voice.value.heartCount;
     isLiked.value = voice.value.liked; 
     isLoading.value = false;
+    voiceType.value = voice.value.voiceType;
+
+    console.log(voiceType)
+
     if(voiceFromIdxDB){
       const url = URL.createObjectURL(voiceFromIdxDB);
       audioSrc.value = url;
@@ -83,35 +86,89 @@ onMounted(async () => {
     isLoading.value = false; 
   }
 });
-const toggleLike = async () => {
+const toggleLike = () => {
+  console.log('toggleLike activated')
+  
   const token = sessionStorage.getItem('access-token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   if (!token) {
     console.error('JWT 토큰이 없습니다.');
     return;
   }
-
+  
   try {
     const url = `${import.meta.env.VITE_BASE_URL}/api-voice/${voice.value.voiceId}/like`;
+    console.log(url)
+    
+    const response = async () => { // async 추가
+      if (voiceType.value === 'virus') { // 비교 연산자 수정
 
-    const response = await axios.post(url, null, {
-      headers: {
-        Authorization: `Bearer ${token}`
+        await getGeo();
+
+        const formData = new FormData();
+        formData.append("latitude", lat);
+        formData.append("longitude", lon);
+
+        try {
+          const result = await axios.post(url, formData, { headers });
+          return result; // 결과 반환
+        } catch (error) {
+          console.error("Error occurred while sending the request:", error);
+        }
+      } else {
+        console.log('not virus!!!!!!!');
+        try {
+          const result = await axios.post(url, null, { headers });
+          return result; // 결과 반환
+        } catch (error) {
+          console.error("Error occurred while sending the request:", error);
+        }
       }
-    });
+    };  
 
-    if (response.status === 200 && response.data) {
-      isLiked.value = response.data.isLiked;
-      // if (!isLiked.value) {
-      //   storageStore.hasNewLikeNotifications = true;
-      // }
-      likeCount.value = response.data.likeCount;
-    } else {
-      console.error('서버에서 응답이 제대로 오지 않았습니다.');
-    }
-  } catch (error) {
+  // 함수 호출
+  response().then(result => {
+    // 결과를 사용
+    console.log("Response:", result);
+    isLiked.value = result.data.isLiked;
+    likeCount.value = result.data.likeCount;
+  }).catch(error => {
+    // 에러 처리
+    console.error("Error:", error);
+  });
+
+  }
+  catch (error) {
     console.error('Error like:', error);
   }
 };
+
+function getGeo() {
+    return new Promise((resolve, reject) => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    lat = position.coords.latitude;
+                    lon = position.coords.longitude;  
+                    resolve();
+                },
+                (error) => {
+                    console.log("위치 정보를 가져오는데 실패했습니다: " + error.message);
+                    reject(new Error("위치 정보를 가져오는데 실패했습니다: " + error.message));
+
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            alert("이 브라우저에서는 위치 정보 서비스를 지원하지 않습니다.");
+            reject(new Error("위치 정보를 가져오는데 실패했습니다: "));
+        }
+    })
+}
 </script>
 
 <style scoped>

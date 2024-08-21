@@ -7,10 +7,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Super;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Getter
 @Setter
 @SuperBuilder

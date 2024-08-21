@@ -22,9 +22,6 @@
     
       <v-container justify="center" class="btn-row">
         <v-row justify="space-between">
-          <!-- <v-btn class="player-btn" @click="goToStart">
-            <v-icon>mdi-skip-backward</v-icon>
-          </v-btn> -->
           <v-btn class="player-btn" @click="rewindAudio">
             <v-icon>mdi-rewind</v-icon>
           </v-btn>
@@ -34,9 +31,6 @@
           <v-btn class="player-btn" @click="fastForwardAudio">
             <v-icon>mdi-fast-forward</v-icon>
           </v-btn>
-          <!-- <v-btn class="player-btn" @click="goToEnd">
-            <v-icon>mdi-skip-forward</v-icon>
-          </v-btn> -->
         </v-row>
       </v-container>
     </v-container>
@@ -44,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 const props = defineProps({
   src: {
