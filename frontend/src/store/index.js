@@ -1,7 +1,7 @@
 import { createStore } from 'vuex';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import { saveVoice, getVoice } from '../utils/rtc';
+import { saveVoice } from '../utils/rtc';
 
 let latitude = 0.0;
 let longitude = 0.0;
@@ -15,7 +15,7 @@ let voiceId = null;
 const peerConfiguration = {
     iceServers: [
         {
-            urls: "turn:i11a505.p.ssafy.io",  // TURN 서버의 URL
+            urls: "turn:",  // TURN 서버의 URL
             username: "usr",   // TURN 서버의 사용자 이름
             credential: "pass"  // TURN 서버의 비밀번호
         }
@@ -41,10 +41,7 @@ export default createStore({
     },
     actions: {
         connectWebSocket({ commit }) {
-            //const uri = 'i11a505.p.ssafy.io';
             const uri = import.meta.env.VITE_BASE_URL;
-            //const uri = 'localhost';
-            //const socket = new SockJS('http's'://' + uri + '/stomp/handshake');
 
             const socket = new SockJS(uri + '/stomp/handshake');
             stompClient = Stomp.over(socket);
