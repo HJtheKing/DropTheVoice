@@ -1,7 +1,6 @@
 
 package com.ssafy.a505.domain.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,18 +9,12 @@ import com.ssafy.a505.domain.dto.request.MemberRequestDTO;
 import com.ssafy.a505.domain.dto.request.PasswordRequestDTO;
 import com.ssafy.a505.domain.dto.response.MailDTO;
 import com.ssafy.a505.domain.dto.response.MemberResponseDTO;
-import com.ssafy.a505.domain.entity.Member;
 import com.ssafy.a505.domain.service.MemberService;
 import com.ssafy.a505.global.execption.CustomException;
 import com.ssafy.a505.global.execption.ErrorCode;
 import com.ssafy.a505.global.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +30,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api-member")
 @Tag(name = "MemberController")
-//@CrossOrigin("*")
 public class MemberController {
     // 응답을 편하게 하기 위해 상수로 지정
     private static final String SUCCESS = "success";
@@ -98,12 +90,9 @@ public class MemberController {
         Map<String, Object> result = new HashMap<>();
 
         long memberID = memberService.login(memberRequestDTO);
-//        MemberResponseDTO findMemberDto = memberService.getMemberByMemberId(memberID);
         if(memberID != -1) {
-            // 토큰 만들어서 넘김
             result.put("message", SUCCESS);
             result.put("access-token", jwtUtil.createToken(memberRequestDTO.getMemberName(), memberID));
-            // id 같이 보내면 덜 번거로움
             status = HttpStatus.ACCEPTED;
         }else {
             log.info("로그인 실패");
@@ -164,11 +153,9 @@ public class MemberController {
 
         if(file == null) log.info("couldnt recieve the file");
         else log.info("file recieved");
-        // JSON 문자열을 Map으로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> jsonMap = objectMapper.readValue(userData, HashMap.class);
 
-        // "id" 값을 Long으로 변환
         Long id = null;
         if (jsonMap.get("id") instanceof Integer) {
             id = ((Integer) jsonMap.get("id")).longValue();

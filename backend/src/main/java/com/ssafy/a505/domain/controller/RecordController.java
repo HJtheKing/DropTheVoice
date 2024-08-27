@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 @CrossOrigin(origins = "http://localhost:3000")
 public class RecordController {
 
-//    @Autowired
-//    RedisUtils redisUtils;
 
     @PostMapping("/record")
     public ResponseEntity<?> saveRecord(@ModelAttribute VoiceDto voiceDto) throws IOException {
@@ -30,12 +28,6 @@ public class RecordController {
         voice.setDateTime(LocalDateTime.now());
         log.info("voice ={}", voice);
 
-        // S3에 음성 파일 저장
-
-        // RDB 저장 로직
-
-        // Redis 저장 로직
-//        redisUtils.addLocation("TP_KEY", voiceDto.getLatitude(), voiceDto.getLongitude());
         return new ResponseEntity<Voice>(voice, HttpStatus.OK);
     }
 

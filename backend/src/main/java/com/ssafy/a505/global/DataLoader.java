@@ -22,7 +22,7 @@ public class DataLoader {
     private final VoiceRepository voiceRepository;
 
     @Bean
-    public CommandLineRunner loadData(HeartRepository heartRepository, SpreadRepository spreadRepository) {
+    public CommandLineRunner loadData() {
         return args -> {
             // 멤버 데이터 생성 및 저장
             Member member1 = Member.builder()

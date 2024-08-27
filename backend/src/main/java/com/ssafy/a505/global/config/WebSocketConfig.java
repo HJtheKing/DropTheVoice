@@ -1,6 +1,5 @@
 package com.ssafy.a505.global.config;
 
-import com.ssafy.a505.domain.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +19,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-    private final RedisService redisService;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -62,9 +59,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
             StompHeaderAccessor headerAccessor= StompHeaderAccessor.wrap(message);
             if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
-                //{simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={},
-                // simpSessionId=pzvyh0aw}
-
                 String sessionId = headerAccessor.getSessionId();
                 log.info("연결 종료 세션 ID : "+sessionId);
             }

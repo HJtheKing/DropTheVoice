@@ -127,11 +127,6 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean isUserNameDuplicate(String userName) {
-        return memberRepository.findByMemberName(userName).isPresent();
-    }
-
-    @Override
     public MemberResponseDTO getMemberByMemberEmail(MemberRequestDTO memberRequestDTO) {
         Optional<Member> findOptional = memberRepository.findByMemberEmail(memberRequestDTO.getMemberEmail());
         Member target = findOptional.get();

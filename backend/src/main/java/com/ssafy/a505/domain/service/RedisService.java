@@ -1,10 +1,6 @@
 package com.ssafy.a505.domain.service;
 
 import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
-import com.ssafy.a505.domain.entity.Coordinate;
-import com.ssafy.a505.domain.repository.MemberRepository;
-import com.ssafy.a505.domain.repository.SpreadRepository;
-import com.ssafy.a505.domain.repository.VoiceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.*;
@@ -30,9 +26,6 @@ import static org.springframework.data.redis.connection.RedisGeoCommands.GeoRadi
 public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final MemberRepository memberRepository;
-    private final SpreadRepository spreadRepository;
-    private final VoiceRepository voiceRepository;
 
     public static final String WS_KEY= "WS_SESSION";
 
@@ -148,46 +141,6 @@ public class RedisService {
         return shuffledList.stream()
                 .limit(cnt)
                 .collect(Collectors.toSet());
-    }
-
-    // 반경 내 Member 반환 -> 최초 전파시에 사용됨으로 isReceived 로직 거칠 필요 없음!
-    public Set<Coordinate> getMembersByRadiusV4(Double longitude, Double latitude, Double radiusInKm, int cnt, Set<String> set){
-        Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
-        GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
-        GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(MEMBER_KEY, within, args);
-
-        List<Coordinate> shuffledList = geoResults.getContent().stream()
-                .map(geoResult -> {
-                    GeoLocation<Object> content = geoResult.getContent();
-                    Point point = content.getPoint();
-                    String memberId = content.getName().toString();
-                    return new Coordinate(memberId, point.getX(), point.getY());
-                })
-                .filter(coord -> set.contains(coord.getName()))
-                .distinct()
-                .collect(Collectors.toList());
-
-        Collections.shuffle(shuffledList);
-        return shuffledList.stream()
-                .limit(cnt)
-                .collect(Collectors.toSet());
-    }
-
-    public List<RedisResponseDTO> getVoicesByRadius(Double longitude, Double latitude, Double radiusInKm, Long memberId){
-        Circle within = new Circle(new Point(longitude, latitude), new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS));
-        GeoRadiusCommandArgs args = newGeoRadiusArgs().includeCoordinates();
-        GeoResults<GeoLocation<Object>> geoResults = redisTemplate.opsForGeo().radius(VOICE_KEY, within, args);
-
-        List<RedisResponseDTO> result = geoResults.getContent().stream()
-                .map(geoResult -> {
-                    GeoLocation<Object> content = geoResult.getContent();
-                    Point point = content.getPoint();
-                    Long voiceId = Long.valueOf(content.getName().toString());
-                    return new RedisResponseDTO(voiceId, point.getX(), point.getY());
-                })
-                .filter(dto -> !isReceived(dto.getId(), memberId))
-                .collect(Collectors.toList());
-        return result;
     }
 
     // 1분마다 만료된 사용자 위치 제거

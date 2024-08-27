@@ -1,46 +1,28 @@
 package com.ssafy.a505.domain.controller;
 
-import com.ssafy.a505.domain.dto.response.RedisResponseDTO;
 import com.ssafy.a505.domain.entity.Coordinate;
-import com.ssafy.a505.global.OfferDto;
 import com.ssafy.a505.domain.service.RedisService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/ws")
 @Slf4j
 public class StompController {
-    private final SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private RedisService redisService;
-
-    public Set<String> sessionIDs;
-
-    public StompController(SimpMessagingTemplate simpMessagingTemplate){
-        sessionIDs = new HashSet<>();
-        this.messagingTemplate = simpMessagingTemplate;
-    }
+    private final RedisService redisService;
 
     /**
-     *
      * @param coordinate
      *
      * 매 10초마다 프론트엔드에서 호출되는 메서드.

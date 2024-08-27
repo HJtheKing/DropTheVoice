@@ -29,7 +29,6 @@ public class NotificationService {
 
         try {
             emitter.send(SseEmitter.event()
-//                    .name("INIT")
                     .data("Connected!"));
 
             Optional<Member> optionalMember = memberRepository.findByMemberId(memberId);
@@ -53,7 +52,6 @@ public class NotificationService {
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event()
-//                        .name("MESSAGE")
                         .data(message));
             } catch (IOException e) {
                 emitterRepository.deleteById(memberId);

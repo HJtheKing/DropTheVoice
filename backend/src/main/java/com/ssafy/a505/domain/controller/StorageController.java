@@ -1,11 +1,9 @@
 package com.ssafy.a505.domain.controller;
 
 import com.ssafy.a505.domain.entity.Voice;
-import com.ssafy.a505.domain.repository.VoiceRepository;
 import com.ssafy.a505.domain.service.VoiceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
