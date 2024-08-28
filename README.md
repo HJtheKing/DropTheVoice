@@ -24,19 +24,12 @@ Drop The Voice를 통해 자신의 이야기를 전국으로 전파하세요!
 - DB : MySQL:8.0, Redis:alpine
 
 ## 사용도구
-- 이슈 관리 :
-<img src="https://img.shields.io/badge/Jira-0052CC?style=flat-square&logo=Jira&logoColor=white" />
-- 형상 관리 :
-<img src="https://img.shields.io/badge/GitLab-FC6D26?style=flat-square&logo=GitLab&logoColor=white" />
-- 커뮤니케이션 :
-<img src="https://img.shields.io/badge/Notion-000000?style=flat-square&logo=Notion&logoColor=white" />
-<img src="https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=Slack&logoColor=white" />
-<img src="https://img.shields.io/badge/Mattermost-0058CC?style=flat-square&logo=Mattermost&logoColor=white" />
+- 이슈 관리 : <img src="https://img.shields.io/badge/Jira-0052CC?style=flat-square&logo=Jira&logoColor=white" />
+- 형상 관리 : <img src="https://img.shields.io/badge/GitLab-FC6D26?style=flat-square&logo=GitLab&logoColor=white" />
+- 커뮤니케이션 : <img src="https://img.shields.io/badge/Notion-000000?style=flat-square&logo=Notion&logoColor=white" /> <img src="https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=Slack&logoColor=white" /> <img src="https://img.shields.io/badge/Mattermost-0058CC?style=flat-square&logo=Mattermost&logoColor=white" />
 
-- 디자인 :
-<img src="https://img.shields.io/badge/Figma-F24E1E?style=flat-square&logo=Figma&logoColor=white" />
-- CI/CD :
-<img src="https://img.shields.io/badge/GitLab-FC6D26?style=flat-square&logo=Gitlab&logoColor=white" />
+- 디자인 : <img src="https://img.shields.io/badge/Figma-F24E1E?style=flat-square&logo=Figma&logoColor=white" />
+- CI/CD : <img src="https://img.shields.io/badge/GitLab-FC6D26?style=flat-square&logo=Gitlab&logoColor=white" />
 
 
 ## 주요 기능
