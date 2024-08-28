@@ -50,7 +50,7 @@
               <v-col cols="8">
                 <v-card-title class="py-3">
                   <div class="content">
-                    <h3 class="title mb-2">{{ voice.title }}</h3>
+                    <h3 class="title mb-2" style="font-size: 18px;">{{ voice.title }}</h3>
                     <div class="d-flex align-center mb-2">
                       <v-icon color="blue" class="mr-2">mdi-thumb-up</v-icon>
                       <span class="mr-10">{{ voice.heartCount }}</span>

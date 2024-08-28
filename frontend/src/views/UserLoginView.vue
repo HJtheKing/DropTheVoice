@@ -5,7 +5,7 @@
       <v-form @submit.prevent="login">
         <v-card class="dark-card">
           <v-card-title class="text-left">
-            <h1>로그인</h1>
+            <h3>로그인</h3>
           </v-card-title>
           <v-card-text>
             <v-text-field

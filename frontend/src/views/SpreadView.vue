@@ -9,8 +9,8 @@
       </v-row>
 
       <div class="tab-container">
-        <button :class="{ active: activeTab === 'pokemon' }" @click="setTab('pokemon')">포켓몬</button>
-        <button :class="{ active: activeTab === 'virus' }" @click="setTab('virus')">바이러스</button>
+        <button :class="{ active: activeTab === 'pokemon' }" @click="setTab('pokemon')">음성 두기</button>
+        <button :class="{ active: activeTab === 'virus' }" @click="setTab('virus')">음성 전파</button>
       </div>
 
       <MapComponent v-if="activeTab === 'pokemon'"/>

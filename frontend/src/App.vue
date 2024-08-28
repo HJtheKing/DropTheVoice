@@ -2,11 +2,9 @@
   <v-app id="inspire">
     <div class="main-content">
       <router-view />
+      <MyHeader />
     </div>
     <MenuBar />
-    <v-btn icon class="floating-back-button" @click="goBack">
-      <v-icon>mdi-arrow-left</v-icon>
-    </v-btn>
   </v-app>
 </template>
 
@@ -17,15 +15,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from './store/user';
 
 import { onMounted } from 'vue';
+import MyHeader from './components/MyHeader.vue';
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
-
-const goBack = () => {
-  router.back();
-};
 
 onMounted(async () => {
   await router.isReady();
@@ -39,7 +34,7 @@ onMounted(async () => {
 
 <style scoped>
 .main-content {
-  padding-bottom: 50px; /* MenuBar의 높이만큼 여백 추가 */
+  padding-top: 64px; /* MenuBar의 높이만큼 여백 추가 */
 }
 
 .floating-back-button {

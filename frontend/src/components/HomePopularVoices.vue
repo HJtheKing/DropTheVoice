@@ -3,7 +3,7 @@
     <v-container class="py-4">
       <v-row align="center" justify="space-between">
         <v-col cols="12" md="6">
-          <h2>오늘의 인기 음성</h2>
+          <h3>🔥 오늘의 인기 음성 🔥</h3>
         </v-col>
       </v-row>
       
