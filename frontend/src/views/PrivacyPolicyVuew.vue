@@ -47,7 +47,7 @@
                 개인 정보 처리 방침에 대한 질문이 있으시면, 아래 연락처로 문의해주시기 바랍니다:
               </p>
               <ul class="policy-list">
-                <li class="policy-item">이메일: ssafy@ssafy.com</li>
+                <li class="policy-item">이메일: dtv@dtv.com</li>
                 <li class="policy-item">전화: 02) 456-7890</li>
                 <li class="policy-item">주소: 서울특별시 강남구 테헤란로 212</li>
               </ul>

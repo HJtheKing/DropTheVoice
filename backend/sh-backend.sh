@@ -5,8 +5,8 @@ chmod +x $0
 
 docker logout
 # Docker Hub 로그인 정보
-DOCKER_HUB_USERNAME="gbds234"
-DOCKER_HUB_PASSWORD="ssafya505"
+DOCKER_HUB_USERNAME=
+DOCKER_HUB_PASSWORD=
 
 # Docker 로그인 명령어 실행
 echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
