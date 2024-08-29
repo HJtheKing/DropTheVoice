@@ -129,9 +129,9 @@ public class VoiceUploadServiceImpl implements VoiceUploadService {
         int dataType;
         if(voice.isProcessed()) dataType = 2;
         else dataType = 1;
-//        String saveFile = s3FileService.uploadFile(multipartFile, dataType);
+        String saveFile = s3FileService.uploadFile(multipartFile, dataType);
         voice.setSaveFolder(s3FileService.getFileFolder(dataType));
-//        voice.setSavePath(saveFile);
+        voice.setSavePath(saveFile);
         voice.setSavePath("saveFile");
         voice.setOriginalName(multipartFile.getOriginalFilename());
         return voice;
