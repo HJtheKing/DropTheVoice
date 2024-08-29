@@ -33,7 +33,7 @@ Drop The Voice를 통해 자신의 이야기를 전국으로 전파하세요!
 
 
 ## 시스템 아키텍처
-<img src="upload/my.drawio.png" style="display: block; margin: 0 auto;"/>
+<img src="upload/mydrawio.png" style="display: block; margin: 0 auto;"/>
 
 ## 주요 기능
 ### ⭐️ WebRTC : 음성 전파
