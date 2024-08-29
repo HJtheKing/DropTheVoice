@@ -32,6 +32,9 @@ Drop The Voice를 통해 자신의 이야기를 전국으로 전파하세요!
 - CI/CD : <img src="https://img.shields.io/badge/GitLab-FC6D26?style=flat-square&logo=Gitlab&logoColor=white" />
 
 
+## 시스템 아키텍처
+<img src="upload/my.drawio.png" style="display: block; margin: 0 auto;"/>
+
 ## 주요 기능
 ### ⭐️ WebRTC : 음성 전파
 - 현재 접속 중인 반경 내의 무작위 N명의 사용자에게 P2P로 음성 전파
@@ -54,3 +57,22 @@ Drop The Voice를 통해 자신의 이야기를 전국으로 전파하세요!
 
 
 ## 화면 구성
+| 로그인  |  메인화면   |
+| :-------------------------------------------: | :------------: |
+|  <img width="329" src="upload/1.login.jpg"/> |  <img width="329" src="upload/2.main.jpg"/>|  
+| 마이페이지   |  음성 상세   |  
+|  <img width="329" src="upload/3.myPage.jpg"/> |  <img width="329" src="upload/4.voiceDetail.jpg"/>|
+| 음성 뿌리기   |  녹음 (음성 두기, 전파 공통)   |  
+|  <img width="329" src="upload/5.spread.jpg"/> |  <img width="329" src="upload/6.record.jpg"/>|
+| 업로드 (음성 두기, 전파 공통)   |  음성 변조   |  
+|  <img width="329" src="upload/7.upload.jpg"/> |  <img width="329" src="upload/8.voiceChange.jpg"/>|
+| 업로드 완료   |  배지 알림   |  
+|  <img width="329" src="upload/9.uploadComp.jpg"/> |  <img width="329" src="upload/10.receiveVoice.jpg"/>|
+| 보관함 - 전파된 음성 목록   |  음성 줍기 - 지도   |  
+|  <img width="329" src="upload/11.storage.jpg"/> |  <img width="329" src="upload/12.pickVoice_1.jpg"/>|
+| 음성 줍기 - 리스트   |  음성 줍기 - 줍기   |  
+|  <img width="329" src="upload/13.pickVoice_2.jpg"/> |  <img width="329" src="upload/14.pickVoice_3.jpg"/>|
+| 보관함 - 줍한 음성 목록   | 
+|  <img width="329" src="upload/15.stoarge_pick.jpg"/> |  
+
+---
